@@ -110,4 +110,15 @@ Prisma 7부터 `datasource` 블록에 `url`/`directUrl`을 직접 못 쓰고, �
 
 ## 다음 단계: 4. 일정관리
 
-DESIGN.md 3번 기능 정의서 기준 — 월간 캘린더 뷰 + 일정 등록/수정/삭제 + 다가오는 일정. `Event` 모델은 스키마에 이미 있음(`prisma/schema.prisma`). 가계부에서 만든 패턴(`lib/auth.ts`의 `requireProfile()`, Server Action에서 `revalidatePath`, flat list + Partner 컬러 바)을 그대로 재사용하면 됨. 새 화면은 `app/(app)/calendar/page.tsx`로 만들면 셸이 자동으로 씌워지고, `components/nav-links.tsx`에 항목만 추가하면 됨 — 색/폰트는 이미 토스 톤으로 맞춰져 있으니 새로 안 정해도 됨.
+DESIGN.md 3번 기능 정의서 기준 — 월간 캘린더 뷰 + 일정 등록/수정/삭제 + 다가오는 일정. `Event` 모델은 스키마에 이미 있음(`prisma/schema.prisma`).
+
+**재사용할 수 있는 것들**
+- `lib/auth.ts`의 `requireProfile()` / `getSessionProfile()` — 인증/프로필 조회
+- Server Action 패턴(`actions/budget.ts` 참고): `useActionState`용 `{ error? }` 반환, mutation 후 `revalidatePath`, 날짜는 꼭 `parseDate()`처럼 `Number.isNaN(date.getTime())`으로 유효성 검사할 것
+- `components/date-picker.tsx` — 날짜/시간 입력에 그대로 재사용 가능 (일정 등록 시 날짜 선택에 바로 쓰면 됨)
+- flat list + Partner 컬러 바 스타일(가계부 리스트 참고), 셀렉트/인풋은 이미 토스 filled 스타일 적용된 공통 컴포넌트(`components/ui/select.tsx`, `input.tsx`) 그대로 사용
+- 새 화면은 `app/(app)/calendar/page.tsx`로 만들면 셸이 자동으로 씌워짐 — 만든 뒤 `components/nav-links.tsx`에 항목 추가 잊지 말 것
+
+**주의**
+- 월간 캘린더 "그리드"를 새로 만들어야 하는데, `components/ui/calendar.tsx`(react-day-picker 기반, 이번에 날짜 피커용으로 설치함)를 그대로 월간 뷰로 재활용할 수 있는지 먼저 검토해볼 것 — 안 맞으면 직접 그리드 짜야 함
+- 혹시 이 기능에 그래프/차트가 필요해지면(예: 이번 달 일정 유형별 비중 같은 거) **`dataviz` 스킬을 코드 작성 전에 반드시 로드**하고, 색상은 `node scripts/validate_palette.js`로 검증할 것 — 홈 화면 위젯 만들 때 했던 방식 그대로 따르면 됨
