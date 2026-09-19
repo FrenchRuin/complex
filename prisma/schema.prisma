@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Supabase Auth의 auth.users와 1:1로 연결되는 프로필
+// id는 auth.users.id(UUID)와 동일하게 사용
+model Profile {
+  id        String   @id
+  name      String // "나" / "배우자" 같은 표시 이름
+  colorRole String // "A" | "B" — 디자인의 Partner A/B 컬러와 매칭
+  coupleId  String?
+  couple    Couple?  @relation(fields: [coupleId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+// 두 사람을 묶는 단위. 대부분의 데이터는 이 coupleId로 공유됨
+model Couple {
+  id           String        @id @default(cuid())
+  name         String // 예: "민수 ♥ 지은"
+  profiles     Profile[]
+  categories   Category[]
+  transactions Transaction[]
+  events       Event[]
+  trips        Trip[]
+  createdAt    DateTime      @default(now())
+}
+
+// 가계부 카테고리 (식비, 데이트, 결혼준비 등)
+model Category {
+  id           String        @id @default(cuid())
+  coupleId     String
+  couple       Couple        @relation(fields: [coupleId], references: [id])
+  name         String
+  type         String // "income" | "expense"
+  icon         String?
+  transactions Transaction[]
+}
+
+// 가계부 거래
+model Transaction {
+  id          String   @id @default(cuid())
+  coupleId    String
+  couple      Couple   @relation(fields: [coupleId], references: [id])
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+  type        String // "income" | "expense"
+  amount      Int // 원 단위
+  memo        String?
+  date        DateTime
+  createdById String // Profile.id — 누가 입력했는지 (Partner A/B 컬러 표시에 사용)
+  createdAt   DateTime @default(now())
+}
+
+// 일정
+model Event {
+  id          String    @id @default(cuid())
+  coupleId    String
+  couple      Couple    @relation(fields: [coupleId], references: [id])
+  title       String
+  description String?
+  startAt     DateTime
+  endAt       DateTime?
+  isAllDay    Boolean   @default(false)
+  category    String? // "결혼준비" | "데이트" | "기타"
+  createdById String // Profile.id
+  createdAt   DateTime  @default(now())
+}
+
+// 여행
+model Trip {
+  id          String     @id @default(cuid())
+  coupleId    String
+  couple      Couple     @relation(fields: [coupleId], references: [id])
+  title       String // "제주도 신혼여행"
+  destination String?
+  startDate   DateTime
+  endDate     DateTime
+  budget      Int?
+  status      String     @default("planning") // planning | confirmed | done
+  items       TripItem[]
+  createdAt   DateTime   @default(now())
+}
+
+// 여행 세부 일정 / 체크리스트
+model TripItem {
+  id        String  @id @default(cuid())
+  tripId    String
+  trip      Trip    @relation(fields: [tripId], references: [id])
+  day       Int // 여행 몇일차 (체크리스트 항목은 0 등으로 별도 취급 가능)
+  time      String?
+  title     String // "성산일출봉 방문"
+  memo      String?
+  type      String // "장소" | "숙소" | "이동" | "할일"
+  isChecked Boolean @default(false)
+  order     Int     @default(0)
+}
