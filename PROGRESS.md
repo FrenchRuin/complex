@@ -11,6 +11,8 @@ DESIGN.md 6번(개발 우선순위) 순서대로 진행하면서, 각 단계에�
 | 3. 가계부 (등록/목록) | ✅ 완료 | 거래 등록/수정/삭제, 카테고리 관리, 월 필터까지 브라우저 테스트 완료 |
 | 디자인 방향 전환 + 레이아웃 셸 | ✅ 완료 | 사용자 피드백으로 Linear/Plane→노션/Slack 방향 전환, 사이드바(데스크톱)/탭바(모바일) 셸 구축 |
 | 디자인 리터치 (토스 톤) + 설정 페이지 분리 | ✅ 완료 | Pretendard 폰트, 토스 블루 팔레트, 폰트 크기 축소, 카테고리 관리를 `/settings`로 분리 |
+| UX 버그 수정 (Select/날짜/필수입력) | ✅ 완료 | 셀렉트 드롭다운 위치, 캘린더 날짜 피커, 네이티브 필수입력 팝업 제거 |
+| 홈 화면 가계부 요약 위젯 | ✅ 완료 | 이번 달 수입/지출/순잔액 스탯 + 카테고리별 지출 스택 바 차트 |
 | 4. 일정관리 | 🔲 시작 전 | |
 | 5. 여행계획 | 🔲 시작 전 | |
 
@@ -60,6 +62,16 @@ DESIGN.md 6번(개발 우선순위) 순서대로 진행하면서, 각 단계에�
 - **`components/ui/select.tsx`의 `SelectContent`가 트리거를 가리고 열림**: 기본값 `alignItemWithTrigger: true`가 macOS 네이티브 팝업 메뉴 스타일(선택된 항목이 트리거와 같은 위치에 겹쳐서 뜨는 방식)이라, 웹에서 흔히 기대하는 "트리거 아래로 드롭다운" 동작이 아니었음. `alignItemWithTrigger: false`, `align: "start"`로 기본값 변경 → 이제 일반적인 드롭다운처럼 트리거 바로 아래에 열림. `Select`를 쓰는 모든 화면(가계부 거래 폼, 설정 카테고리 폼)에 자동 반영.
 - **날짜 입력이 브라우저 네이티브 `<input type="date">`라 밋밋함** → `pnpm dlx shadcn add calendar popover`로 설치(`react-day-picker`, `date-fns` 의존성 추가됨), `components/date-picker.tsx` 신규(Popover+Calendar 조합, 한글 로케일(`date-fns/locale/ko`), 트리거 버튼 + 숨김 input으로 기존 `FormData` 기반 Server Action과 호환). `components/budget/transaction-form-dialog.tsx`의 날짜 필드를 이걸로 교체, 새 거래 등록 시 기본값을 오늘 날짜로 설정. 나중에 4단계(일정관리) 만들 때도 이 컴포넌트 재사용 가능.
 - **필수 입력을 비우고 제출하면 브라우저 네이티브 "이 입력란을 작성하세요" 말풍선이 뜸**: `Input`/`Select`에 걸어둔 HTML `required` 속성 때문에, 폼이 서버로 가기도 전에 브라우저가 자체 검증 팝업으로 막아버려서 우리가 만든 예쁜 에러 메시지(`state.error`)가 아예 뜰 기회가 없었음. 모든 폼(`app/login/page.tsx`, `components/budget/transaction-form-dialog.tsx`, `components/settings/category-settings.tsx`)에서 `required`를 제거함 — 이미 Server Action 쪽에 동일한 필수값 검증이 다 있어서(비어있으면 `state.error`로 반환) 기능적으로는 그대로고, 에러 메시지만 우리 스타일로 통일됨. **앞으로 새 폼 만들 때도 `required` 쓰지 말고 Server Action에서 검증 후 `state.error`로 보여줄 것.**
+
+## 홈 화면 가계부 요약 위젯
+
+DESIGN.md 5번(홈 대시보드, 원래 "MVP 이후"로 미뤄뒀던 항목)을 가계부 부분만 앞당겨서 만듦 — 사용자가 4단계(일정관리) 가기 전에 요청함.
+
+- 차트/그래프를 만들기 전에 **`dataviz` 스킬을 반드시 먼저 로드**해서 절차(폼 선택→색상→검증→마크→인터랙션→접근성)를 따름. "카테고리별 지출 비중"은 part-to-whole이라 스킬 가이드대로 파이 차트가 아니라 **가로 스택 바**로 만듦.
+- `node scripts/validate_palette.js`로 카테고리 색상(6슬롯, dataviz 스킬의 검증된 기본 팔레트) 팔레트를 우리 앱의 흰 배경(`#ffffff`)에 대해 실제로 돌려서 통과 확인 — 눈대중으로 정하지 않음. 카테고리가 6개 넘으면 나머지는 "기타"(회색, 팔레트 슬롯 안 씀)로 접음.
+- `components/home/expense-breakdown.tsx` 신규: 서버 컴포넌트로 작성 가능했음(JS 상태 없이 Tailwind `group/seg` + `group-hover/seg:` 순수 CSS로 호버 툴팁 구현 — 툴팁은 보조 수단이고 값은 범례에도 항상 텍스트로 같이 보여줘서 "툴팁이 유일한 정보 경로"가 되지 않게 함, dataviz 스킬의 필수 규칙).
+- `app/(app)/page.tsx`에 이번 달 수입/지출/순잔액 스탯 타일 3개 + 위 컴포넌트 추가, "가계부 전체 보기" 링크로 `/budget` 연결. 프로필 없는 계정은 기존 안내 카드만 보이게 그대로 둠.
+- 브라우저에서 카테고리 7개(임시 시드 스크립트로 거래 채움 → 테스트 후 삭제)로 6개+기타 접힘, 빈 상태(거래 0개) 문구까지 확인.
 
 ## ⚠️ 꼭 알아둬야 할 사항
 
