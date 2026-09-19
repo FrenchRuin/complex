@@ -17,7 +17,7 @@ export function AppShell({
   const displayName = profile?.name ?? user.email ?? "계정";
 
   return (
-    <div className="flex min-h-full flex-1 flex-col md:flex-row">
+    <div className="flex h-full min-h-0 flex-1 flex-col md:flex-row">
       <aside className="hidden w-60 shrink-0 flex-col border-r border-border bg-muted/30 md:flex">
         <div className="px-4 py-5">
           <span className="font-heading text-sm font-semibold">
@@ -67,7 +67,7 @@ export function AppShell({
         </form>
       </header>
 
-      <main className="flex-1 overflow-y-auto pb-16 md:pb-0">{children}</main>
+      <main className="min-h-0 flex-1 overflow-y-auto pb-16 md:pb-0">{children}</main>
 
       <div className="fixed inset-x-0 bottom-0 border-t border-border bg-background md:hidden">
         <NavLinks variant="mobile" />
