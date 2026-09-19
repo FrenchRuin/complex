@@ -32,7 +32,7 @@ export default function LoginPage() {
     <div className="flex min-h-full flex-1 items-center justify-center p-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-xl">커플 라이프 매니저</CardTitle>
+          <CardTitle className="text-lg">커플 라이프 매니저</CardTitle>
           <CardDescription>두 사람만을 위한 공간이에요.</CardDescription>
         </CardHeader>
         <CardContent>
@@ -44,7 +44,6 @@ export default function LoginPage() {
                 name="email"
                 type="email"
                 autoComplete="email"
-                required
               />
             </div>
             <div className="flex flex-col gap-2">
@@ -54,7 +53,6 @@ export default function LoginPage() {
                 name="password"
                 type="password"
                 autoComplete="current-password"
-                required
               />
             </div>
             {state.error && (

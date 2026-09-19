@@ -1,8 +1,9 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 
-export async function requireProfile() {
+export const getSessionProfile = cache(async () => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -13,6 +14,12 @@ export async function requireProfile() {
   }
 
   const profile = await prisma.profile.findUnique({ where: { id: user.id } });
+
+  return { user, profile };
+});
+
+export async function requireProfile() {
+  const { profile } = await getSessionProfile();
 
   if (!profile || !profile.coupleId) {
     throw new Error(

@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# 참고용 디자인 스크린샷 (제품 코드 아님, 커밋 안 함)
+/ref
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

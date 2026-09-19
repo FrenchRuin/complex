@@ -3,7 +3,6 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { requireProfile } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { TransactionFormDialog } from "@/components/budget/transaction-form-dialog";
-import { CategoryManager } from "@/components/budget/category-manager";
 import { DeleteTransactionButton } from "@/components/budget/delete-transaction-button";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -80,10 +79,13 @@ export default async function BudgetPage({
   );
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-4 pb-24">
+    <div className="flex w-full flex-col gap-6 p-6">
       <header className="flex items-center justify-between gap-2">
-        <h1 className="font-heading text-xl font-medium">가계부</h1>
-        <CategoryManager categories={categories} />
+        <h1 className="font-heading text-lg font-medium">가계부</h1>
+        <TransactionFormDialog
+          categories={categories}
+          trigger={<Button size="sm">거래 추가</Button>}
+        />
       </header>
 
       <div className="flex items-center justify-between">
@@ -93,7 +95,7 @@ export default async function BudgetPage({
           nativeButton={false}
           render={<Link href={`/budget?month=${formatMonthParam(prevMonth.year, prevMonth.month)}`} />}
         >
-          <ChevronLeft />
+          <ChevronLeft strokeWidth={1.5} />
         </Button>
         <div className="text-sm text-muted-foreground">
           {year}년 {month}월 · 수입 {currency.format(totals.income)}원 · 지출{" "}
@@ -105,20 +107,19 @@ export default async function BudgetPage({
           nativeButton={false}
           render={<Link href={`/budget?month=${formatMonthParam(nextMonth.year, nextMonth.month)}`} />}
         >
-          <ChevronRight />
+          <ChevronRight strokeWidth={1.5} />
         </Button>
       </div>
 
       {categories.length === 0 && (
         <p className="text-sm text-muted-foreground">
-          카테고리가 아직 없어요. 위 &quot;카테고리 관리&quot;에서 먼저 하나 추가해주세요.
+          카테고리가 아직 없어요.{" "}
+          <Link href="/settings" className="text-primary underline underline-offset-2">
+            설정
+          </Link>
+          에서 먼저 하나 추가해주세요.
         </p>
       )}
-
-      <TransactionFormDialog
-        categories={categories}
-        trigger={<Button className="w-full">거래 추가</Button>}
-      />
 
       <div className="flex flex-col gap-2">
         {transactions.length === 0 && (

@@ -1,11 +1,6 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -21,8 +16,18 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        {/* 이 환경의 @base-ui/react 버전에서 다이얼로그/셀렉트 등의 닫기 애니메이션 완료 감지가
+            멈춰서(getAnimations()가 절대 resolve 안 됨) 팝업이 영원히 열려있는 채로 걸리는 버그가 있음.
+            애니메이션 대기를 완전히 건너뛰게 하는 공식 탈출구 플래그로 우회. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "globalThis.BASE_UI_ANIMATIONS_DISABLED = true;",
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

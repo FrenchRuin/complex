@@ -138,14 +138,22 @@
 
 ```
 app/
-  login/page.tsx        # 로그인 (공개)
-  page.tsx              # 홈 (보호됨)
-  layout.tsx
+  login/page.tsx        # 로그인 (공개, 셸 없음)
+  (app)/                # 로그인 이후 화면 전부 — route group이라 URL엔 안 붙음
+    layout.tsx           # getSessionProfile() + AppShell 렌더
+    page.tsx              # 홈 (/)
+    budget/page.tsx        # 가계부 (/budget)
+  layout.tsx             # 루트 레이아웃 (폰트, Base UI 애니메이션 우회 스크립트 등)
 actions/
   auth.ts               # signIn/signOut Server Actions
+  budget.ts             # 가계부 Server Actions
 components/
+  app-shell.tsx          # 사이드바(데스크톱)/상단바+탭바(모바일) 레이아웃 셸
+  nav-links.tsx           # 셸에서 쓰는 내비게이션 (활성 상태 표시)
+  budget/                # 가계부 전용 클라이언트 컴포넌트
   ui/                    # shadcn 컴포넌트
 lib/
+  auth.ts               # getSessionProfile()/requireProfile()
   prisma.ts
   supabase/
     server.ts            # Server Component/Action용 Supabase 클라이언트
@@ -157,7 +165,7 @@ scripts/
 proxy.ts                 # 라우트 보호 (Next.js 16 — middleware.ts의 새 이름)
 ```
 
-가계부/일정관리/여행계획을 만들 때는 `app/budget`, `app/calendar`, `app/trips`, `actions/budget.ts` 등으로 이 구조를 그대로 확장한다. 폴더별로 특별한 규칙이 필요해지면 그 폴더에 하위 CLAUDE.md를 둔다.
+일정관리/여행계획을 만들 때는 `app/(app)/calendar`, `app/(app)/trips`, `actions/calendar.ts` 등으로 `(app)` 그룹 안에 추가하면 셸(사이드바/탭바)이 자동으로 적용된다 — 완성되면 `components/nav-links.tsx`의 항목 목록에도 추가할 것. 폴더별로 특별한 규칙이 필요해지면 그 폴더에 하위 CLAUDE.md를 둔다.
 
 > **Next.js 버전 메모**: 이 프로젝트는 Next.js 16을 사용. `middleware.ts`가 `proxy.ts`로 이름이 바뀌었고(`export function proxy` + `export const config`), 다른 부분은 App Router 문법과 거의 동일. 헷갈리면 `node_modules/next/dist/docs/` 참고.
 
@@ -165,26 +173,20 @@ proxy.ts                 # 라우트 보호 (Next.js 16 — middleware.ts의 새
 
 ## 9. 디자인 방향
 
-> 레퍼런스: Linear/Plane 스타일 프로젝트 관리 툴 (사이드바 + 상단 필터 탭 + 밀도 있는 리스트뷰 구조). 톤은 다크/라이트 모드 전환 가능하게, "두 사람을 색으로 구분"하는 걸 장식이 아닌 기능으로 사용.
+> 레퍼런스: 노션/Slack 느낌 — 중립 팔레트 + 넉넉한 여백 + 얇은 hairline 보더, 화려한 장식 없이 "차분한 생산성 툴" 톤. "두 사람을 색으로 구분"하는 것만은 장식이 아닌 기능으로 계속 유지.
 
 ### 색상 토큰
-
-| 이름 | 라이트 | 다크 | 용도 |
-|---|---|---|---|
-| Surface (배경) | `#FAF8F4` | `#1B1A22` | 전체 배경 |
-| Ink (텍스트) | `#2A2620` | `#EDE9E2` | 본문 텍스트 |
-| Partner A | `#B15B65` (더스티 로즈) | 동일(다크에서 살짝 밝게) | 나(배우자1) — 거래/일정 좌측 컬러 바 등 |
-| Partner B | `#2F6F62` (딥 파인그린) | 동일 | 배우자(배우자2) |
-| Border/Divider | Surface에서 파생된 저채도 회색 | 〃 | 리스트 행 구분선 |
+- 배경/텍스트/보더 등 기본 팔레트는 shadcn 중립(`neutral`) 팔레트 그대로 사용 (`app/globals.css`의 `--background`/`--foreground`/`--border` 등, 다크모드 자동 대응)
+- Partner A(`#B15B65`, 더스티 로즈) / Partner B(`#2F6F62`, 딥 파인그린) — `--color-partner-a`/`--color-partner-b` 토큰. 페이지 전체 톤에 쓰지 않고 "누가 기록했는지" 표시하는 작은 포인트(리스트 행 좌측 컬러 바, 사이드바 하단 프로필 옆 점)로만 사용
 
 ### 타이포그래피
-- 헤딩/섹션 타이틀: 세리프 (Fraunces 등)
-- 본문/리스트/숫자: 산세리프 (Inter, Public Sans 등)
+- 헤딩/본문 전부 산세리프(Geist) — 세리프 조합은 쓰지 않음
 
 ### 레이아웃
-- 좌측 고정 사이드바 (대시보드 / 가계부 / 일정관리 / 여행계획 + 다크·라이트 토글)
-- 메인 영역: 상단 페이지명+필터 탭, 그 아래 flat 리스트뷰 (카드 UI 지양)
-- 리스트 각 행 좌측에 Partner A/B 컬러 바로 "누가 등록/지출했는지" 표시
+- **데스크톱**: 좌측 고정 사이드바(앱 이름 → 내비게이션 → 하단 내 이름/컬러/로그아웃), 오른쪽에 콘텐츠 영역
+- **모바일**: 상단 바(앱 이름 + 로그아웃) + 하단 고정 탭바(내비게이션) — `components/app-shell.tsx`, `components/nav-links.tsx` 참고
+- 리스트는 flat list(카드 중첩 지양), 각 행 좌측에 Partner A/B 컬러 바
+- 내비게이션에는 실제로 만들어진 기능만 노출 (일정관리/여행계획은 만들면서 `components/nav-links.tsx`에 추가)
 
 > 세부 컴포넌트 스타일은 실제 구현 단계에서 다듬을 예정. 톤/컬러는 나중에 얼마든지 조정 가능.
 

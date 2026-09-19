@@ -9,6 +9,8 @@ DESIGN.md 6번(개발 우선순위) 순서대로 진행하면서, 각 단계에�
 | 1. 프로젝트 세팅 (Next.js/Prisma/Supabase) | ✅ 완료 | Supabase 프로젝트 연결 + `prisma migrate dev` 완료, 테이블 7개 생성됨 |
 | 2. 로그인 | ✅ 완료 | 실제 계정으로 로그인/로그아웃까지 브라우저 테스트 완료 |
 | 3. 가계부 (등록/목록) | ✅ 완료 | 거래 등록/수정/삭제, 카테고리 관리, 월 필터까지 브라우저 테스트 완료 |
+| 디자인 방향 전환 + 레이아웃 셸 | ✅ 완료 | 사용자 피드백으로 Linear/Plane→노션/Slack 방향 전환, 사이드바(데스크톱)/탭바(모바일) 셸 구축 |
+| 디자인 리터치 (토스 톤) + 설정 페이지 분리 | ✅ 완료 | Pretendard 폰트, 토스 블루 팔레트, 폰트 크기 축소, 카테고리 관리를 `/settings`로 분리 |
 | 4. 일정관리 | 🔲 시작 전 | |
 | 5. 여행계획 | 🔲 시작 전 | |
 
@@ -40,6 +42,25 @@ DESIGN.md 6번(개발 우선순위) 순서대로 진행하면서, 각 단계에�
 - **날짜 서버 검증 부족으로 잘못된 날짜가 `null`로 저장됨**: `new Date(dateValue)`가 유효하지 않은 문자열(Invalid Date)이어도 그대로 Prisma에 넘기면 DB에 `date: null`이 들어감(스키마상 non-null인데도). `actions/budget.ts`의 `parseDate()`에서 `Number.isNaN(date.getTime())`으로 유효성 검사 후 반려하도록 수정함 — 앞으로 날짜/시간 필드를 다루는 액션(일정관리 등)에서도 같은 패턴 적용할 것.
 - **`useEffect` 안에서 `setState`로 다이얼로그 닫기 → lint 에러**: `react-hooks/set-state-in-effect` 규칙에 걸림. `useActionState` 결과가 바뀌었을 때 뭔가 하고 싶으면 `useEffect` 대신 렌더 중 "이전 상태와 비교 후 조건부 setState" 패턴(`if (state !== prevState) { setPrevState(state); ... }`) 사용할 것.
 
+## 디자인 리터치(토스 톤)에서 한 일
+
+- `pnpm add pretendard` → `app/globals.css`에서 `pretendard/dist/web/variable/pretendardvariable.css`를 `@import`, `--font-sans`/`--font-heading`을 `"Pretendard Variable", -apple-system, ...` 리터럴로 지정. `app/layout.tsx`의 Geist Sans 로딩은 제거(Geist Mono는 유지)
+- `app/globals.css`의 `:root`/`.dark` 색상 토큰을 토스 팔레트로 교체 — Primary `#3182F6`, Accent `#E8F3FF`, Muted `#F2F4F6`/`#8B95A1`, Border `#E5E8EB`, Destructive `#F04452`. Partner A/B 컬러는 그대로 유지(기능이라 무관)
+- 페이지 h1/카드 타이틀 `text-xl`→`text-lg`, 자주 쓰는 lucide 아이콘에 `strokeWidth={1.5}` 적용해서 더 부드럽게
+- **카테고리 관리를 가계부 다이얼로그에서 `/settings` 페이지로 분리**: `components/budget/category-manager.tsx`(Dialog 버전) 삭제, 로직을 `components/settings/category-settings.tsx`로 옮겨서 페이지에 바로 렌더. `app/(app)/settings/page.tsx` 신규, `components/nav-links.tsx`에 "설정" 메뉴 추가. 가계부 화면의 카테고리 0개 안내 문구는 `/settings`로 가는 링크로 변경
+- Pretendard 폰트가 실제로 로드됐는지 `document.fonts`로 확인(`Pretendard Variable:loaded`), 설정 페이지 카테고리 추가/삭제까지 브라우저 테스트 완료
+- 이어서 사용자가 `ref/`(gitignore 대상 아님, 그냥 참고용 스크린샷 폴더)에 Linear/Plane류 툴 참고 이미지 3장(`home.png`/`list.png`/`cal.png`)을 넣어줌 → 공통적으로 콘텐츠 영역이 사이드바 옆 전체 폭을 쓰고, 액션 버튼은 작게 툴바에 얹혀있는 스타일이었음. 이를 반영해서:
+  - `app/(app)/budget/page.tsx`, `app/(app)/settings/page.tsx`의 `mx-auto max-w-2xl` 제거 → 홈처럼 전체 폭 사용
+  - "거래 추가" 버튼을 `w-full` 큰 버튼에서 `size="sm"` 작은 버튼으로 바꾸고 페이지 제목 옆(툴바 자리)으로 이동
+  - `components/settings/category-settings.tsx`의 이름 입력 필드는 `flex-1`(전체 폭 늘어남) 대신 `sm:w-64` 고정폭으로 — 페이지는 전체 폭을 쓰되 개별 폼 컨트롤까지 늘어나진 않게 함
+- `components/ui/input.tsx`/`components/ui/select.tsx`가 기본형(얇은 테두리 + 투명 배경)이라 밋밋하다는 피드백 → 토스 스타일 filled input으로 교체: 테두리 없애고 `bg-secondary`(연회색) 채움, 포커스 시 `bg-background`로 바뀌면서 토스 블루 테두리+링 표시, 높이도 `h-8`→`h-9`로 살짝 키움. 로그인/설정 폼 등 `Input`/`Select`를 쓰는 모든 화면에 자동 반영됨
+
+## 발견/수정한 버그 2건 (사용자가 직접 지적함)
+
+- **`components/ui/select.tsx`의 `SelectContent`가 트리거를 가리고 열림**: 기본값 `alignItemWithTrigger: true`가 macOS 네이티브 팝업 메뉴 스타일(선택된 항목이 트리거와 같은 위치에 겹쳐서 뜨는 방식)이라, 웹에서 흔히 기대하는 "트리거 아래로 드롭다운" 동작이 아니었음. `alignItemWithTrigger: false`, `align: "start"`로 기본값 변경 → 이제 일반적인 드롭다운처럼 트리거 바로 아래에 열림. `Select`를 쓰는 모든 화면(가계부 거래 폼, 설정 카테고리 폼)에 자동 반영.
+- **날짜 입력이 브라우저 네이티브 `<input type="date">`라 밋밋함** → `pnpm dlx shadcn add calendar popover`로 설치(`react-day-picker`, `date-fns` 의존성 추가됨), `components/date-picker.tsx` 신규(Popover+Calendar 조합, 한글 로케일(`date-fns/locale/ko`), 트리거 버튼 + 숨김 input으로 기존 `FormData` 기반 Server Action과 호환). `components/budget/transaction-form-dialog.tsx`의 날짜 필드를 이걸로 교체, 새 거래 등록 시 기본값을 오늘 날짜로 설정. 나중에 4단계(일정관리) 만들 때도 이 컴포넌트 재사용 가능.
+- **필수 입력을 비우고 제출하면 브라우저 네이티브 "이 입력란을 작성하세요" 말풍선이 뜸**: `Input`/`Select`에 걸어둔 HTML `required` 속성 때문에, 폼이 서버로 가기도 전에 브라우저가 자체 검증 팝업으로 막아버려서 우리가 만든 예쁜 에러 메시지(`state.error`)가 아예 뜰 기회가 없었음. 모든 폼(`app/login/page.tsx`, `components/budget/transaction-form-dialog.tsx`, `components/settings/category-settings.tsx`)에서 `required`를 제거함 — 이미 Server Action 쪽에 동일한 필수값 검증이 다 있어서(비어있으면 `state.error`로 반환) 기능적으로는 그대로고, 에러 메시지만 우리 스타일로 통일됨. **앞으로 새 폼 만들 때도 `required` 쓰지 말고 Server Action에서 검증 후 `state.error`로 보여줄 것.**
+
 ## ⚠️ 꼭 알아둬야 할 사항
 
 ### 이 프로젝트는 Next.js 16 — `middleware.ts`가 아니라 `proxy.ts`
@@ -51,21 +72,30 @@ Prisma 7부터 `datasource` 블록에 `url`/`directUrl`을 직접 못 쓰고, �
 ### `prisma.config.ts`에서 `dotenv/config`는 `.env.local`을 안 읽음
 `import "dotenv/config"`는 `.env` 파일만 자동으로 읽고 `.env.local`은 무시함. 그래서 `.env.local`에 `DIRECT_URL`을 채워놔도 `prisma migrate dev`가 "datasource.url property is required" 에러를 냄. `import { config } from "dotenv"; config({ path: ".env.local" });` 형태로 명시적으로 로드해야 함 (지금은 고쳐져 있음).
 
+### Base UI 팝업(다이얼로그/셀렉트 등)이 닫히지 않고 영원히 열려있는 버그 — 고쳐둠
+이 프로젝트의 `@base-ui/react` 버전에서, 팝업을 닫을 때 내부적으로 CSS 애니메이션이 끝나길 기다리는 로직(`useAnimationsFinished`가 `element.getAnimations()`의 완료를 기다림)이 이 환경에서 절대 resolve되지 않아서 X 버튼/Escape/바깥 클릭 어떤 걸로 닫으려 해도 다이얼로그가 계속 화면에 남아있는 심각한 버그가 있었음(직접 소스 까보고 확인함 — 내 코드 문제가 아니라 라이브러리 자체 문제, `DialogContent`에 커스텀 로직을 전혀 안 넣은 카테고리 관리 다이얼로그에서도 동일하게 재현됨). `app/layout.tsx`의 `<head>`에 `globalThis.BASE_UI_ANIMATIONS_DISABLED = true`를 설정하는 스크립트를 추가해서 애니메이션 완료 대기 자체를 건너뛰게 해 해결함 — 이후 새로 만드는 Dialog/Select/Popover 등 애니메이션 있는 Base UI 컴포넌트도 이 플래그 덕분에 정상적으로 닫힘. 혹시 이 플래그를 지우거나 값을 바꾸면 이 버그가 재발하니 주의.
+
 ### shadcn init 기본값이 `base-nova` 스타일(Base UI 기반)로 바뀜
 `@radix-ui/react-*`가 아니라 `@base-ui/react` 위에 얹은 컴포넌트가 생성됨(`components.json`의 `style: "base-nova"`). 컴포넌트 커스터마이징할 때 Radix 문서를 그대로 따라하면 API가 안 맞을 수 있음 — Base UI 문서 기준으로 확인할 것.
 
 ### shadcn init 직후 폰트가 깨지는 버그 — 이미 수정해둠
 `shadcn init`이 `app/globals.css`의 `@theme inline`에 `--font-sans: var(--font-sans)`(순환 참조)를 넣어서 폰트가 깨지는 알려진 버그가 있음. `"Geist", "Geist Fallback", ...` 같은 리터럴 값으로 고쳐뒀음 — 나중에 `shadcn add`로 컴포넌트를 추가하다가 `globals.css`가 다시 덮어써지면 이 부분을 다시 확인할 것.
 
-### 디자인 토큰(Partner A/B 컬러, Fraunces 세리프 폰트 등)은 아직 미적용
-지금은 shadcn 기본 컬러(neutral)/기본 폰트(Geist) 그대로. DESIGN.md 9번의 실제 디자인 방향(더스티 로즈/딥 파인그린, 세리프+산세리프 조합, 좌측 사이드바)은 가계부/일정관리 등 실제 화면을 만들 때 반영 예정 — 로그인 화면은 기능 확인용 최소 스타일임.
+### 디자인 방향: 노션/Slack 느낌으로 전환함 (Linear/Plane → 폐기)
+가계부까지 만들고 나서 사용자가 "노션/Slack 느낌을 원했다"는 피드백을 줘서 DESIGN.md 9번을 다시 씀 — 세리프 헤딩 계획 폐기(전부 산세리프), 좌측 고정 사이드바(데스크톱)/상단바+하단 탭바(모바일) 셸을 실제로 구현함(`components/app-shell.tsx`, `components/nav-links.tsx`, `app/(app)/layout.tsx`). Partner A/B 컬러는 페이지 톤이 아니라 리스트 행 컬러 바 등 "기능적 포인트"로만 계속 사용. 앞으로 만드는 화면(`app/(app)/...`)은 이 셸 안에 자동으로 들어감.
 
 ### 이 컴퓨터의 pnpm 관련 메모
 로컬에 pnpm이 전역 설치돼있지 않아 `npm install -g pnpm`으로 설치함 (corepack은 서명 검증 에러로 실패). 설치 경로(`C:\Users\toxic\AppData\Roaming\npm`)를 사용자 PATH에 영구 등록했지만, 이 세션의 셸 도구는 매 호출마다 새 프로세스라 PATH 갱신이 반영 안 될 때가 있음 — pnpm 관련 명령이 "not recognized" 에러를 내면 `$env:PATH += ";C:\Users\toxic\AppData\Roaming\npm"`를 같은 명령 안에서 먼저 실행할 것.
+
+### 라우트 구조 재편: `app/(app)/` route group
+로그인 이후 화면은 전부 `app/(app)/` 안으로 옮김(`page.tsx`, `budget/page.tsx`) — route group이라 URL은 그대로(`/`, `/budget`)고, `app/(app)/layout.tsx`가 `AppShell`을 씌워줌. `/login`은 이 그룹 밖에 있어서 셸이 안 붙음. `lib/auth.ts`의 `getSessionProfile()`(React `cache()`로 감쌈)을 레이아웃과 페이지가 같이 써서 세션 조회가 중복 안 되게 함 — `requireProfile()`은 그 위에 얹혀서 coupleId 없으면 에러 던지는 기존 동작 유지.
+
+### `next build` 직후에는 dev 서버를 재시작해야 함 + Windows에서 `taskkill /IM node.exe`는 전체 node 프로세스를 죽임
+같은 `.next` 디렉토리를 build와 dev가 같이 쓰면 라우트 타입 캐시가 꼬여서 `pnpm typecheck`가 존재하지 않는 파일을 찾는 에러를 냄 — build 돌린 뒤엔 dev 서버를 재시작할 것. 재시작할 때 `taskkill //F //IM node.exe`를 쓰면 이름 기준으로 전체 node 프로세스를 다 죽이므로(이 프로젝트의 dev 서버뿐 아니라 시스템의 다른 node 프로세스도 영향받을 수 있음) 가능하면 PID를 특정해서 끄는 걸 우선 고려할 것.
 
 ### 브라우저 자동화로 테스트할 때 참고
 이 프로젝트를 Claude in Chrome 등으로 테스트할 때, 작은 아이콘 버튼(휴지통 삭제 버튼 등)은 좌표/ref 클릭이 가끔 씹히는 경우가 있었음 — 클릭했는데 서버 로그에 해당 액션이 안 찍히면 `document.querySelector(...).click()`으로 JS에서 직접 클릭해서 재확인할 것. 네이티브 `<input type="date">`에 키보드로 타이핑해서 값 넣는 것도 세그먼트가 꼬이기 쉬우니, `input.value = "YYYY-MM-DD"` 후 `input` / `change` 이벤트를 dispatch하는 방식이 더 안정적임.
 
 ## 다음 단계: 4. 일정관리
 
-DESIGN.md 3번 기능 정의서 기준 — 월간 캘린더 뷰 + 일정 등록/수정/삭제 + 다가오는 일정. `Event` 모델은 스키마에 이미 있음(`prisma/schema.prisma`). 가계부에서 만든 패턴(`lib/auth.ts`의 `requireProfile()`, Server Action에서 `revalidatePath`, flat list + Partner 컬러 바)을 그대로 재사용하면 됨.
+DESIGN.md 3번 기능 정의서 기준 — 월간 캘린더 뷰 + 일정 등록/수정/삭제 + 다가오는 일정. `Event` 모델은 스키마에 이미 있음(`prisma/schema.prisma`). 가계부에서 만든 패턴(`lib/auth.ts`의 `requireProfile()`, Server Action에서 `revalidatePath`, flat list + Partner 컬러 바)을 그대로 재사용하면 됨. 새 화면은 `app/(app)/calendar/page.tsx`로 만들면 셸이 자동으로 씌워지고, `components/nav-links.tsx`에 항목만 추가하면 됨 — 색/폰트는 이미 토스 톤으로 맞춰져 있으니 새로 안 정해도 됨.

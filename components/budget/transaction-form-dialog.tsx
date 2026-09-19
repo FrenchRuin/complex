@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DatePicker } from "@/components/date-picker";
 import {
   Select,
   SelectContent,
@@ -57,6 +58,7 @@ export function TransactionFormDialog({
   trigger: React.ReactElement;
 }) {
   const [open, setOpen] = useState(false);
+  const [formKey, setFormKey] = useState(0);
   const [type, setType] = useState<"income" | "expense">(
     transaction?.type ?? "expense",
   );
@@ -80,15 +82,18 @@ export function TransactionFormDialog({
       open={open}
       onOpenChange={(next) => {
         setOpen(next);
-        if (next) setType(transaction?.type ?? "expense");
+        if (next) {
+          setType(transaction?.type ?? "expense");
+          setFormKey((key) => key + 1);
+        }
       }}
     >
       <DialogTrigger render={trigger} />
-      <DialogContent key={open ? "open" : "closed"}>
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{transaction ? "거래 수정" : "거래 추가"}</DialogTitle>
         </DialogHeader>
-        <form action={formAction} className="flex flex-col gap-4">
+        <form key={formKey} action={formAction} className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <Label htmlFor="type">수입/지출</Label>
             <Select
@@ -96,7 +101,6 @@ export function TransactionFormDialog({
               value={type}
               onValueChange={(value) => setType(value as "income" | "expense")}
               items={{ expense: "지출", income: "수입" }}
-              required
             >
               <SelectTrigger id="type" className="w-full">
                 <SelectValue />
@@ -124,7 +128,6 @@ export function TransactionFormDialog({
                 items={Object.fromEntries(
                   categoriesForType.map((category) => [category.id, category.name]),
                 )}
-                required
               >
                 <SelectTrigger id="categoryId" className="w-full">
                   <SelectValue placeholder="카테고리 선택" />
@@ -149,19 +152,12 @@ export function TransactionFormDialog({
               min={1}
               step={1}
               defaultValue={transaction?.amount}
-              required
             />
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="date">날짜</Label>
-            <Input
-              id="date"
-              name="date"
-              type="date"
-              defaultValue={transaction?.date}
-              required
-            />
+            <Label>날짜</Label>
+            <DatePicker name="date" defaultValue={transaction?.date} />
           </div>
 
           <div className="flex flex-col gap-2">
