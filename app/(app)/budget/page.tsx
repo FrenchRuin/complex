@@ -3,9 +3,8 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { requireProfile } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { TransactionFormDialog } from "@/components/budget/transaction-form-dialog";
-import { DeleteTransactionButton } from "@/components/budget/delete-transaction-button";
+import { BudgetDayView } from "@/components/budget/budget-day-view";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 function parseMonth(monthParam: string | undefined) {
   if (monthParam && /^\d{4}-\d{2}$/.test(monthParam)) {
@@ -78,6 +77,21 @@ export default async function BudgetPage({
     { income: 0, expense: 0 },
   );
 
+  const rows = transactions.map((t) => {
+    const author = profileById.get(t.createdById);
+    return {
+      id: t.id,
+      type: t.type as "income" | "expense",
+      amount: t.amount,
+      date: toDateInputValue(t.date),
+      memo: t.memo,
+      categoryId: t.categoryId,
+      categoryName: t.category.name,
+      authorName: author?.name ?? null,
+      authorColorRole: (author?.colorRole as "A" | "B" | undefined) ?? null,
+    };
+  });
+
   return (
     <div className="flex w-full flex-col gap-6 p-6">
       <header className="flex items-center justify-between gap-2">
@@ -121,58 +135,7 @@ export default async function BudgetPage({
         </p>
       )}
 
-      <div className="flex flex-col gap-2">
-        {transactions.length === 0 && (
-          <p className="text-sm text-muted-foreground">이번 달 기록된 거래가 없어요.</p>
-        )}
-        {transactions.map((t) => {
-          const author = profileById.get(t.createdById);
-          const colorClass = author?.colorRole === "A" ? "border-partner-a" : "border-partner-b";
-          return (
-            <div
-              key={t.id}
-              className={`flex items-center justify-between gap-3 rounded-lg border-l-4 bg-card py-2 pr-2 pl-3 ring-1 ring-foreground/10 ${colorClass}`}
-            >
-              <div className="flex min-w-0 flex-col gap-0.5">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">{t.category.name}</span>
-                  <Badge variant={t.type === "income" ? "default" : "secondary"}>
-                    {t.type === "income" ? "수입" : "지출"}
-                  </Badge>
-                </div>
-                <div className="truncate text-xs text-muted-foreground">
-                  {t.date.toISOString().slice(0, 10)}
-                  {t.memo ? ` · ${t.memo}` : ""}
-                  {author ? ` · ${author.name}` : ""}
-                </div>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="text-sm font-medium whitespace-nowrap">
-                  {t.type === "income" ? "+" : "-"}
-                  {currency.format(t.amount)}원
-                </span>
-                <TransactionFormDialog
-                  categories={categories}
-                  transaction={{
-                    id: t.id,
-                    type: t.type as "income" | "expense",
-                    amount: t.amount,
-                    date: toDateInputValue(t.date),
-                    categoryId: t.categoryId,
-                    memo: t.memo,
-                  }}
-                  trigger={
-                    <Button variant="ghost" size="sm">
-                      수정
-                    </Button>
-                  }
-                />
-                <DeleteTransactionButton transactionId={t.id} />
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      <BudgetDayView year={year} month={month} transactions={rows} categories={categories} />
     </div>
   );
 }
