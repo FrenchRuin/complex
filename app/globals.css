@@ -1,21 +1,33 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "pretendard/dist/web/variable/pretendardvariable.css";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: "Pretendard Variable", -apple-system, BlinkMacSystemFont,
+  --font-sans: var(--font-jakarta), -apple-system, BlinkMacSystemFont,
     system-ui, Roboto, "Malgun Gothic", sans-serif;
   --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, monospace;
-  --font-heading: "Pretendard Variable", -apple-system, BlinkMacSystemFont,
+  --font-heading: var(--font-jakarta), -apple-system, BlinkMacSystemFont,
     system-ui, Roboto, "Malgun Gothic", sans-serif;
-  /* DESIGN.md 9번 — 커플 색 구분(장식이 아닌 기능): 리스트 행/뱃지 등에서 작성자의 Partner A/B를 표시할 때 사용 */
-  --color-partner-a: #b15b65;
-  --color-partner-b: #2f6f62;
+  /* DESIGN.md 9번 — 커플 색 구분(장식이 아닌 기능): 리스트 행/뱃지 등에서 작성자의 Partner A/B를 표시할 때 사용.
+     민준=accent 블루, 서연=person2 퍼플 (Claude Design 캔버스 톤을 그대로 채택) */
+  --color-partner-a: #1b64da;
+  --color-partner-b: #6c4fe0;
+  --color-ink-secondary: var(--ink-secondary);
+  --color-ink-muted: var(--ink-muted);
+  --color-income: var(--income);
+  --color-income-soft: var(--income-soft);
+  --color-expense: var(--expense);
+  --color-expense-soft: var(--expense-soft);
+  --color-cat-housing: #1baf7a;
+  --color-cat-food: #2a78d6;
+  --color-cat-shop: #eda100;
+  --color-cat-transport: #eb6834;
+  --color-cat-fun: #e87ba4;
+  --color-cat-other: #9ca3af;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -54,74 +66,88 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* 토스 앱 톤의 팔레트 — 파랑 포인트 + 부드러운 회색조 */
+/* Claude Design 캔버스("우리가계부") 톤 — 중립 그레이 + 블루 포인트, Plus Jakarta Sans */
 :root {
-  --background: #ffffff;
+  --background: #f2f4f6;
   --foreground: #191f28;
   --card: #ffffff;
   --card-foreground: #191f28;
   --popover: #ffffff;
   --popover-foreground: #191f28;
-  --primary: #3182f6;
+  --primary: #1b64da;
   --primary-foreground: #ffffff;
-  --secondary: #f2f4f6;
+  --secondary: #f9fafb;
   --secondary-foreground: #191f28;
   --muted: #f2f4f6;
-  --muted-foreground: #8b95a1;
-  --accent: #e8f3ff;
-  --accent-foreground: #3182f6;
-  --destructive: #f04452;
+  --muted-foreground: #4e5968;
+  --accent: #ebf2fe;
+  --accent-foreground: #1b64da;
+  --destructive: #d92e42;
   --border: #e5e8eb;
   --input: #e5e8eb;
-  --ring: #3182f6;
-  --chart-1: #3182f6;
-  --chart-2: #00c471;
-  --chart-3: #ffb800;
-  --chart-4: #8b95a1;
-  --chart-5: #f04452;
+  --ring: #1b64da;
+  --chart-1: #2a78d6;
+  --chart-2: #1baf7a;
+  --chart-3: #eda100;
+  --chart-4: #eb6834;
+  --chart-5: #e87ba4;
   --radius: 0.75rem;
-  --sidebar: #f9fafb;
+  --sidebar: #ffffff;
   --sidebar-foreground: #191f28;
-  --sidebar-primary: #3182f6;
+  --sidebar-primary: #1b64da;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #e8f3ff;
-  --sidebar-accent-foreground: #3182f6;
+  --sidebar-accent: #ebf2fe;
+  --sidebar-accent-foreground: #1b64da;
   --sidebar-border: #e5e8eb;
-  --sidebar-ring: #3182f6;
+  --sidebar-ring: #1b64da;
+
+  --ink-secondary: #4e5968;
+  --ink-muted: #8b95a1;
+  --income: #1b64da;
+  --income-soft: #ebf2fe;
+  --expense: #d92e42;
+  --expense-soft: #fce9eb;
 }
 
 .dark {
-  --background: #17191c;
+  --background: #15171a;
   --foreground: #f2f4f6;
-  --card: #202225;
+  --card: #1e2024;
   --card-foreground: #f2f4f6;
-  --popover: #202225;
+  --popover: #1e2024;
   --popover-foreground: #f2f4f6;
-  --primary: #3182f6;
-  --primary-foreground: #ffffff;
-  --secondary: #2a2c30;
+  --primary: #4d8cf0;
+  --primary-foreground: #0c1220;
+  --secondary: #24262b;
   --secondary-foreground: #f2f4f6;
-  --muted: #2a2c30;
-  --muted-foreground: #8b95a1;
+  --muted: #24262b;
+  --muted-foreground: #9aa3ad;
   --accent: #1c2c42;
-  --accent-foreground: #6ba7fa;
-  --destructive: #f04452;
+  --accent-foreground: #7db0f7;
+  --destructive: #f0596a;
   --border: rgba(255, 255, 255, 0.08);
   --input: rgba(255, 255, 255, 0.12);
-  --ring: #3182f6;
-  --chart-1: #3182f6;
-  --chart-2: #00c471;
-  --chart-3: #ffb800;
-  --chart-4: #8b95a1;
-  --chart-5: #f04452;
-  --sidebar: #202225;
+  --ring: #4d8cf0;
+  --chart-1: #5b9de8;
+  --chart-2: #3fc496;
+  --chart-3: #f0b93d;
+  --chart-4: #f08a5f;
+  --chart-5: #ee97bd;
+  --sidebar: #1e2024;
   --sidebar-foreground: #f2f4f6;
-  --sidebar-primary: #3182f6;
-  --sidebar-primary-foreground: #ffffff;
+  --sidebar-primary: #4d8cf0;
+  --sidebar-primary-foreground: #0c1220;
   --sidebar-accent: #1c2c42;
-  --sidebar-accent-foreground: #6ba7fa;
+  --sidebar-accent-foreground: #7db0f7;
   --sidebar-border: rgba(255, 255, 255, 0.08);
-  --sidebar-ring: #3182f6;
+  --sidebar-ring: #4d8cf0;
+
+  --ink-secondary: #9aa3ad;
+  --ink-muted: #6b7480;
+  --income: #4d8cf0;
+  --income-soft: #1c2c42;
+  --expense: #f0596a;
+  --expense-soft: #3a1f24;
 }
 
 @layer base {

@@ -1,15 +1,14 @@
 const currency = new Intl.NumberFormat("ko-KR");
 
-// dataviz 스킬의 검증된 카테고리 팔레트(6슬롯) — 우리 앱은 아직 자체 카테고리 색상 체계가 없어서 그대로 채택
+// Claude Design 캔버스("우리가계부")의 카테고리 팔레트(6슬롯) — globals.css의 --color-cat-* 토큰과 동일
 const CATEGORY_COLORS = [
-  "#2a78d6", // blue
-  "#eb6834", // orange
-  "#1baf7a", // aqua
-  "#eda100", // yellow
-  "#e87ba4", // magenta
-  "#008300", // green
+  "var(--color-cat-housing)",
+  "var(--color-cat-food)",
+  "var(--color-cat-shop)",
+  "var(--color-cat-transport)",
+  "var(--color-cat-fun)",
 ];
-const OTHER_COLOR = "#8b95a1"; // muted-foreground — "기타"는 카테고리 팔레트를 새로 소비하지 않음
+const OTHER_COLOR = "var(--color-cat-other)"; // "기타"는 카테고리 팔레트를 새로 소비하지 않음
 
 export type ExpenseBreakdownItem = { name: string; amount: number };
 

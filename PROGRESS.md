@@ -15,6 +15,7 @@ DESIGN.md 6번(개발 우선순위) 순서대로 진행하면서, 각 단계에�
 | 홈 화면 가계부 요약 위젯 | ✅ 완료 | 이번 달 수입/지출/순잔액 스탯 + 카테고리별 지출 스택 바 차트 |
 | 가계부 캘린더 뷰 | ✅ 완료 | 월간 캘린더에서 날짜별 수입/지출 미리보기 + 날짜 클릭 시 그날 거래만 필터링 |
 | 레이아웃 셸 스크롤 고정 | ✅ 완료 | 사이드바 고정 높이, 오른쪽 콘텐츠 영역만 내부 스크롤되도록 수정 |
+| 디자인 방향 전환 2 (Claude Design 캔버스 "우리가계부") | ✅ 완료 (기존 화면만) | 사용자가 Claude Design으로 새로 뽑은 디자인(claude.ai 아티팩트)을 대시보드/가계부/설정/카테고리 화면에 이식. `타이포+컬러 토큰`은 원문 인용 |
 | 4. 일정관리 | 🔲 시작 전 | |
 | 5. 여행계획 | 🔲 시작 전 | |
 
@@ -130,6 +131,21 @@ Prisma 7부터 `datasource` 블록에 `url`/`directUrl`을 직접 못 쓰고, �
 
 ### 브라우저 자동화로 테스트할 때 참고
 이 프로젝트를 Claude in Chrome 등으로 테스트할 때, 작은 아이콘 버튼(휴지통 삭제 버튼 등)은 좌표/ref 클릭이 가끔 씹히는 경우가 있었음 — 클릭했는데 서버 로그에 해당 액션이 안 찍히면 `document.querySelector(...).click()`으로 JS에서 직접 클릭해서 재확인할 것. 네이티브 `<input type="date">`에 키보드로 타이핑해서 값 넣는 것도 세그먼트가 꼬이기 쉬우니, `input.value = "YYYY-MM-DD"` 후 `input` / `change` 이벤트를 dispatch하는 방식이 더 안정적임.
+
+## 디자인 방향 전환 2 (Claude Design 캔버스 "우리가계부") 에서 한 일
+
+사용자가 Claude(claude.ai)의 Design 아티팩트 기능으로 새 디자인을 직접 만들어 캔버스 링크(`claude.ai/artifact/...`)를 공유 → Artifact 도구의 `read`/`list(scope:"files")`로 캔버스 안 `.dc.html` 아트보드 7종(대시보드/가계부/카테고리/예산/자산/설정/프로필, 라이트+다크)을 직접 읽어서 코드로 이식함.
+
+- **폰트**: Pretendard → **Plus Jakarta Sans**로 전면 교체. `app/layout.tsx`에서 `next/font/google`로 로드(`--font-jakarta`), `app/globals.css`의 CSS `@import` 방식은 제거. `pretendard` npm 패키지 자체는 안 지움(락파일 건드리지 않으려고 그대로 둠, 어차피 안 쓰임).
+- **컬러 토큰 (`app/globals.css`)**: 배경 `#F2F4F6`, surface(card) 흰색, accent 블루 `#1B64DA`, expense 레드 `#D92E42`, income은 accent와 동일 블루. `--ink-secondary`/`--ink-muted` 2단계 보조 텍스트 색, 카테고리 6색(`--color-cat-*`) 토큰 신설.
+- **Partner A/B 컬러 변경**: 기존 로즈(`#B15B65`)/그린(`#2F6F62`) → 디자인 그대로 **블루(`--color-partner-a`, accent와 동일)/퍼플(`--color-partner-b`, `#6C4FE0`)**로 교체. "기능적 색 구분"이라는 DESIGN.md 원칙은 유지하고 색상값만 바꿈 — 이후 화면에서 두 색이 겹쳐 보이는 곳(스탯 카드 accent vs Partner A)이 있으면 참고할 것.
+- **사이드바/내비게이션**: `components/app-shell.tsx` 전면 재작성 — 로고+앱이름+커플이름, 내비 항목(대시보드/가계부/설정) pill 스타일, 하단에 커플 아바타 겹침 표시 + 로그아웃. 이제 두 파트너 이니셜을 실제로 보여주기 위해 `app/(app)/layout.tsx`에서 `coupleId`로 두 Profile을 조회해서 `AppShell`에 내려줌. `components/nav-links.tsx` 아이콘/active 스타일도 새 톤에 맞춤.
+- **대시보드(`/`)**: 스탯 카드 3개(수입/지출/잔액), **최근 6개월 수입·지출 추이 라인 차트**(`components/home/trend-chart.tsx`, 신규 — 실제 Transaction 데이터로 계산, SVG 직접 구현) 추가, 최근 거래 5건 리스트, 카테고리별 지출(기존 가로 스택 바 유지·색상만 새 토큰으로 교체). 라인 차트 만들기 전에 **dataviz 스킬 로드 + `validate_palette.js`로 income/expense 색 조합 실제 검증**(둘 다 PASS) 하고 진행함.
+- **가계부(`/budget`)**: 캘린더 그리드/거래 리스트 카드 스타일만 새 톤으로 리스킨(`components/budget/budget-day-view.tsx`). 기존 기능(월 이동, 날짜 클릭 필터, 거래 CRUD)은 전부 그대로.
+- **설정 구조 변경**: 캔버스 디자인이 `/settings`를 카드 2개(카테고리/프로필)로 가는 허브로 바꿔서, 그대로 라우트를 나눔 — `/settings`(허브, 신규) → `/settings/categories`(기존 카테고리 관리 로직 그대로 이동) / `/settings/profile`(신규, 이름·이메일·커플 연결 상태 표시 + 로그아웃). **프로필 이름 수정이나 알림 토글은 아직 백엔드가 없어서 넣지 않음**(디자인엔 있었지만 가짜 기능을 만들지 않기 위해 읽기 전용으로만 구현) — 필요하면 다음에 Server Action 추가해서 붙일 것.
+- **다크모드 토글은 넣지 않음**: 디자인엔 "다크 모드로 보기" 버튼이 있었지만, 이 프로젝트엔 아직 `next-themes` 같은 다크모드 전환 장치가 없어서(있는 건 `.dark` CSS 변수뿐) 눌러도 아무 일 안 하는 가짜 버튼을 만들지 않으려고 제외함. 실제로 다크모드 토글을 원하면 별도 작업으로 진행.
+- **⚠️ 이식하지 않은 화면 — "예산"/"자산"**: 캔버스에 있던 `Budget.dc.html`/`Assets.dc.html`은 **스키마에 없는 새 기능**(예산 한도, 자산 관리 모델)이라 CLAUDE.md 원칙("스키마를 임의로 크게 바꾸지 말고 먼저 확인받을 것")에 따라 만들지 않고 보류함. 사이드바 내비게이션에도 아직 안 넣음(만들어진 기능만 노출 원칙). 이 두 기능을 만들려면 먼저 Prisma 스키마에 `Budget`/`Asset` 모델을 추가할지 사용자와 상의해야 함.
+- 검증: `pnpm typecheck`, `pnpm lint`, `pnpm build` 모두 통과. **이 세션엔 `.env.local`(Supabase 연결 정보)이 없어서 실제 브라우저로 로그인해서 데이터가 뜨는지는 확인 못 함** — 다음에 실제 환경에서 브라우저 테스트 필요.
 
 ## 다음 단계: 4. 일정관리
 
