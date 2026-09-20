@@ -4,6 +4,7 @@ import { requireProfile } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { TransactionFormDialog } from "@/components/budget/transaction-form-dialog";
 import { BudgetDayView } from "@/components/budget/budget-day-view";
+import { MonthPicker } from "@/components/budget/month-picker";
 import { Button } from "@/components/ui/button";
 
 function parseMonth(monthParam: string | undefined) {
@@ -103,7 +104,7 @@ export default async function BudgetPage({
         </div>
         <TransactionFormDialog
           categories={categories}
-          trigger={<Button size="sm">거래 추가</Button>}
+          trigger={<Button>거래 추가</Button>}
         />
       </div>
 
@@ -116,9 +117,7 @@ export default async function BudgetPage({
         >
           <ChevronLeft strokeWidth={2} />
         </Button>
-        <div className="px-2 text-sm font-bold text-foreground tabular-nums">
-          {year}년 {month}월
-        </div>
+        <MonthPicker year={year} month={month} />
         <Button
           variant="ghost"
           size="icon-sm"
@@ -142,7 +141,13 @@ export default async function BudgetPage({
         </p>
       )}
 
-      <BudgetDayView year={year} month={month} transactions={rows} categories={categories} />
+      <BudgetDayView
+        year={year}
+        month={month}
+        transactions={rows}
+        categories={categories}
+        partners={profiles.map((p) => ({ id: p.id, name: p.name, colorRole: p.colorRole as "A" | "B" }))}
+      />
     </div>
   );
 }

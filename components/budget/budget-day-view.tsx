@@ -11,13 +11,22 @@ import {
   isSameMonth,
   isToday,
 } from "date-fns";
+import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { TransactionFormDialog } from "@/components/budget/transaction-form-dialog";
 import { DeleteTransactionButton } from "@/components/budget/delete-transaction-button";
 
 type Category = { id: string; name: string; type: "income" | "expense" };
+type Partner = { id: string; name: string; colorRole: "A" | "B" };
 
 type TransactionRow = {
   id: string;
@@ -47,28 +56,46 @@ export function BudgetDayView({
   month,
   transactions,
   categories,
+  partners,
 }: {
   year: number;
   month: number;
   transactions: TransactionRow[];
   categories: Category[];
+  partners: Partner[];
 }) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [memberFilter, setMemberFilter] = useState<"all" | "A" | "B">("all");
+
+  const filteredTransactions = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return transactions.filter((t) => {
+      if (categoryFilter !== "all" && t.categoryId !== categoryFilter) return false;
+      if (memberFilter !== "all" && t.authorColorRole !== memberFilter) return false;
+      if (q) {
+        const haystack = `${t.categoryName} ${t.memo ?? ""}`.toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [transactions, query, categoryFilter, memberFilter]);
 
   const dailyTotals = useMemo(() => {
     const map = new Map<string, { income: number; expense: number }>();
-    for (const t of transactions) {
+    for (const t of filteredTransactions) {
       const entry = map.get(t.date) ?? { income: 0, expense: 0 };
       if (t.type === "income") entry.income += t.amount;
       else entry.expense += t.amount;
       map.set(t.date, entry);
     }
     return map;
-  }, [transactions]);
+  }, [filteredTransactions]);
 
   const monthTotals = useMemo(
     () =>
-      transactions.reduce(
+      filteredTransactions.reduce(
         (acc, t) => {
           if (t.type === "income") acc.income += t.amount;
           else acc.expense += t.amount;
@@ -76,7 +103,7 @@ export function BudgetDayView({
         },
         { income: 0, expense: 0 },
       ),
-    [transactions],
+    [filteredTransactions],
   );
 
   const monthAnchor = new Date(year, month - 1, 1);
@@ -85,8 +112,8 @@ export function BudgetDayView({
   const days = eachDayOfInterval({ start: gridStart, end: gridEnd });
 
   const visibleTransactions = selectedDate
-    ? transactions.filter((t) => t.date === selectedDate)
-    : transactions;
+    ? filteredTransactions.filter((t) => t.date === selectedDate)
+    : filteredTransactions;
 
   const visibleTotals = useMemo(
     () =>
@@ -101,8 +128,76 @@ export function BudgetDayView({
     [visibleTransactions],
   );
 
+  const categoryItems = { all: "전체", ...Object.fromEntries(categories.map((c) => [c.id, c.name])) };
+
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-wrap items-center gap-2.5">
+        <label className="relative min-w-[200px] flex-1 max-w-[300px]">
+          <Search className="pointer-events-none absolute top-1/2 left-3 size-[15px] -translate-y-1/2 text-ink-muted" strokeWidth={2} />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="거래 내용 검색"
+            className="w-full rounded-[10px] border border-border bg-card py-2.5 pr-3 pl-9 text-[13.5px] text-foreground outline-none focus-visible:border-ring"
+          />
+        </label>
+
+        <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v ?? "all")} items={categoryItems}>
+          <SelectTrigger className="h-auto rounded-[10px] border border-border bg-card px-3 py-2.5 text-[13px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">카테고리: 전체</SelectItem>
+            {categories.map((c) => (
+              <SelectItem key={c.id} value={c.id}>
+                {c.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {partners.length > 0 && (
+          <div className="flex rounded-[10px] border border-border bg-secondary p-[3px]">
+            <button
+              type="button"
+              onClick={() => setMemberFilter("all")}
+              className={cn(
+                "rounded-[7px] px-3.5 py-1.5 text-[12.5px] font-bold transition-colors",
+                memberFilter === "all" ? "bg-card text-foreground shadow-sm" : "text-ink-secondary",
+              )}
+            >
+              전체
+            </button>
+            {partners.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => setMemberFilter(p.colorRole)}
+                className={cn(
+                  "rounded-[7px] px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors",
+                  memberFilter === p.colorRole ? "bg-card text-foreground shadow-sm" : "text-ink-secondary",
+                )}
+              >
+                {p.name}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="flex-1" />
+
+        <div className="flex items-center gap-3.5">
+          <span className="flex items-center gap-1.5 text-[12.5px] text-ink-secondary">
+            <span className="size-2 rounded-sm bg-income" /> 수입
+          </span>
+          <span className="flex items-center gap-1.5 text-[12.5px] text-ink-secondary">
+            <span className="size-2 rounded-sm bg-expense" /> 지출
+          </span>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[1fr_320px]">
         <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
           <div className="grid grid-cols-7 gap-2 pb-2.5">
@@ -222,7 +317,7 @@ export function BudgetDayView({
 
         {visibleTransactions.length === 0 && (
           <p className="py-4 text-sm text-ink-secondary">
-            {selectedDate ? "이 날짜엔 기록된 거래가 없어요." : "이번 달 기록된 거래가 없어요."}
+            {selectedDate ? "이 날짜엔 조건에 맞는 거래가 없어요." : "조건에 맞는 거래가 없어요."}
           </p>
         )}
 

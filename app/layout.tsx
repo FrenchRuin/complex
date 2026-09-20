@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
+import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
 const geistMono = Geist_Mono({
@@ -22,6 +23,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="ko"
       className={`${geistMono.variable} ${plusJakartaSans.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <head>
         {/* 이 환경의 @base-ui/react 버전에서 다이얼로그/셀렉트 등의 닫기 애니메이션 완료 감지가
@@ -33,7 +35,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           }}
         />
       </head>
-      <body className="flex h-dvh flex-col overflow-hidden">{children}</body>
+      <body className="flex h-dvh flex-col overflow-hidden" suppressHydrationWarning>
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
     </html>
   );
 }

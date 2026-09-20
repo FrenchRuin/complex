@@ -143,9 +143,20 @@ Prisma 7부터 `datasource` 블록에 `url`/`directUrl`을 직접 못 쓰고, �
 - **대시보드(`/`)**: 스탯 카드 3개(수입/지출/잔액), **최근 6개월 수입·지출 추이 라인 차트**(`components/home/trend-chart.tsx`, 신규 — 실제 Transaction 데이터로 계산, SVG 직접 구현) 추가, 최근 거래 5건 리스트, 카테고리별 지출(기존 가로 스택 바 유지·색상만 새 토큰으로 교체). 라인 차트 만들기 전에 **dataviz 스킬 로드 + `validate_palette.js`로 income/expense 색 조합 실제 검증**(둘 다 PASS) 하고 진행함.
 - **가계부(`/budget`)**: 캘린더 그리드/거래 리스트 카드 스타일만 새 톤으로 리스킨(`components/budget/budget-day-view.tsx`). 기존 기능(월 이동, 날짜 클릭 필터, 거래 CRUD)은 전부 그대로.
 - **설정 구조 변경**: 캔버스 디자인이 `/settings`를 카드 2개(카테고리/프로필)로 가는 허브로 바꿔서, 그대로 라우트를 나눔 — `/settings`(허브, 신규) → `/settings/categories`(기존 카테고리 관리 로직 그대로 이동) / `/settings/profile`(신규, 이름·이메일·커플 연결 상태 표시 + 로그아웃). **프로필 이름 수정이나 알림 토글은 아직 백엔드가 없어서 넣지 않음**(디자인엔 있었지만 가짜 기능을 만들지 않기 위해 읽기 전용으로만 구현) — 필요하면 다음에 Server Action 추가해서 붙일 것.
-- **다크모드 토글은 넣지 않음**: 디자인엔 "다크 모드로 보기" 버튼이 있었지만, 이 프로젝트엔 아직 `next-themes` 같은 다크모드 전환 장치가 없어서(있는 건 `.dark` CSS 변수뿐) 눌러도 아무 일 안 하는 가짜 버튼을 만들지 않으려고 제외함. 실제로 다크모드 토글을 원하면 별도 작업으로 진행.
+- ~~다크모드 토글은 넣지 않음~~ → 사용자 피드백으로 이후 실제 구현함 (아래 "1차 피드백 반영" 참고)
 - **⚠️ 이식하지 않은 화면 — "예산"/"자산"**: 캔버스에 있던 `Budget.dc.html`/`Assets.dc.html`은 **스키마에 없는 새 기능**(예산 한도, 자산 관리 모델)이라 CLAUDE.md 원칙("스키마를 임의로 크게 바꾸지 말고 먼저 확인받을 것")에 따라 만들지 않고 보류함. 사이드바 내비게이션에도 아직 안 넣음(만들어진 기능만 노출 원칙). 이 두 기능을 만들려면 먼저 Prisma 스키마에 `Budget`/`Asset` 모델을 추가할지 사용자와 상의해야 함.
 - 검증: `pnpm typecheck`, `pnpm lint`, `pnpm build` 모두 통과. **이 세션엔 `.env.local`(Supabase 연결 정보)이 없어서 실제 브라우저로 로그인해서 데이터가 뜨는지는 확인 못 함** — 다음에 실제 환경에서 브라우저 테스트 필요.
+
+## 디자인 이식 1차 피드백 반영
+
+사용자가 로컬에서 실제로 브랜치를 pull받아 확인해보고 준 피드백: "다크모드 없음", "디자인이 전체적으로 다 옮겨지지 않은 것 같다", "버튼들도 상이하다", "가계부 연월 선택 버튼을 눌렀을 때 캘린더(월/년 선택) 레이어가 안 뜬다". 아래처럼 수정함.
+
+- **다크모드 실제 구현**: `next-themes` 설치 → `components/theme-provider.tsx`(루트 레이아웃에서 감쌈, `attribute="class"`라 기존 `@custom-variant dark (&:is(.dark *))` 토큰 구조와 그대로 호환), `components/theme-toggle.tsx`(신규, 사이드바엔 텍스트+아이콘 버전, 모바일 상단바엔 아이콘만 있는 `compact` 버전). `.dark` CSS 변수는 이미 있었으니 실제로 전환되는 버튼만 추가한 셈. `app/layout.tsx`의 `<html>`/`<body>`에 `suppressHydrationWarning` 추가(next-themes 공식 가이드) — 테마 아이콘은 클라이언트 마운트 후에만 실제 값 보여주는 표준 패턴이라 `useEffect`+`setState`가 `react-hooks/set-state-in-effect` 린트에 걸려서 `eslint-disable-next-line` 한 줄 추가함(next-themes 자체 문서가 권장하는 우회임, 다른 방법 없음).
+- **가계부 연월 선택 팝오버 신규 구현**: `components/budget/month-picker.tsx` — 기존엔 그냥 "2026년 9월" 텍스트만 있었는데, 캔버스 디자인처럼 눌렀을 때 연도 이동(◀▶) + 1~12월 그리드 + "오늘로 이동" 버튼이 있는 팝오버가 뜨도록 만듦(`components/ui/popover.tsx` 재사용, `date-picker.tsx`와 동일한 `PopoverTrigger render={<Button/>}` 패턴). 월 선택 시 `/budget?month=YYYY-MM`으로 이동.
+- **가계부 툴바 필터 추가**: 캔버스 디자인엔 있었는데 처음 이식할 때 빠뜨렸던 검색창(메모·카테고리명 검색)/카테고리 필터(Select)/작성자 세그먼트 토글(전체·파트너A·파트너B)을 `components/budget/budget-day-view.tsx`에 추가. 캘린더 일별 합계·요약·거래 리스트가 전부 이 필터를 반영해서 계산되도록 함(`filteredTransactions`를 기준으로 파생). `app/(app)/budget/page.tsx`에서 `partners` prop(coupleId로 조회한 두 Profile)을 새로 내려줌.
+- **버튼 스타일 전면 조정 (`components/ui/button.tsx`)**: 기존 shadcn 기본값(`rounded-lg`, `font-medium`, `default` 사이즈 `h-8`)이 캔버스 디자인(굵은 글씨, 더 큰 pill 버튼)보다 확연히 작고 얇았음 → `rounded-xl`, `font-semibold`, `default` 사이즈 `h-10`/`lg` `h-11`로 키움. 이 컴포넌트는 앱 전체에서 공유되는 shadcn 컴포넌트라 로그인 버튼 포함 전체 화면에 자동 반영됨. 가계부 페이지의 "거래 추가" 버튼은 `size="sm"`(너무 작았음) 제거하고 기본 사이즈로 변경.
+- 검증: `pnpm typecheck`/`pnpm lint`/`pnpm build` 통과. `/login`은 이 세션에서도 스크린샷으로 버튼 크기·폰트 확인함. **다크모드 토글·연월 팝오버·가계부 필터는 로그인 뒤 화면이라 이 세션에선 실제 클릭 테스트를 못 했음 — 로컬에서 실제로 눌러보고 이상 있으면 알려주세요.**
+- 아직 손 안 댄 것: "예산"/"자산" 화면(스키마 필요, 보류 중), 홈 대시보드의 "저축률 목표" 게이지(목표 저축률 데이터가 없어서 제외), 카테고리 관리 페이지의 드래그 순서변경.
 
 ## 다음 단계: 4. 일정관리
 

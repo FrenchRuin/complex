@@ -2,6 +2,7 @@ import { Heart, LogOut } from "lucide-react";
 import { signOut } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { NavLinks } from "@/components/nav-links";
+import { ThemeToggle } from "@/components/theme-toggle";
 import type { getSessionProfile } from "@/lib/auth";
 import type { Profile } from "@prisma/client";
 
@@ -51,6 +52,8 @@ export function AppShell({
           <NavLinks variant="sidebar" />
         </div>
 
+        <ThemeToggle />
+
         <div className="flex items-center gap-2.5 rounded-2xl border border-border bg-card p-3">
           <div className="flex shrink-0">
             {partners.length > 0 ? (
@@ -89,16 +92,19 @@ export function AppShell({
             우리가계부
           </span>
         </div>
-        <form action={signOut}>
-          <Button
-            type="submit"
-            variant="ghost"
-            size="icon-sm"
-            aria-label="로그아웃"
-          >
-            <LogOut strokeWidth={1.5} />
-          </Button>
-        </form>
+        <div className="flex items-center gap-1">
+          <ThemeToggle compact />
+          <form action={signOut}>
+            <Button
+              type="submit"
+              variant="ghost"
+              size="icon-sm"
+              aria-label="로그아웃"
+            >
+              <LogOut strokeWidth={1.5} />
+            </Button>
+          </form>
+        </div>
       </header>
 
       <main className="min-h-0 flex-1 overflow-y-auto pb-16 md:pb-0">{children}</main>
