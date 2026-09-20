@@ -93,27 +93,31 @@ export default async function BudgetPage({
   });
 
   return (
-    <div className="flex w-full flex-col gap-6 p-6">
-      <header className="flex items-center justify-between gap-2">
-        <h1 className="font-heading text-lg font-medium">가계부</h1>
+    <div className="flex w-full flex-col gap-6 p-6 md:p-10">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex flex-col gap-1.5">
+          <h1 className="font-heading text-[28px] font-bold text-foreground md:text-[32px]">가계부</h1>
+          <p className="text-[14.5px] text-ink-secondary">
+            달력에서 날짜를 선택해 그날의 거래를 확인하고 관리하세요.
+          </p>
+        </div>
         <TransactionFormDialog
           categories={categories}
           trigger={<Button size="sm">거래 추가</Button>}
         />
-      </header>
+      </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-center gap-1 self-center rounded-full border border-border bg-card px-2 py-1.5">
         <Button
           variant="ghost"
           size="icon-sm"
           nativeButton={false}
           render={<Link href={`/budget?month=${formatMonthParam(prevMonth.year, prevMonth.month)}`} />}
         >
-          <ChevronLeft strokeWidth={1.5} />
+          <ChevronLeft strokeWidth={2} />
         </Button>
-        <div className="text-sm text-muted-foreground">
-          {year}년 {month}월 · 수입 {currency.format(totals.income)}원 · 지출{" "}
-          {currency.format(totals.expense)}원
+        <div className="px-2 text-sm font-bold text-foreground tabular-nums">
+          {year}년 {month}월
         </div>
         <Button
           variant="ghost"
@@ -121,15 +125,18 @@ export default async function BudgetPage({
           nativeButton={false}
           render={<Link href={`/budget?month=${formatMonthParam(nextMonth.year, nextMonth.month)}`} />}
         >
-          <ChevronRight strokeWidth={1.5} />
+          <ChevronRight strokeWidth={2} />
         </Button>
       </div>
+      <p className="-mt-3 text-center text-[13px] text-ink-secondary">
+        수입 {currency.format(totals.income)}원 · 지출 {currency.format(totals.expense)}원
+      </p>
 
       {categories.length === 0 && (
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-ink-secondary">
           카테고리가 아직 없어요.{" "}
-          <Link href="/settings" className="text-primary underline underline-offset-2">
-            설정
+          <Link href="/settings/categories" className="text-primary underline underline-offset-2">
+            설정 · 카테고리
           </Link>
           에서 먼저 하나 추가해주세요.
         </p>

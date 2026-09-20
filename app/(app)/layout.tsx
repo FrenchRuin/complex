@@ -1,5 +1,6 @@
 import { AppShell } from "@/components/app-shell";
 import { getSessionProfile } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 export default async function AppLayout({
   children,
@@ -8,5 +9,16 @@ export default async function AppLayout({
 }) {
   const session = await getSessionProfile();
 
-  return <AppShell session={session}>{children}</AppShell>;
+  const partners = session.profile?.coupleId
+    ? await prisma.profile.findMany({
+        where: { coupleId: session.profile.coupleId },
+        orderBy: { colorRole: "asc" },
+      })
+    : [];
+
+  return (
+    <AppShell session={session} partners={partners}>
+      {children}
+    </AppShell>
+  );
 }
