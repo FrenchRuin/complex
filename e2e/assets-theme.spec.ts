@@ -10,7 +10,7 @@ test("자산·부채 추가 → 순자산, 저축 목표 적립 → 진행률 (F
     const dialog = page.getByRole("dialog", { name: "자산·부채 추가" });
     await dialog.getByLabel("이름").fill(name);
     if (kind) await dialog.getByLabel("종류").selectOption({ label: kind });
-    await dialog.getByLabel(/금액/).fill(amount);
+    await dialog.getByLabel("금액", { exact: true }).fill(amount);
     await dialog.getByRole("button", { name: "저장" }).click();
     await expect(dialog).toBeHidden();
   };
@@ -18,6 +18,20 @@ test("자산·부채 추가 → 순자산, 저축 목표 적립 → 진행률 (F
   await add("E2E 대출", "2000000", "대출");
   await expect(page.getByText("자산 5,000,000원 − 부채 2,000,000원")).toBeVisible();
   await expect(page.getByText("3,000,000원").first()).toBeVisible();
+
+  // 지난 날짜 금액 기록 → 지금 금액은 그대로, 추이 표에 지난달이 생긴다 (F-41)
+  await page.getByRole("button", { name: /E2E 통장/ }).click();
+  const edit = page.getByRole("dialog", { name: "자산·부채 수정" });
+  await edit.getByLabel("새 금액").fill("4000000");
+  await edit.getByRole("button", { name: /기준일/ }).click();
+  await page.getByRole("button", { name: "이전 달" }).click();
+  await page.getByRole("group", { name: /날짜/ }).getByRole("button", { name: /^\d+월 15일/ }).click();
+  await edit.getByRole("button", { name: "금액 기록 추가" }).click();
+  await expect(edit.getByRole("listitem")).toHaveCount(2);
+  await edit.getByRole("button", { name: "닫기" }).click();
+  await expect(page.getByText("자산 5,000,000원 − 부채 2,000,000원")).toBeVisible();
+  await page.getByText("표로 보기").click();
+  await expect(page.getByRole("table")).toContainText("4,000,000원");
 
   await page.getByRole("button", { name: "저축 목표 추가" }).click();
   const goalDialog = page.getByRole("dialog", { name: "저축 목표 추가" });

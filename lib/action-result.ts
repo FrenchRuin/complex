@@ -27,7 +27,10 @@ const RPC_ERROR_MESSAGES: Record<string, string> = {
   recurring_not_in_month: "이번 달에는 이 정기지출이 없어요. 새로고침해 주세요",
   already_paid: "이미 납부 체크했어요. 새로고침해 주세요",
   invalid_amount: "금액을 입력해 주세요",
-  invalid_goal: "저축 목표를 찾을 수 없어요. 새로고침해 주세요",};
+  invalid_goal: "저축 목표를 찾을 수 없어요. 새로고침해 주세요",
+  invalid_asset: "자산 항목을 찾을 수 없어요. 새로고침해 주세요",
+  last_asset_value: "금액 기록은 하나 이상 있어야 해요. 항목을 지우려면 항목 삭제를 눌러 주세요",
+};
 
 const FALLBACK = "저장하지 못했어요. 잠시 후 다시 시도해 주세요";
 

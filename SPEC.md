@@ -203,7 +203,8 @@
 | F-42 | 저축 목표 | 3차 |
 
 - **F-40**: 항목 이름, 종류(예금·적금·투자·보증금·부동산·자동차·대출·기타), 소유(공동/A/B), 금액, 부채 여부. 순자산 = 자산 합 − 부채 합.
-- **F-41**: 매월 1일 첫 접속 시 지난달 말 기준 순자산을 스냅샷으로 저장. 12개월 추이 그래프.
+- **F-41**: 항목마다 **금액 기록**(기준일 + 금액)을 쌓는다. 항목 금액은 가장 최근 기록. 추이는 매달 말일 기준으로 그때까지의 가장 최근 기록을 더해 계산하고(이번 달은 오늘 기준), 최근 12개월을 막대로 보여준다. 지난 날짜로 기록을 넣으면 그 달 값이 바뀐다. 삭제한 항목은 삭제한 날 이전 달까지만 포함.
+- 결정 (2026-09-28): 스냅샷 방식(`net_worth_snapshots`) 대신 금액 기록 방식으로 바꿨다. 같은 날짜 기록은 금액만 바꾸고, 항목마다 기록이 하나는 남아야 한다. 기존 항목은 등록일 기준 기록 하나로 옮겼다.
 - **F-42**: 목표 이름, 목표액, 기한(선택). "적립" 버튼으로 금액·날짜·사람 기록. 진행률, 기한까지 월 필요 금액.
 - 결정 (2026-09-27): 적립은 **목표에만** 기록하고 가계부 지출 내역으로는 만들지 않는다. 자산·항목·목표·적립 삭제는 소프트 삭제. 스냅샷은 그 달 첫 접속 때(1일이 아니어도) 지난달 것이 없으면 만든다 (자산이 하나라도 있을 때만).
 - 폰 진입: 탭바는 그대로 두고 **홈 요약 카드 + 설정 메뉴 "자산·목표"**로 들어간다.
@@ -372,8 +373,9 @@
 
 ### 5.3 3차 테이블
 
-- **assets**: `household_id`, `name`, `kind`, `owner`(`'joint'`/`'a'`/`'b'`), `amount bigint`, `is_liability bool`, `memo`, `updated_at`.
-- **net_worth_snapshots**: `household_id`, `month date`, `total_assets`, `total_liabilities`. (household_id, month) unique.
+- **assets**: `household_id`, `name`, `kind`, `owner`(`'joint'`/`'a'`/`'b'`), `amount bigint`, `is_liability bool`, `memo`, `updated_at`, `value_as_of date`. `amount`·`value_as_of`는 가장 최근 금액 기록을 DB가 복사해 둔다.
+- **asset_values**: `household_id`, `asset_id`, `as_of date`, `amount bigint`, `created_by`, `deleted_at`. 지우지 않은 것 중 (asset_id, as_of) unique. 쓰기는 `set_asset_value()`, 지우기는 `delete_asset_value()`.
+- ~~net_worth_snapshots~~: 금액 기록 방식으로 바꾸며 삭제 (2026-09-28).
 - **goals**: `household_id`, `name`, `target_amount`, `due_date null`, `is_done`.
 - **goal_contributions**: `goal_id`, `amount`, `contributed_on`, `member_slot`.
 

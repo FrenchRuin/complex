@@ -14,6 +14,61 @@ export type Database = {
   }
   public: {
     Tables: {
+      asset_values: {
+        Row: {
+          amount: number
+          as_of: string
+          asset_id: string
+          created_at: string
+          created_by: string
+          deleted_at: string | null
+          household_id: string
+          id: string
+        }
+        Insert: {
+          amount: number
+          as_of: string
+          asset_id: string
+          created_at?: string
+          created_by: string
+          deleted_at?: string | null
+          household_id: string
+          id?: string
+        }
+        Update: {
+          amount?: number
+          as_of?: string
+          asset_id?: string
+          created_at?: string
+          created_by?: string
+          deleted_at?: string | null
+          household_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_values_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_values_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_values_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assets: {
         Row: {
           amount: number
@@ -27,6 +82,7 @@ export type Database = {
           name: string
           owner: string
           updated_at: string
+          value_as_of: string | null
         }
         Insert: {
           amount: number
@@ -40,6 +96,7 @@ export type Database = {
           name: string
           owner: string
           updated_at?: string
+          value_as_of?: string | null
         }
         Update: {
           amount?: number
@@ -53,6 +110,7 @@ export type Database = {
           name?: string
           owner?: string
           updated_at?: string
+          value_as_of?: string | null
         }
         Relationships: [
           {
@@ -424,41 +482,6 @@ export type Database = {
           },
         ]
       }
-      net_worth_snapshots: {
-        Row: {
-          created_at: string
-          household_id: string
-          id: string
-          month: string
-          total_assets: number
-          total_liabilities: number
-        }
-        Insert: {
-          created_at?: string
-          household_id: string
-          id?: string
-          month: string
-          total_assets: number
-          total_liabilities: number
-        }
-        Update: {
-          created_at?: string
-          household_id?: string
-          id?: string
-          month?: string
-          total_assets?: number
-          total_liabilities?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "net_worth_snapshots_household_id_fkey"
-            columns: ["household_id"]
-            isOneToOne: false
-            referencedRelation: "households"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       payment_methods: {
         Row: {
           created_at: string
@@ -703,11 +726,8 @@ export type Database = {
       }
       create_household: { Args: { p_display_name: string }; Returns: string }
       create_invite: { Args: never; Returns: string }
+      delete_asset_value: { Args: { p_value_id: string }; Returns: undefined }
       ensure_month_budgets: { Args: { p_month: string }; Returns: undefined }
-      ensure_net_worth_snapshot: {
-        Args: { p_current_month: string }
-        Returns: undefined
-      }
       get_invite: {
         Args: { p_token: string }
         Returns: {
@@ -726,6 +746,10 @@ export type Database = {
       }
       my_household_id: { Args: never; Returns: string }
       normalize_merchant: { Args: { p: string }; Returns: string }
+      set_asset_value: {
+        Args: { p_amount: number; p_as_of: string; p_asset_id: string }
+        Returns: undefined
+      }
       uncheck_recurring: {
         Args: { p_item_id: string; p_month: string }
         Returns: undefined

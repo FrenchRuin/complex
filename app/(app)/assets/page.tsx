@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { SettingsSection } from "@/components/settings/SettingsSection";
 import { getAssetsOverview } from "@/lib/assets";
 import { netWorth, netWorthTrend } from "@/lib/calc/assets";
-import { currentMonthKST } from "@/lib/date";
+import { currentMonthKST, todayKST } from "@/lib/date";
 import { getHouseholdMembers, requireMember, toMemberNames } from "@/lib/household";
 import { formatWon } from "@/lib/money";
 
@@ -36,13 +36,16 @@ export default async function AssetsPage() {
               자산 {formatWon(worth.assets)} − 부채 {formatWon(worth.liabilities)}
             </p>
           </section>
-          <SettingsSection title="자산·부채" description="금액이 바뀌면 항목을 눌러 고쳐 주세요.">
+          <SettingsSection title="자산·부채" description="금액이 바뀌면 항목을 눌러 금액 기록을 추가해 주세요.">
             <AssetList assets={overview.assets} names={names} />
           </SettingsSection>
         </div>
         <div className="flex flex-col gap-4">
-          <SettingsSection title="순자산 추이" description="매달 말 기준 순자산이에요.">
-            <NetWorthChart points={netWorthTrend(overview.snapshots, worth.net, currentMonthKST())} />
+          <SettingsSection
+            title="순자산 추이"
+            description="매달 말일 기준으로, 그때까지의 가장 최근 금액 기록을 더해 계산해요. 이번 달은 오늘 기준이에요."
+          >
+            <NetWorthChart points={netWorthTrend(overview.history.assets, overview.history.values, currentMonthKST(), todayKST())} />
           </SettingsSection>
           <SettingsSection title="저축 목표" description="적립은 목표에만 기록되고 가계부 지출에는 들어가지 않아요.">
             <GoalList goals={overview.goals} names={names} mySlot={me.slot} />

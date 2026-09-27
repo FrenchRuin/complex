@@ -1,7 +1,7 @@
 /**
  * 자산·순자산·저축 목표 계산 (F-40~F-42).
  */
-import { monthOf, shiftMonth, type DateString, type MonthString } from "@/lib/date";
+import { monthOf, monthRange, shiftMonth, type DateString, type MonthString } from "@/lib/date";
 import { formatWon } from "@/lib/money";
 
 export const ASSET_KINDS = [
@@ -43,21 +43,46 @@ export function netWorth(items: readonly AssetAmount[]): NetWorth {
 
 export type TrendPoint = { month: MonthString; net: number; current: boolean };
 
+export type HistoryAsset = { id: string; isLiability: boolean; deletedOn: DateString | null };
+export type HistoryValue = { assetId: string; asOf: DateString; amount: number };
+
 /**
- * 추이 그래프: 기록된 월말 순자산(최근 11개월) + 이번 달 "지금" 값.
- * 기록이 없는 달은 건너뛴다.
+ * 그 날짜 기준 순자산: 항목마다 그날까지의 가장 최근 금액 기록을 쓴다.
+ * 그날 이전에 삭제한 항목, 그날까지 기록이 없는 항목은 빠진다.
+ */
+export function netWorthOn(date: DateString, assets: readonly HistoryAsset[], values: readonly HistoryValue[]): number {
+  let net = 0;
+  for (const asset of assets) {
+    if (asset.deletedOn && asset.deletedOn <= date) continue;
+    let latest: HistoryValue | null = null;
+    for (const v of values) {
+      if (v.assetId === asset.id && v.asOf <= date && (!latest || v.asOf > latest.asOf)) latest = v;
+    }
+    if (latest) net += asset.isLiability ? -latest.amount : latest.amount;
+  }
+  return net;
+}
+
+/**
+ * 순자산 추이 (F-41): 최근 12개월 각 달 말일 기준 + 이번 달은 오늘 기준("지금").
+ * 금액 기록이 처음 생긴 달부터 보여준다. 지난 날짜로 기록을 넣으면 그 달 값도 바뀐다.
  */
 export function netWorthTrend(
-  snapshots: readonly { month: DateString; totalAssets: number; totalLiabilities: number }[],
-  currentNet: number,
+  assets: readonly HistoryAsset[],
+  values: readonly HistoryValue[],
   currentMonth: MonthString,
+  today: DateString,
 ): TrendPoint[] {
-  const oldest = shiftMonth(currentMonth, -11);
-  const past = snapshots
-    .map((s) => ({ month: monthOf(s.month), net: s.totalAssets - s.totalLiabilities, current: false }))
-    .filter((p) => p.month >= oldest && p.month < currentMonth)
-    .sort((a, b) => (a.month < b.month ? -1 : 1));
-  return [...past, { month: currentMonth, net: currentNet, current: true }];
+  if (values.length === 0) return [];
+  const firstMonth = values.reduce((min, v) => (monthOf(v.asOf) < min ? monthOf(v.asOf) : min), currentMonth);
+  const points: TrendPoint[] = [];
+  for (let i = 11; i >= 1; i--) {
+    const month = shiftMonth(currentMonth, -i);
+    if (month < firstMonth) continue;
+    points.push({ month, net: netWorthOn(monthRange(month).end, assets, values), current: false });
+  }
+  points.push({ month: currentMonth, net: netWorthOn(today, assets, values), current: true });
+  return points;
 }
 
 export type GoalProgress = {
