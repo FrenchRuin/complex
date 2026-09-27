@@ -11,6 +11,7 @@ import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { TextField } from "@/components/ui/TextField";
 import { useToast } from "@/components/ui/Toast";
 import { defaultAssignment } from "@/lib/calc/assignment";
+import { suggestCategory } from "@/lib/calc/merchant";
 import { todayKST } from "@/lib/date";
 import { CATEGORY_TYPE_LABEL, CATEGORY_TYPES, type CategoryType, type Scope, type Slot } from "@/lib/domain";
 import { AmountInput } from "./AmountInput";
@@ -45,12 +46,27 @@ export function TransactionForm({ record, data, onDone }: Props) {
   const [scope, setScope] = useState<Scope>(firstAssignment.scope);
   const [memberSlot, setMemberSlot] = useState<Slot>(firstAssignment.memberSlot);
   const [keepOpen, setKeepOpen] = useState(false);
+  // 직접 카테고리를 고르기 전까지는 가맹점을 보고 자동 추천한다 (F-16). 편집은 추천하지 않음
+  const [categoryTouched, setCategoryTouched] = useState(Boolean(record));
 
   const categories = data.categories.filter((c) => c.type === type);
+  const suggest = (text: string, forType: CategoryType) =>
+    suggestCategory(text, forType, data.rules, data.categories);
 
   function changeType(next: CategoryType) {
     setType(next);
-    if (!data.categories.some((c) => c.id === categoryId && c.type === next)) setCategoryId(null);
+    if (!categoryTouched) setCategoryId(suggest(merchant, next));
+    else if (!data.categories.some((c) => c.id === categoryId && c.type === next)) setCategoryId(null);
+  }
+
+  function changeMerchant(value: string) {
+    setMerchant(value);
+    if (!categoryTouched) setCategoryId(suggest(value, type));
+  }
+
+  function pickCategory(id: string) {
+    setCategoryTouched(true);
+    setCategoryId(id);
   }
 
   function changePaymentMethod(id: string | null) {
@@ -85,6 +101,7 @@ export function TransactionForm({ record, data, onDone }: Props) {
         setMerchant("");
         setMemo("");
         setCategoryId(null);
+        setCategoryTouched(false);
         amountRef.current?.focus();
       } else {
         onDone();
@@ -138,13 +155,13 @@ export function TransactionForm({ record, data, onDone }: Props) {
           onChange={(e) => setOccurredOn(e.target.value)}
           required
         />
-        <CategoryGrid categories={categories} value={categoryId} onChange={setCategoryId} />
         <TextField
           label="가맹점·내용 (선택)"
           value={merchant}
-          onChange={(e) => setMerchant(e.target.value)}
+          onChange={(e) => changeMerchant(e.target.value)}
           maxLength={50}
         />
+        <CategoryGrid categories={categories} value={categoryId} onChange={pickCategory} />
         <PaymentMethodSelect
           methods={data.paymentMethods}
           names={data.names}

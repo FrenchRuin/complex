@@ -18,6 +18,14 @@ export const getVisibleCategories = cache(async (): Promise<CategoryOption[]> =>
   return data.map((c) => ({ ...c, type: c.type === "income" ? "income" : "expense" }));
 });
 
+/** 가맹점 규칙: 정리한 가맹점 이름 → 카테고리 id (F-16) */
+export const getMerchantRules = cache(async (): Promise<Record<string, string>> => {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("merchant_rules").select("merchant_key, category_id");
+  if (error) throw new Error(`가맹점 규칙을 불러오지 못했어요: ${error.message}`);
+  return Object.fromEntries(data.map((r) => [r.merchant_key, r.category_id]));
+});
+
 /** 숨기지 않은 결제수단 (순서대로) */
 export const getVisiblePaymentMethods = cache(async (): Promise<PaymentMethodOption[]> => {
   const supabase = await createClient();
