@@ -1,6 +1,6 @@
 # 진행 기록
 
-## M1 — 가구 만들기·초대, 프로필, 설정 기본 (폰 확인 대기)
+## M1 — 가구 만들기·초대, 프로필, 설정 기본 (완료 2026-09-27, 폰 확인함)
 
 ### 한 일
 - DB 첫 마이그레이션: households, members, invites, categories, payment_methods + RLS
