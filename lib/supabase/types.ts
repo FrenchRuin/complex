@@ -156,6 +156,48 @@ export type Database = {
           },
         ]
       }
+      merchant_rules: {
+        Row: {
+          category_id: string
+          created_at: string
+          household_id: string
+          id: string
+          merchant_key: string
+          updated_at: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          household_id: string
+          id?: string
+          merchant_key: string
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          household_id?: string
+          id?: string
+          merchant_key?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_rules_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_rules_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_methods: {
         Row: {
           created_at: string
@@ -408,6 +450,7 @@ export type Database = {
         }[]
       }
       my_household_id: { Args: never; Returns: string }
+      normalize_merchant: { Args: { p: string }; Returns: string }
       uncheck_recurring: {
         Args: { p_item_id: string; p_month: string }
         Returns: undefined
