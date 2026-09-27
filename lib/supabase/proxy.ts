@@ -1,7 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { isAllowedEmail } from "@/lib/auth/allowed";
+import { safeNextPath } from "@/lib/auth/redirect";
 import { getSupabaseEnv } from "./env";
+import type { Database } from "./types";
 
 /** 로그인 없이 볼 수 있는 경로 */
 const PUBLIC_PATHS = ["/login"];
@@ -12,15 +14,15 @@ function isPublicPath(pathname: string): boolean {
 
 /**
  * 요청마다 세션을 갱신하고, 로그인 여부와 허용 이메일을 확인한다.
- * - 로그인 안 함 → /login
+ * - 로그인 안 함 → /login?next=원래 경로
  * - 허용되지 않은 이메일 → 로그아웃 후 /login?error=not-allowed
- * - 로그인한 사람이 /login → /
+ * - 로그인한 사람이 /login → next 또는 /
  */
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
   const { url, publishableKey } = getSupabaseEnv();
 
-  const supabase = createServerClient(url, publishableKey, {
+  const supabase = createServerClient<Database>(url, publishableKey, {
     cookies: {
       getAll() {
         return request.cookies.getAll();
@@ -52,7 +54,9 @@ export async function updateSession(request: NextRequest) {
   };
 
   if (!claims) {
-    return isPublicPath(pathname) ? response : redirectTo("/login");
+    if (isPublicPath(pathname)) return response;
+    const next = `${pathname}${request.nextUrl.search}`;
+    return redirectTo("/login", pathname === "/" ? "" : `?next=${encodeURIComponent(next)}`);
   }
 
   const email = typeof claims.email === "string" ? claims.email : null;
@@ -62,7 +66,9 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (isPublicPath(pathname)) {
-    return redirectTo("/");
+    const next = safeNextPath(request.nextUrl.searchParams.get("next")) ?? "/";
+    const [nextPath, nextSearch = ""] = next.split("?");
+    return redirectTo(nextPath, nextSearch ? `?${nextSearch}` : "");
   }
 
   return response;

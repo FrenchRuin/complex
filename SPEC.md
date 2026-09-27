@@ -217,7 +217,7 @@
 | F-53 | PWA 설치, 다크 모드 | 3차 |
 
 **F-50 카테고리 관리**
-- 지출/수입 각각 추가, 이름 변경, 아이콘 선택(Lucide 아이콘 목록 중), 순서 변경(드래그), 숨기기.
+- 지출/수입 각각 추가, 이름 변경, 아이콘 선택(Lucide 아이콘 목록 중), 순서 변경(`위로`/`아래로` 버튼, 키보드 조작 가능), 숨기기.
 - 내역이 있는 카테고리는 삭제 대신 숨기기만 가능.
 
 **F-51 계좌·카드 관리**
@@ -398,7 +398,7 @@
 
 가구 생성 시 넣는다. 아이콘은 Lucide 이름.
 
-**지출**: 식비(`utensils`), 카페·간식(`coffee`), 배달(`bike`), 생활·마트(`shopping-cart`), 주거·관리비(`home`), 통신(`smartphone`), 교통(`bus`), 쇼핑(`shopping-bag`), 의료(`pill`), 보험(`shield`), 구독(`play-square`), 경조사(`gift`), 데이트·여가(`film`), 여행(`train-front`), 기타(`circle-ellipsis`)
+**지출**: 식비(`utensils`), 카페·간식(`coffee`), 배달(`bike`), 생활·마트(`shopping-cart`), 주거·관리비(`house`), 통신(`smartphone`), 교통(`bus`), 쇼핑(`shopping-bag`), 의료(`pill`), 보험(`shield`), 구독(`square-play`), 경조사(`gift`), 데이트·여가(`film`), 여행(`train-front`), 기타(`circle-ellipsis`)
 
 **수입**: 급여(`wallet`), 부수입(`coins`), 용돈·선물(`gift`), 환불(`undo-2`), 기타수입(`circle-plus`)
 

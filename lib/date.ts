@@ -40,6 +40,11 @@ export function todayKST(now: Date = new Date()): DateString {
   return format(new TZDate(now, TIME_ZONE), "yyyy-MM-dd");
 }
 
+/** 시각(timestamptz)을 한국 시간 "10월 4일"로 */
+export function formatMonthDayKST(timestamp: string | Date): string {
+  return format(new TZDate(new Date(timestamp), TIME_ZONE), "M월 d일");
+}
+
 /** 한국 시간 기준 이번 달 */
 export function currentMonthKST(now: Date = new Date()): MonthString {
   return todayKST(now).slice(0, 7);

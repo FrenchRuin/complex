@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   currentMonthKST,
+  formatMonthDayKST,
   monthRange,
   samePeriodLastMonth,
   shiftMonth,
@@ -22,6 +23,13 @@ describe("currentMonthKST", () => {
   it("월말 밤은 한국에서 다음 달이다", () => {
     // 2026-09-30 16:00 UTC = 2026-10-01 01:00 KST
     expect(currentMonthKST(new Date("2026-09-30T16:00:00Z"))).toBe("2026-10");
+  });
+});
+
+describe("formatMonthDayKST", () => {
+  it("한국 시간 날짜로 쓴다", () => {
+    // 2026-10-03 16:00 UTC = 2026-10-04 01:00 KST
+    expect(formatMonthDayKST("2026-10-03T16:00:00Z")).toBe("10월 4일");
   });
 });
 

@@ -1,13 +1,14 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { getSupabaseEnv } from "./env";
+import type { Database } from "./types";
 
 /** 서버 컴포넌트·서버 액션용 Supabase 클라이언트. 요청마다 새로 만든다. */
 export async function createClient() {
   const cookieStore = await cookies();
   const { url, publishableKey } = getSupabaseEnv();
 
-  return createServerClient(url, publishableKey, {
+  return createServerClient<Database>(url, publishableKey, {
     cookies: {
       getAll() {
         return cookieStore.getAll();
