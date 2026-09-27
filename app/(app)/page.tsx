@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ActivityLine } from "@/components/dashboard/ActivityLine";
+import { AssetsCard } from "@/components/dashboard/AssetsCard";
 import { BudgetCard } from "@/components/dashboard/BudgetCard";
+import { getAssetsOverview } from "@/lib/assets";
 import { getMonthBudgets } from "@/lib/budget";
 import { budgetSummary, categoryBudgetRows, spentByCategory } from "@/lib/calc/budget";
 import { MonthSummary } from "@/components/dashboard/MonthSummary";
@@ -33,7 +35,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
   const members = await getHouseholdMembers();
   const partner = members.find((m) => m.id !== me.id) ?? null;
 
-  const [thisMonthRows, lastPeriodRows, recent, recurring, labels, activity, budgets] = await Promise.all([
+  const [thisMonthRows, lastPeriodRows, recent, recurring, labels, activity, budgets, assets] = await Promise.all([
     getTransactionsInRange(monthRange(month)),
     getTransactionsInRange(samePeriodLastMonth(today)),
     getRecentTransactions(who, 6),
@@ -41,6 +43,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
     getLabelMaps(),
     partner ? getLatestActivityBy(partner.id) : Promise.resolve(null),
     getMonthBudgets(month),
+    getAssetsOverview(),
   ]);
   const budgetRows = who === "all" ? categoryBudgetRows(budgets, spentByCategory(thisMonthRows)) : null;
 
@@ -87,6 +90,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
           </div>
 
           <div className="flex flex-col gap-4">
+            {who === "all" ? <AssetsCard overview={assets} /> : null}
             <SettingsSection title="이번 달 정기지출">
               <RecurringChecklist
                 overview={{ rows: recurringRows }}

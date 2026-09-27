@@ -31,8 +31,38 @@
   --shadow-sheet-value: 0 -8px 32px #151b2329;
 }
 
+/*
+ * 다크: 화면 모드가 "시스템"이면 폰 설정을 따르고, "라이트"/"다크"를 고르면 그걸 따른다.
+ * <html data-theme="light|dark">는 app/layout.tsx의 작은 스크립트가 그리기 전에 붙인다.
+ */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --surface: #0f1318;
+  --surface-raised: #181d24;
+  --surface-sunken: #0a0d11;
+  --line: #262d36;
+  --line-strong: #6b7682;
+  --ink: #eef1f4;
+  --ink-muted: #a3adb8;
+  --primary: #78aef2;
+  --primary-soft: #172636;
+  --on-primary: #0b1220;
+  --joint: #a9b8cc;
+  --joint-soft: #1e2733;
+  --member-a: #4fc7b2;
+  --member-a-soft: #0f2a26;
+  --member-b: #f2a45e;
+  --member-b-soft: #33200f;
+  --danger: #ff8a7e;
+  --danger-soft: #3a1714;
+
+  --shadow-float-value: 0 10px 24px -4px #000000cc;
+  --shadow-sheet-value: 0 -8px 32px #000000e6;
+}
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     color-scheme: dark;
 
     --surface: #0f1318;

@@ -74,6 +74,21 @@ export function RealtimeProvider({ householdId, children }: { householdId: strin
           "postgres_changes",
           { event: "*", schema: "public", table: "budgets", filter: `household_id=eq.${householdId}` },
           scheduleRefresh,
+        )
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "assets", filter: `household_id=eq.${householdId}` },
+          scheduleRefresh,
+        )
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "goals", filter: `household_id=eq.${householdId}` },
+          scheduleRefresh,
+        )
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "goal_contributions", filter: `household_id=eq.${householdId}` },
+          scheduleRefresh,
         )        .subscribe((state) => {
           if (state === "SUBSCRIBED") {
             setStatus("online");
