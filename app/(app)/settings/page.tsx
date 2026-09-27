@@ -1,8 +1,7 @@
-import { ChevronLeft } from "lucide-react";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import Link from "next/link";
 import { DisplayNameForm } from "@/components/household/DisplayNameForm";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { CategorySection } from "@/components/settings/CategorySection";
 import { HouseholdSection } from "@/components/settings/HouseholdSection";
 import { PaymentMethodSection } from "@/components/settings/PaymentMethodSection";
@@ -55,17 +54,9 @@ export default async function SettingsPage() {
   const invite = invites.data[0];
 
   return (
-    <main className="mx-auto flex w-full max-w-[640px] flex-col gap-4 px-5 py-6">
-      <header className="flex items-center gap-1">
-        <Link
-          href="/"
-          aria-label="홈으로"
-          className="-ml-2 inline-flex size-11 items-center justify-center rounded-sm text-ink"
-        >
-          <ChevronLeft size={22} strokeWidth={1.75} aria-hidden />
-        </Link>
-        <h1 className="text-title text-ink">설정</h1>
-      </header>
+    <>
+    <PageHeader title="설정" />
+    <div className="flex w-full max-w-[720px] flex-col gap-4 px-5 py-6 lg:px-8">
 
       <SettingsSection title="프로필" description="앱의 모든 곳에서 이 이름으로 불러요.">
         <DisplayNameForm
@@ -106,6 +97,7 @@ export default async function SettingsPage() {
           로그아웃
         </Button>
       </form>
-    </main>
+    </div>
+    </>
   );
 }
