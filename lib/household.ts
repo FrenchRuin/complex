@@ -16,14 +16,16 @@ export type HouseholdMember = { id: string; slot: Slot; displayName: string };
 /** 로그인한 사람의 구성원 정보. 가구가 없으면 null. 요청마다 한 번만 조회한다. */
 export const getCurrentMember = cache(async (): Promise<CurrentMember | null> => {
   const supabase = await createClient();
-  const { data: userData } = await supabase.auth.getUser();
-  const user = userData.user;
-  if (!user) return null;
+  // getClaims: 로그인 토큰(ES256) 서명을 서버에서 공개키로 검증한다.
+  // getUser와 달리 매번 Supabase에 묻지 않아 왕복 한 번을 줄인다.
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const userId = claimsData?.claims.sub;
+  if (!userId) return null;
 
   const { data, error } = await supabase
     .from("members")
     .select("id, user_id, household_id, slot, display_name")
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .maybeSingle();
 
   if (error) throw new Error(`구성원 정보를 불러오지 못했어요: ${error.message}`);
