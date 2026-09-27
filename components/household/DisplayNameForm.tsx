@@ -38,7 +38,6 @@ export function DisplayNameForm({
         defaultValue={defaultValue}
         maxLength={10}
         autoComplete="nickname"
-        placeholder="예: 지훈"
         required
       />
       <FormMessage state={state} successMessage={successMessage} />

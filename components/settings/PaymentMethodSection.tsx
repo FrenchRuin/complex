@@ -64,15 +64,15 @@ export function PaymentMethodSection({ methods, names }: Props) {
                 <Icon size={20} strokeWidth={1.75} />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="flex items-center gap-2">
-                  <span
-                    className={`truncate text-body ${method.is_hidden ? "text-ink-muted" : "text-ink"}`}
-                  >
-                    {method.name}
-                  </span>
-                  <PersonChip owner={method.owner} label={ownerLabel(method.owner, names)} />
+                <span
+                  className={`block truncate text-body ${method.is_hidden ? "text-ink-muted" : "text-ink"}`}
+                >
+                  {method.name}
                 </span>
-                <span className="block truncate text-caption text-ink-muted">{details}</span>
+                <span className="mt-1 flex min-w-0 items-center gap-2">
+                  <PersonChip owner={method.owner} label={ownerLabel(method.owner, names)} />
+                  <span className="truncate text-caption text-ink-muted">{details}</span>
+                </span>
               </span>
               <RowActions
                 itemName={method.name}

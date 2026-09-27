@@ -27,26 +27,36 @@ export function RowActions({
   onEdit,
   onToggleHidden,
 }: Props) {
+  // 좁은 화면에서 이름 자리를 남기려고 36px 버튼을 쓴다 (최소 터치 영역 24px 이상)
   return (
-    <div className="flex shrink-0 items-center">
+    <div className="-mr-2 flex shrink-0 items-center">
       <IconButton
         icon={ChevronUp}
         label={`${itemName} 위로`}
         disabled={disabled || isFirst}
         onClick={() => onMove("up")}
+        size="sm"
       />
       <IconButton
         icon={ChevronDown}
         label={`${itemName} 아래로`}
         disabled={disabled || isLast}
         onClick={() => onMove("down")}
+        size="sm"
       />
-      <IconButton icon={Pencil} label={`${itemName} 수정`} disabled={disabled} onClick={onEdit} />
+      <IconButton
+        icon={Pencil}
+        label={`${itemName} 수정`}
+        disabled={disabled}
+        onClick={onEdit}
+        size="sm"
+      />
       <IconButton
         icon={hidden ? Eye : EyeOff}
         label={hidden ? `${itemName} 다시 보이기` : `${itemName} 숨기기`}
         disabled={disabled}
         onClick={onToggleHidden}
+        size="sm"
       />
     </div>
   );
