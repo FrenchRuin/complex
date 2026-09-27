@@ -70,6 +70,11 @@ export function RealtimeProvider({ householdId, children }: { householdId: strin
           },
           scheduleRefresh,
         )
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "budgets", filter: `household_id=eq.${householdId}` },
+          scheduleRefresh,
+        )
         .subscribe((state) => {
           if (state === "SUBSCRIBED") {
             setStatus("online");

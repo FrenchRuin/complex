@@ -8,9 +8,12 @@ import { PaymentMethodSection } from "@/components/settings/PaymentMethodSection
 import { SettingsSection } from "@/components/settings/SettingsSection";
 import { UsageSection } from "@/components/settings/UsageSection";
 import { Button } from "@/components/ui/Button";
-import { formatMonthDayKST } from "@/lib/date";
+import { BudgetEditor } from "@/components/settings/BudgetEditor";
+import { getMonthBudgets } from "@/lib/budget";
+import { currentMonthKST, formatMonthDayKST, formatMonthLabel } from "@/lib/date";
 import { toOwner, toPaymentKind } from "@/lib/domain";
 import { getHouseholdMembers, requireMember, toMemberNames } from "@/lib/household";
+import { getVisibleCategories } from "@/lib/household-data";
 import { createClient } from "@/lib/supabase/server";
 import { logout, updateDisplayName } from "./actions";
 
@@ -31,7 +34,8 @@ export default async function SettingsPage() {
   const me = await requireMember();
   const supabase = await createClient();
 
-  const [members, categories, methods, invites, origin, usageRes] = await Promise.all([
+  const month = currentMonthKST();
+  const [members, categories, methods, invites, origin, usageRes, visibleCategories, budgets] = await Promise.all([
     getHouseholdMembers(),
     supabase.from("categories").select("id, type, name, icon, sort_order, is_hidden"),
     supabase
@@ -46,6 +50,8 @@ export default async function SettingsPage() {
       .limit(1),
     getOrigin(),
     supabase.rpc("get_usage"),
+    getVisibleCategories(),
+    getMonthBudgets(month),
   ]);
 
   if (categories.error) throw loadError(categories.error);
@@ -95,6 +101,13 @@ export default async function SettingsPage() {
           kind: toPaymentKind(m.kind),
           owner: toOwner(m.owner),
         }))}
+      />
+
+      <BudgetEditor
+        monthLabel={formatMonthLabel(month)}
+        monthFirst={`${month}-01`}
+        categories={visibleCategories}
+        budgets={budgets}
       />
 
       {usageRow ? (
