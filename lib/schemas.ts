@@ -2,6 +2,7 @@
  * 폼 입력·서버 액션 인자 검증 (Zod). 오류 문구는 해요체로 원인과 해결 방법을 말한다.
  */
 import { z } from "zod";
+import { ASSET_KINDS } from "./calc/assets";
 import { CATEGORY_ICON_NAMES } from "./category-icons";
 import { CATEGORY_TYPES, OWNERS, PAYMENT_KINDS, SCOPES, SLOTS } from "./domain";
 
@@ -115,6 +116,46 @@ export const recurringInputSchema = z.object({
 });
 
 export type RecurringInput = z.input<typeof recurringInputSchema>;
+
+const moneySchema = (label: string) =>
+  z
+    .number(`${label}을 입력해 주세요`)
+    .int(`${label}은 원 단위로 입력해 주세요`)
+    .max(100_000_000_000_000, `${label}이 너무 커요. 다시 확인해 주세요`);
+
+/** 자산·부채 항목 (F-40) */
+export const assetInputSchema = z.object({
+  id: z.uuid().optional(),
+  name: z.string().trim().min(1, "이름을 입력해 주세요").max(30, "이름은 30자까지 쓸 수 있어요"),
+  kind: z.enum(ASSET_KINDS, "종류를 골라 주세요"),
+  owner: z.enum(OWNERS, "소유를 골라 주세요"),
+  amount: moneySchema("금액").min(0, "금액을 확인해 주세요"),
+  isLiability: z.boolean(),
+  memo: z
+    .string()
+    .trim()
+    .max(200, "메모는 200자까지 쓸 수 있어요")
+    .transform((v) => (v === "" ? null : v)),
+});
+export type AssetInput = z.input<typeof assetInputSchema>;
+
+/** 저축 목표 (F-42) */
+export const goalInputSchema = z.object({
+  id: z.uuid().optional(),
+  name: z.string().trim().min(1, "목표 이름을 입력해 주세요").max(30, "목표 이름은 30자까지 쓸 수 있어요"),
+  targetAmount: moneySchema("목표액").min(1, "목표액을 입력해 주세요"),
+  dueDate: dateStringSchema.nullable(),
+});
+export type GoalInput = z.input<typeof goalInputSchema>;
+
+/** 적립 (F-42) */
+export const contributionInputSchema = z.object({
+  goalId: z.uuid(),
+  amount: moneySchema("금액").min(1, "금액을 입력해 주세요"),
+  contributedOn: dateStringSchema,
+  memberSlot: z.enum(SLOTS),
+});
+export type ContributionInput = z.input<typeof contributionInputSchema>;
 
 /** "yyyy-MM-01" */
 export const monthFirstSchema = dateStringSchema.refine(
