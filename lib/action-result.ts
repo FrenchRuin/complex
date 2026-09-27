@@ -20,6 +20,9 @@ const RPC_ERROR_MESSAGES: Record<string, string> = {
   invite_not_found: "초대 링크를 찾을 수 없어요. 링크를 다시 받아 주세요",
   invite_used: "이미 사용한 초대 링크예요. 새 링크를 받아 주세요",
   invite_expired: "초대 링크가 만료됐어요. 새 링크를 받아 주세요",
+  invalid_category: "카테고리를 찾을 수 없어요. 새로고침 후 다시 골라 주세요",
+  category_type_mismatch: "지출/수입에 맞는 카테고리를 골라 주세요",
+  invalid_payment_method: "결제수단을 찾을 수 없어요. 새로고침 후 다시 골라 주세요",
 };
 
 const FALLBACK = "저장하지 못했어요. 잠시 후 다시 시도해 주세요";

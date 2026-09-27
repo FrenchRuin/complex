@@ -14,6 +14,19 @@ export type CategoryType = (typeof CATEGORY_TYPES)[number];
 export const PAYMENT_KINDS = ["card", "account", "cash", "other"] as const;
 export type PaymentKind = (typeof PAYMENT_KINDS)[number];
 
+export const SCOPES = ["joint", "personal"] as const;
+export type Scope = (typeof SCOPES)[number];
+
+export const SCOPE_LABEL: Record<Scope, string> = { joint: "공동", personal: "개인" };
+
+export function toScope(value: string): Scope {
+  return value === "joint" ? "joint" : "personal";
+}
+
+export function toCategoryType(value: string): CategoryType {
+  return value === "income" ? "income" : "expense";
+}
+
 export const CATEGORY_TYPE_LABEL: Record<CategoryType, string> = {
   expense: "지출",
   income: "수입",

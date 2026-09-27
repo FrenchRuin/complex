@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { categoryInputSchema, displayNameSchema, paymentMethodInputSchema } from "./schemas";
+import {
+  categoryInputSchema,
+  displayNameSchema,
+  paymentMethodInputSchema,
+  transactionInputSchema,
+} from "./schemas";
 
 describe("displayNameSchema", () => {
   it("앞뒤 공백을 지운다", () => {
@@ -23,6 +28,45 @@ describe("categoryInputSchema", () => {
     expect(
       categoryInputSchema.safeParse({ type: "expense", name: "간식", icon: "coffee" }).success,
     ).toBe(true);
+  });
+});
+
+describe("transactionInputSchema", () => {
+  const base = {
+    type: "expense",
+    amount: 12000,
+    occurredOn: "2026-09-27",
+    categoryId: "7b6c0a1e-4a4f-4b8e-9d7a-2f1d3c5b6a70",
+    merchant: " 다이소 ",
+    memo: "",
+    paymentMethodId: null,
+    scope: "joint",
+    memberSlot: "a",
+  } as const;
+
+  it("가맹점 공백을 지우고 빈 메모는 null", () => {
+    const parsed = transactionInputSchema.parse(base);
+    expect(parsed.merchant).toBe("다이소");
+    expect(parsed.memo).toBeNull();
+  });
+
+  it("금액은 1원 이상 정수", () => {
+    expect(transactionInputSchema.safeParse({ ...base, amount: 0 }).success).toBe(false);
+    expect(transactionInputSchema.safeParse({ ...base, amount: 1.5 }).success).toBe(false);
+  });
+
+  it("없는 날짜는 거부한다", () => {
+    expect(transactionInputSchema.safeParse({ ...base, occurredOn: "2026-02-30" }).success).toBe(
+      false,
+    );
+    expect(transactionInputSchema.safeParse({ ...base, occurredOn: "2028-02-29" }).success).toBe(
+      true,
+    );
+  });
+
+  it("카테고리가 없으면 안내 문구", () => {
+    const result = transactionInputSchema.safeParse({ ...base, categoryId: "" });
+    expect(result.error?.issues[0]?.message).toBe("카테고리를 골라 주세요");
   });
 });
 
