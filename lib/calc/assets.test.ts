@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { goalHint, goalProgress, netWorth, netWorthTrend, toAssetKind } from "./assets";
+import { goalHint, goalProgress, netWorth, netWorthOn, netWorthTrend, toAssetKind } from "./assets";
 
 describe("netWorth", () => {
   it("자산 합 − 부채 합", () => {
@@ -18,22 +18,44 @@ describe("netWorth", () => {
   });
 });
 
-describe("netWorthTrend", () => {
-  it("최근 11개월 기록 + 이번 달 지금 값, 오래된 순", () => {
-    const trend = netWorthTrend(
-      [
-        { month: "2026-08-01", totalAssets: 100, totalLiabilities: 40 },
-        { month: "2025-09-01", totalAssets: 1, totalLiabilities: 0 }, // 12개월 전 → 제외
-        { month: "2026-07-01", totalAssets: 90, totalLiabilities: 40 },
-      ],
-      70,
-      "2026-09",
-    );
-    expect(trend).toEqual([
-      { month: "2026-07", net: 50, current: false },
-      { month: "2026-08", net: 60, current: false },
-      { month: "2026-09", net: 70, current: true },
+describe("netWorthOn / netWorthTrend (금액 기록 기준)", () => {
+  const assets = [
+    { id: "saving", isLiability: false, deletedOn: null },
+    { id: "loan", isLiability: true, deletedOn: null },
+    { id: "car", isLiability: false, deletedOn: "2026-09-10" }, // 9월 10일에 팔아서 삭제
+  ];
+  const values = [
+    { assetId: "saving", asOf: "2026-07-15", amount: 1000 },
+    { assetId: "saving", asOf: "2026-08-31", amount: 1200 },
+    { assetId: "saving", asOf: "2026-09-20", amount: 1500 },
+    { assetId: "loan", asOf: "2026-08-10", amount: 500 },
+    { assetId: "car", asOf: "2026-07-01", amount: 300 },
+  ];
+
+  it("그날까지의 가장 최근 금액, 삭제 전까지만 포함", () => {
+    expect(netWorthOn("2026-07-31", assets, values)).toBe(1000 + 300);
+    expect(netWorthOn("2026-08-31", assets, values)).toBe(1200 - 500 + 300);
+    expect(netWorthOn("2026-09-28", assets, values)).toBe(1500 - 500); // 차는 9월 10일 삭제
+    expect(netWorthOn("2026-06-30", assets, values)).toBe(0);
+  });
+
+  it("처음 기록한 달부터 매달 말 기준 + 이번 달은 오늘 기준", () => {
+    expect(netWorthTrend(assets, values, "2026-09", "2026-09-28")).toEqual([
+      { month: "2026-07", net: 1300, current: false },
+      { month: "2026-08", net: 1000, current: false },
+      { month: "2026-09", net: 1000, current: true },
     ]);
+  });
+
+  it("지난 날짜로 기록을 넣으면 그 달 값이 바뀐다", () => {
+    const more = [...values, { assetId: "saving", asOf: "2026-07-31", amount: 1100 }];
+    expect(netWorthTrend(assets, more, "2026-09", "2026-09-28")[0]).toEqual({ month: "2026-07", net: 1400, current: false });
+  });
+
+  it("최근 12개월만, 기록이 없으면 빈 목록", () => {
+    const old = [{ assetId: "saving", asOf: "2024-01-01", amount: 1 }];
+    expect(netWorthTrend(assets, old, "2026-09", "2026-09-28")).toHaveLength(12);
+    expect(netWorthTrend(assets, [], "2026-09", "2026-09-28")).toEqual([]);
   });
 });
 

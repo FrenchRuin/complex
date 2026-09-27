@@ -123,13 +123,12 @@ const moneySchema = (label: string) =>
     .int(`${label}은 원 단위로 입력해 주세요`)
     .max(100_000_000_000_000, `${label}이 너무 커요. 다시 확인해 주세요`);
 
-/** 자산·부채 항목 (F-40) */
-export const assetInputSchema = z.object({
+/** 자산·부채 항목 정보 (F-40). 금액은 따로 기록한다 */
+export const assetInfoSchema = z.object({
   id: z.uuid().optional(),
   name: z.string().trim().min(1, "이름을 입력해 주세요").max(30, "이름은 30자까지 쓸 수 있어요"),
   kind: z.enum(ASSET_KINDS, "종류를 골라 주세요"),
   owner: z.enum(OWNERS, "소유를 골라 주세요"),
-  amount: moneySchema("금액").min(0, "금액을 확인해 주세요"),
   isLiability: z.boolean(),
   memo: z
     .string()
@@ -137,7 +136,14 @@ export const assetInputSchema = z.object({
     .max(200, "메모는 200자까지 쓸 수 있어요")
     .transform((v) => (v === "" ? null : v)),
 });
-export type AssetInput = z.input<typeof assetInputSchema>;
+export type AssetInfoInput = z.input<typeof assetInfoSchema>;
+
+/** 금액 기록: 언제 기준 얼마 */
+export const assetValueSchema = z.object({
+  amount: moneySchema("금액").min(0, "금액을 확인해 주세요"),
+  asOf: dateStringSchema,
+});
+export type AssetValueInput = z.input<typeof assetValueSchema>;
 
 /** 저축 목표 (F-42) */
 export const goalInputSchema = z.object({

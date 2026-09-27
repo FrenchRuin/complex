@@ -9,13 +9,13 @@ const shortMonth = (month: string) => `${Number(month.slice(5, 7))}월`;
 
 /**
  * 순자산 추이 (F-41). 값 하나라 primary 한 색, 범례 없음. 이번 달은 "지금"으로 옅게.
- * 기록이 1개(지금)뿐이면 그래프 대신 안내를 보여준다. "표로 보기"로 숫자도 제공.
+ * 점이 1개(이번 달)뿐이면 그래프 대신 안내를 보여준다. "표로 보기"로 숫자도 제공.
  */
 export function NetWorthChart({ points }: { points: TrendPoint[] }) {
   if (points.length < 2) {
     return (
       <p className="py-6 text-center text-body text-ink-muted">
-        매달 첫 접속 때 지난달 순자산을 기록해요. 다음 달부터 추이가 보여요.
+        지난달 이전 날짜로 금액 기록을 넣으면 추이가 보여요.
       </p>
     );
   }

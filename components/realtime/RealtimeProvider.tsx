@@ -89,7 +89,13 @@ export function RealtimeProvider({ householdId, children }: { householdId: strin
           "postgres_changes",
           { event: "*", schema: "public", table: "goal_contributions", filter: `household_id=eq.${householdId}` },
           scheduleRefresh,
-        )        .subscribe((state) => {
+        )
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "asset_values", filter: `household_id=eq.${householdId}` },
+          scheduleRefresh,
+        )
+        .subscribe((state) => {
           if (state === "SUBSCRIBED") {
             setStatus("online");
             // 끊긴 사이에 바뀐 것이 있을 수 있으니 다시 읽는다

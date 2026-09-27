@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { PersonChip } from "@/components/ui/PersonChip";
 import type { AssetItem } from "@/lib/assets";
 import { ASSET_KIND_LABEL } from "@/lib/calc/assets";
-import { formatMonthDayKST } from "@/lib/date";
+import { formatDayHeader, todayKST } from "@/lib/date";
 import { ownerLabel, type MemberNames } from "@/lib/domain";
 import { formatWon } from "@/lib/money";
 import { AssetEditor } from "./AssetEditor";
@@ -15,7 +15,10 @@ type Props = { assets: AssetItem[]; names: MemberNames };
 
 /** 자산·부채 목록 (F-40). 행을 누르면 수정 창 */
 export function AssetList({ assets, names }: Props) {
-  const [editing, setEditing] = useState<AssetItem | "new" | null>(null);
+  // id로 들고 있어야 금액 기록을 바꾼 뒤 새 데이터로 다시 그린다
+  const [editingId, setEditingId] = useState<string | "new" | null>(null);
+  const editing = editingId === "new" ? "new" : (assets.find((a) => a.id === editingId) ?? null);
+  const currentYear = Number(todayKST().slice(0, 4));
   const groups = [
     { title: "자산", items: assets.filter((a) => !a.isLiability) },
     { title: "부채", items: assets.filter((a) => a.isLiability) },
@@ -40,13 +43,13 @@ export function AssetList({ assets, names }: Props) {
                   <li key={a.id} className="border-b border-line last:border-b-0">
                     <button
                       type="button"
-                      onClick={() => setEditing(a)}
+                      onClick={() => setEditingId(a.id)}
                       className="flex w-full items-center gap-3 py-3 text-left hover:bg-surface-sunken/60"
                     >
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-body text-ink">{a.name}</span>
                         <span className="block truncate text-caption text-ink-muted">
-                          {ASSET_KIND_LABEL[a.kind]} · {formatMonthDayKST(a.updatedAt)} 기준
+                          {ASSET_KIND_LABEL[a.kind]} · {formatDayHeader(a.valueAsOf, currentYear)} 기준
                         </span>
                       </span>
                       <span className="flex shrink-0 flex-col items-end gap-1">
@@ -64,7 +67,7 @@ export function AssetList({ assets, names }: Props) {
           ) : null,
         )
       )}
-      <Button variant="secondary" onClick={() => setEditing("new")} className="w-full">
+      <Button variant="secondary" onClick={() => setEditingId("new")} className="w-full">
         <Plus size={20} strokeWidth={1.75} aria-hidden />
         자산·부채 추가
       </Button>
@@ -73,7 +76,7 @@ export function AssetList({ assets, names }: Props) {
           key={editing === "new" ? "new" : editing.id}
           item={editing === "new" ? null : editing}
           names={names}
-          onClose={() => setEditing(null)}
+          onClose={() => setEditingId(null)}
         />
       ) : null}
     </div>
