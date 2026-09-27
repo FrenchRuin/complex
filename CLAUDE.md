@@ -49,7 +49,8 @@ components/
   layout/                   # Sidebar, MobileTabBar, PageHeader
   transactions/, recurring/, dashboard/ ...
 lib/
-  supabase/                 # server.ts, client.ts, middleware.ts
+  supabase/                 # server.ts, client.ts, proxy.ts(세션 갱신), env.ts
+  auth/                     # 허용 이메일 확인
   money.ts                  # 금액 포맷·파싱 (formatWon, formatWonShort, parseWon)
   date.ts                   # KST 기준 월 경계, 지난달 같은 기간 등
   calc/                     # 합계, 분할 비율, 정산 등 순수 계산 함수
@@ -112,15 +113,17 @@ docs/progress.md
 ```bash
 pnpm dev            # 개발 서버 (http://localhost:3000)
 pnpm lint           # ESLint
-pnpm typecheck      # tsc --noEmit
+pnpm typecheck      # next typegen + tsc --noEmit
 pnpm test           # Vitest
 pnpm test:e2e       # Playwright (M3 이후)
-pnpm db:start       # 로컬 Supabase (Docker 필요)
-pnpm db:migrate     # 마이그레이션 적용
+pnpm db:link        # 클라우드 Supabase 프로젝트 연결 (처음 한 번, supabase login 필요)
+pnpm db:migrate     # 마이그레이션을 클라우드 프로젝트에 적용 (supabase db push)
 pnpm db:types       # DB 타입 생성 → lib/supabase/types.ts
 ```
 
-M0에서 위 스크립트를 `package.json`에 만든다.
+로컬 Supabase(Docker)는 쓰지 않는다. 개발도 클라우드 프로젝트에 바로 연결한다.
+
+이 PC 환경 메모: pnpm은 11.x (12.x는 exe라 윈도우 스마트 앱 컨트롤에 막힘), 전역 설치 위치 `%APPDATA%\npm`. Next.js 16은 `middleware.ts` 대신 루트 `proxy.ts`를 쓴다.
 
 ## 환경변수
 
@@ -128,7 +131,7 @@ M0에서 위 스크립트를 `package.json`에 만든다.
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=   # Publishable key (옛 anon 키도 동작)
 SUPABASE_SERVICE_ROLE_KEY=
 ALLOWED_EMAILS=a@gmail.com,b@gmail.com
 ```
@@ -140,3 +143,13 @@ Vercel에도 같은 값을 등록한다.
 - `main`은 항상 배포 가능한 상태. 기능은 브랜치에서 작업하고 PR로 합친다.
 - 커밋 메시지는 한국어로 무엇을 했는지 한 줄: `내역 추가 패널 구현 (F-10)`. 관련 기능 ID를 괄호로 붙인다.
 - 한 커밋에 한 가지 일.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
