@@ -173,30 +173,30 @@ begin
   values (v_household_id, v_uid, 'a', trim(p_display_name));
 
   insert into public.categories (household_id, type, name, icon, sort_order)
-  select v_household_id, c.type, c.name, c.icon, c.ord::int
+  select v_household_id, c.type, c.name, c.icon, c.ord
   from (
     values
-      ('expense', '식비', 'utensils'),
-      ('expense', '카페·간식', 'coffee'),
-      ('expense', '배달', 'bike'),
-      ('expense', '생활·마트', 'shopping-cart'),
-      ('expense', '주거·관리비', 'house'),
-      ('expense', '통신', 'smartphone'),
-      ('expense', '교통', 'bus'),
-      ('expense', '쇼핑', 'shopping-bag'),
-      ('expense', '의료', 'pill'),
-      ('expense', '보험', 'shield'),
-      ('expense', '구독', 'square-play'),
-      ('expense', '경조사', 'gift'),
-      ('expense', '데이트·여가', 'film'),
-      ('expense', '여행', 'train-front'),
-      ('expense', '기타', 'circle-ellipsis'),
-      ('income', '급여', 'wallet'),
-      ('income', '부수입', 'coins'),
-      ('income', '용돈·선물', 'gift'),
-      ('income', '환불', 'undo-2'),
-      ('income', '기타수입', 'circle-plus')
-  ) with ordinality as c(type, name, icon, ord);
+      ('expense', '식비', 'utensils', 1),
+      ('expense', '카페·간식', 'coffee', 2),
+      ('expense', '배달', 'bike', 3),
+      ('expense', '생활·마트', 'shopping-cart', 4),
+      ('expense', '주거·관리비', 'house', 5),
+      ('expense', '통신', 'smartphone', 6),
+      ('expense', '교통', 'bus', 7),
+      ('expense', '쇼핑', 'shopping-bag', 8),
+      ('expense', '의료', 'pill', 9),
+      ('expense', '보험', 'shield', 10),
+      ('expense', '구독', 'square-play', 11),
+      ('expense', '경조사', 'gift', 12),
+      ('expense', '데이트·여가', 'film', 13),
+      ('expense', '여행', 'train-front', 14),
+      ('expense', '기타', 'circle-ellipsis', 15),
+      ('income', '급여', 'wallet', 1),
+      ('income', '부수입', 'coins', 2),
+      ('income', '용돈·선물', 'gift', 3),
+      ('income', '환불', 'undo-2', 4),
+      ('income', '기타수입', 'circle-plus', 5)
+  ) as c(type, name, icon, ord);
 
   insert into public.payment_methods (household_id, name, kind, owner, sort_order)
   values (v_household_id, '현금', 'cash', 'joint', 1);
