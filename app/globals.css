@@ -136,6 +136,9 @@
     font-size: 15px;
     line-height: 22px;
     -webkit-font-smoothing: antialiased;
+    /* 한국어는 단어(어절) 단위로 줄을 바꾼다 */
+    word-break: keep-all;
+    overflow-wrap: anywhere;
   }
 
   /* 모든 컨트롤에 같은 포커스 링 */

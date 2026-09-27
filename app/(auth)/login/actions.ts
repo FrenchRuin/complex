@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { isAllowedEmail } from "@/lib/auth/allowed";
+import { safeNextPath } from "@/lib/auth/redirect";
 import { createClient } from "@/lib/supabase/server";
 
 export type LoginState = { error: string | null; email: string };
@@ -43,5 +44,5 @@ export async function login(_prev: LoginState, formData: FormData): Promise<Logi
     return { error: "로그인하지 못했어요. 잠시 후 다시 시도해 주세요", email };
   }
 
-  redirect("/");
+  redirect(safeNextPath(formData.get("next")) ?? "/");
 }
