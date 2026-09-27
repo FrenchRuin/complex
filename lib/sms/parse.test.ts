@@ -57,8 +57,7 @@ describe("fixtures/sms 예시 문자 인식", () => {
   for (const [file, expected] of Object.entries(CASES)) {
     it(file, () => {
       const [message] = splitMessages(fixture(file));
-      const { raw: _raw, ...parsed } = parseSms(message, TODAY) ?? ({} as ParsedSms);
-      expect(parsed).toEqual(expected);
+      expect(parseSms(message, TODAY)).toEqual({ ...expected, raw: message });
     });
   }
 });
