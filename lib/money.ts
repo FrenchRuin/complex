@@ -1,0 +1,44 @@
+/**
+ * 금액 포맷·파싱. 금액은 항상 원 단위 정수다.
+ * 화면에 금액을 쓸 때는 이 파일의 함수만 사용한다.
+ */
+
+const wonFormatter = new Intl.NumberFormat("ko-KR", { maximumFractionDigits: 0 });
+const manFormatter = new Intl.NumberFormat("ko-KR", { maximumFractionDigits: 1 });
+
+/** 12000 → "12,000원" */
+export function formatWon(amount: number): string {
+  return `${wonFormatter.format(amount)}원`;
+}
+
+/** 쉼표만 붙인다. 입력창 표시용. 12000 → "12,000" */
+export function formatNumber(amount: number): string {
+  return wonFormatter.format(amount);
+}
+
+/**
+ * 좁은 곳(캘린더, 그래프)용 짧은 표기.
+ * 1만 이상은 만 단위 소수 첫째 자리: 87000 → "8.7만", 100000 → "10만".
+ * 1만 미만은 쉼표: 8500 → "8,500".
+ */
+export function formatWonShort(amount: number): string {
+  const sign = amount < 0 ? "-" : "";
+  const abs = Math.abs(amount);
+  if (abs < 10_000) {
+    return `${sign}${wonFormatter.format(abs)}`;
+  }
+  const man = Math.round(abs / 1_000) / 10;
+  return `${sign}${manFormatter.format(man)}만`;
+}
+
+/**
+ * 사용자가 입력한 금액 문자열을 정수로 바꾼다. 숫자가 없으면 null.
+ * "12,000원" → 12000, " 3 500 " → 3500
+ */
+export function parseWon(input: string): number | null {
+  const digits = input.replace(/[^0-9]/g, "");
+  if (digits === "") return null;
+  const value = Number(digits);
+  if (!Number.isSafeInteger(value)) return null;
+  return value;
+}
