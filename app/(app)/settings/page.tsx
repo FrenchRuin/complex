@@ -6,6 +6,7 @@ import { CategorySection } from "@/components/settings/CategorySection";
 import { HouseholdSection } from "@/components/settings/HouseholdSection";
 import { PaymentMethodSection } from "@/components/settings/PaymentMethodSection";
 import { SettingsSection } from "@/components/settings/SettingsSection";
+import { UsageSection } from "@/components/settings/UsageSection";
 import { Button } from "@/components/ui/Button";
 import { formatMonthDayKST } from "@/lib/date";
 import { toOwner, toPaymentKind } from "@/lib/domain";
@@ -30,7 +31,7 @@ export default async function SettingsPage() {
   const me = await requireMember();
   const supabase = await createClient();
 
-  const [members, categories, methods, invites, origin] = await Promise.all([
+  const [members, categories, methods, invites, origin, usageRes] = await Promise.all([
     getHouseholdMembers(),
     supabase.from("categories").select("id, type, name, icon, sort_order, is_hidden"),
     supabase
@@ -44,11 +45,15 @@ export default async function SettingsPage() {
       .order("created_at", { ascending: false })
       .limit(1),
     getOrigin(),
+    supabase.rpc("get_usage"),
   ]);
 
   if (categories.error) throw loadError(categories.error);
   if (methods.error) throw loadError(methods.error);
   if (invites.error) throw loadError(invites.error);
+  const usageRow = usageRes.data?.[0];
+  const supabaseProjectRef =
+    process.env.NEXT_PUBLIC_SUPABASE_URL?.match(/^https:\/\/([a-z0-9]+)\.supabase\.co/)?.[1] ?? null;
 
   const names = toMemberNames(members);
   const invite = invites.data[0];
@@ -91,6 +96,18 @@ export default async function SettingsPage() {
           owner: toOwner(m.owner),
         }))}
       />
+
+      {usageRow ? (
+        <UsageSection
+          usage={{
+            dbSizeBytes: usageRow.db_size_bytes,
+            transactionCount: usageRow.transaction_count,
+            recurringCount: usageRow.recurring_count,
+            lastActivity: usageRow.last_activity,
+          }}
+          supabaseProjectRef={supabaseProjectRef}
+        />
+      ) : null}
 
       <form action={logout}>
         <Button type="submit" variant="secondary" className="w-full">
