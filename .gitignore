@@ -49,3 +49,8 @@ next-env.d.ts
 
 # 로컬 테스트용 임시 파일
 /tmp/
+
+# playwright e2e
+/e2e/.auth/
+/test-results/
+/playwright-report/

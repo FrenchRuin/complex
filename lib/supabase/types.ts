@@ -200,6 +200,79 @@ export type Database = {
           },
         ]
       }
+      recurring_items: {
+        Row: {
+          amount: number
+          category_id: string
+          created_at: string
+          day_of_month: number
+          end_month: string | null
+          household_id: string
+          id: string
+          is_variable: boolean
+          member_slot: string
+          name: string
+          payment_method_id: string | null
+          scope: string
+          start_month: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          category_id: string
+          created_at?: string
+          day_of_month: number
+          end_month?: string | null
+          household_id: string
+          id?: string
+          is_variable?: boolean
+          member_slot: string
+          name: string
+          payment_method_id?: string | null
+          scope: string
+          start_month: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category_id?: string
+          created_at?: string
+          day_of_month?: number
+          end_month?: string | null
+          household_id?: string
+          id?: string
+          is_variable?: boolean
+          member_slot?: string
+          name?: string
+          payment_method_id?: string | null
+          scope?: string
+          start_month?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recurring_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recurring_items_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recurring_items_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transactions: {
         Row: {
           amount: number
@@ -215,6 +288,8 @@ export type Database = {
           occurred_on: string
           occurred_time: string | null
           payment_method_id: string | null
+          recurring_item_id: string | null
+          recurring_month: string | null
           scope: string
           source: string
           type: string
@@ -235,6 +310,8 @@ export type Database = {
           occurred_on: string
           occurred_time?: string | null
           payment_method_id?: string | null
+          recurring_item_id?: string | null
+          recurring_month?: string | null
           scope: string
           source?: string
           type: string
@@ -255,6 +332,8 @@ export type Database = {
           occurred_on?: string
           occurred_time?: string | null
           payment_method_id?: string | null
+          recurring_item_id?: string | null
+          recurring_month?: string | null
           scope?: string
           source?: string
           type?: string
@@ -291,6 +370,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "transactions_recurring_item_id_fkey"
+            columns: ["recurring_item_id"]
+            isOneToOne: false
+            referencedRelation: "recurring_items"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "transactions_updated_by_fkey"
             columns: ["updated_by"]
             isOneToOne: false
@@ -308,6 +394,10 @@ export type Database = {
         Args: { p_display_name: string; p_token: string }
         Returns: string
       }
+      check_recurring: {
+        Args: { p_amount?: number; p_item_id: string; p_month: string }
+        Returns: string
+      }
       create_household: { Args: { p_display_name: string }; Returns: string }
       create_invite: { Args: never; Returns: string }
       get_invite: {
@@ -318,6 +408,10 @@ export type Database = {
         }[]
       }
       my_household_id: { Args: never; Returns: string }
+      uncheck_recurring: {
+        Args: { p_item_id: string; p_month: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

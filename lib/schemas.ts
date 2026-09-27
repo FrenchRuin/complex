@@ -89,6 +89,39 @@ export const transactionInputSchema = z.object({
 
 export type TransactionInput = z.input<typeof transactionInputSchema>;
 
+/** 정기지출 등록·수정 (F-30) */
+export const recurringInputSchema = z.object({
+  id: z.uuid().optional(),
+  name: z
+    .string()
+    .trim()
+    .min(1, "이름을 입력해 주세요")
+    .max(20, "이름은 20자까지 쓸 수 있어요"),
+  amount: z
+    .number("금액을 입력해 주세요")
+    .int("금액은 원 단위로 입력해 주세요")
+    .min(1, "금액을 입력해 주세요")
+    .max(100_000_000_000, "금액이 너무 커요. 다시 확인해 주세요"),
+  dayOfMonth: z
+    .number("결제일을 입력해 주세요")
+    .int("결제일은 1~31 사이 숫자로 입력해 주세요")
+    .min(1, "결제일은 1~31 사이 숫자로 입력해 주세요")
+    .max(31, "결제일은 1~31 사이 숫자로 입력해 주세요"),
+  categoryId: z.uuid("카테고리를 골라 주세요"),
+  paymentMethodId: z.uuid().nullable(),
+  scope: z.enum(SCOPES),
+  memberSlot: z.enum(SLOTS),
+  isVariable: z.boolean(),
+});
+
+export type RecurringInput = z.input<typeof recurringInputSchema>;
+
+/** "yyyy-MM-01" */
+export const monthFirstSchema = dateStringSchema.refine(
+  (value) => value.endsWith("-01"),
+  "잘못된 요청이에요. 새로고침해 주세요",
+);
+
 /** 첫 번째 오류 문구 */
 export function firstError(error: z.ZodError): string {
   return error.issues[0]?.message ?? "입력값을 확인해 주세요";

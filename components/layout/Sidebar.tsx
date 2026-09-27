@@ -8,6 +8,7 @@ import { useSyncStatus } from "@/components/realtime/RealtimeProvider";
 import { useTransactionPanel } from "@/components/transactions/TransactionPanelProvider";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
+import { CountBadge } from "@/components/ui/CountBadge";
 import { ownerLabel, type MemberNames } from "@/lib/domain";
 import type { HouseholdMember } from "@/lib/household";
 import type { PaymentMethodOption } from "@/lib/household-data";
@@ -21,10 +22,12 @@ type Props = {
   members: HouseholdMember[];
   names: MemberNames;
   paymentMethods: PaymentMethodOption[];
+  /** 정기지출 미납 배지 (결제일이 오늘이거나 지난 것) */
+  recurringDue: number;
 };
 
 /** 웹(1024px 이상) 왼쪽 사이드바 248px (SPEC §4.2) */
-export function Sidebar({ me, members, names, paymentMethods }: Props) {
+export function Sidebar({ me, members, names, paymentMethods, recurringDue }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const { openNew } = useTransactionPanel();
@@ -101,7 +104,8 @@ export function Sidebar({ me, members, names, paymentMethods }: Props) {
                   }`}
                 >
                   <item.icon size={20} strokeWidth={1.75} aria-hidden />
-                  {item.label}
+                  <span className="flex-1">{item.label}</span>
+                  {item.href === "/recurring" ? <CountBadge count={recurringDue} label="미납" /> : null}
                 </Link>
               </li>
             );

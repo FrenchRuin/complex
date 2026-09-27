@@ -10,7 +10,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "echo \"Playwright는 M3에서 추가해요\"",
+    "test:e2e": "playwright test",
     "db:link": "supabase link",
     "db:migrate": "supabase db push",
     "db:types": "supabase gen types typescript --linked --schema public > lib/supabase/types.ts"
@@ -30,6 +30,7 @@
     "zod": "4.6.5"
   },
   "devDependencies": {
+    "@playwright/test": "1.63.0",
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "24.19.0",
     "@types/react": "19.3.0",

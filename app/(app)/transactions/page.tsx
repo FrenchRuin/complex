@@ -5,7 +5,7 @@ import { MonthCalendar } from "@/components/transactions/MonthCalendar";
 import { MonthLink } from "@/components/transactions/MonthLinks";
 import { PersonFilterLinks } from "@/components/transactions/PersonFilterLinks";
 import { TransactionList } from "@/components/transactions/TransactionList";
-import { activeFilterCount, parseFilters } from "@/lib/calc/filters";
+import { activeFilterCount, filtersToHref, parseFilters } from "@/lib/calc/filters";
 import { dailyTotals, groupByDay } from "@/lib/calc/group";
 import { currentMonthKST, formatMonthLabel, todayKST } from "@/lib/date";
 import { getHouseholdMembers, requireMember, toMemberNames } from "@/lib/household";
@@ -39,7 +39,11 @@ export default async function TransactionsPage({ searchParams }: PageProps<"/tra
         titleStart={<MonthLink filters={filters} currentMonth={currentMonth} direction="prev" />}
         titleEnd={<MonthLink filters={filters} currentMonth={currentMonth} direction="next" />}
       >
-        <PersonFilterLinks filters={filters} currentMonth={currentMonth} names={names} />
+        <PersonFilterLinks
+          current={filters.who}
+          names={names}
+          hrefFor={(who) => filtersToHref(filters, currentMonth, { who, day: null })}
+        />
       </PageHeader>
 
       <div className="flex flex-col gap-4 px-5 py-4 lg:px-8">

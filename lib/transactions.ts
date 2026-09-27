@@ -1,5 +1,5 @@
-import type { TransactionFilters } from "./calc/filters";
-import { monthRange } from "./date";
+import type { PersonFilter, TransactionFilters } from "./calc/filters";
+import { monthRange, type DateRange } from "./date";
 import { toCategoryType, toScope, toSlot, type CategoryType, type Scope, type Slot } from "./domain";
 import { createClient } from "./supabase/server";
 
@@ -24,36 +24,69 @@ export type TransactionRecord = {
 const COLUMNS =
   "id, type, amount, occurred_on, category_id, merchant, memo, payment_method_id, scope, member_slot, created_by, updated_by, created_at, updated_at";
 
+type Query = Partial<Omit<TransactionFilters, "month" | "day">> & {
+  range?: DateRange;
+  limit?: number;
+};
+
 /**
- * 한 달치 내역 (삭제 제외). 캘린더 합계도 같은 목록으로 내므로 day 필터는 여기서 쓰지 않는다.
+ * 내역 조회 (삭제 제외, 최근 날짜 먼저).
  * 사람 필터: 공동 = scope joint, A = A의 개인만 (SPEC §6)
  */
-export async function getMonthTransactions(filters: TransactionFilters): Promise<TransactionRecord[]> {
+async function fetchTransactions(q: Query): Promise<TransactionRecord[]> {
   const supabase = await createClient();
-  const { start, end } = monthRange(filters.month);
+  let query = supabase.from("transactions").select(COLUMNS).is("deleted_at", null);
 
-  let query = supabase
-    .from("transactions")
-    .select(COLUMNS)
-    .is("deleted_at", null)
-    .gte("occurred_on", start)
-    .lte("occurred_on", end);
+  if (q.range) query = query.gte("occurred_on", q.range.start).lte("occurred_on", q.range.end);
+  if (q.who === "joint") query = query.eq("scope", "joint");
+  if (q.who === "a" || q.who === "b") query = query.eq("scope", "personal").eq("member_slot", q.who);
+  if (q.type && q.type !== "all") query = query.eq("type", q.type);
+  if (q.categories?.length) query = query.in("category_id", q.categories);
+  if (q.paymentMethods?.length) query = query.in("payment_method_id", q.paymentMethods);
+  if (q.q) query = query.or(`merchant.ilike.*${q.q}*,memo.ilike.*${q.q}*`);
 
-  if (filters.who === "joint") query = query.eq("scope", "joint");
-  if (filters.who === "a" || filters.who === "b") {
-    query = query.eq("scope", "personal").eq("member_slot", filters.who);
-  }
-  if (filters.type !== "all") query = query.eq("type", filters.type);
-  if (filters.categories.length) query = query.in("category_id", filters.categories);
-  if (filters.paymentMethods.length) query = query.in("payment_method_id", filters.paymentMethods);
-  if (filters.q) query = query.or(`merchant.ilike.*${filters.q}*,memo.ilike.*${filters.q}*`);
+  query = query.order("occurred_on", { ascending: false }).order("created_at", { ascending: false });
+  if (q.limit) query = query.limit(q.limit);
 
-  const { data, error } = await query
-    .order("occurred_on", { ascending: false })
-    .order("created_at", { ascending: false });
+  const { data, error } = await query;
   if (error) throw new Error(`내역을 불러오지 못했어요: ${error.message}`);
+  return data.map(toRecord);
+}
 
-  return data.map((row) => ({
+/** 한 달치 내역. 캘린더 합계도 같은 목록으로 내므로 day 필터는 여기서 쓰지 않는다. */
+export function getMonthTransactions(filters: TransactionFilters): Promise<TransactionRecord[]> {
+  return fetchTransactions({ ...filters, range: monthRange(filters.month) });
+}
+
+/** 기간 안의 모든 내역 (사람 필터 없음 — 홈에서 나눠 계산) */
+export function getTransactionsInRange(range: DateRange): Promise<TransactionRecord[]> {
+  return fetchTransactions({ range });
+}
+
+/** 최근 내역 n건 */
+export function getRecentTransactions(who: PersonFilter, limit: number): Promise<TransactionRecord[]> {
+  return fetchTransactions({ who, limit });
+}
+
+type Row = {
+  id: string;
+  type: string;
+  amount: number;
+  occurred_on: string;
+  category_id: string;
+  merchant: string | null;
+  memo: string | null;
+  payment_method_id: string | null;
+  scope: string;
+  member_slot: string;
+  created_by: string;
+  updated_by: string;
+  created_at: string;
+  updated_at: string;
+};
+
+function toRecord(row: Row): TransactionRecord {
+  return {
     id: row.id,
     type: toCategoryType(row.type),
     amount: row.amount,
@@ -68,7 +101,40 @@ export async function getMonthTransactions(filters: TransactionFilters): Promise
     updatedBy: row.updated_by,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
-  }));
+  };
+}
+
+export type PartnerActivity = {
+  memberId: string;
+  subjectMerchant: string | null;
+  categoryId: string;
+  amount: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+};
+
+/** 상대가 마지막으로 추가·수정·삭제한 내역 1건 (F-14). 삭제된 것도 포함한다. */
+export async function getLatestActivityBy(memberId: string): Promise<PartnerActivity | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("transactions")
+    .select("merchant, category_id, amount, created_at, updated_at, deleted_at")
+    .eq("updated_by", memberId)
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw new Error(`최근 활동을 불러오지 못했어요: ${error.message}`);
+  if (!data) return null;
+  return {
+    memberId,
+    subjectMerchant: data.merchant,
+    categoryId: data.category_id,
+    amount: data.amount,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+    deletedAt: data.deleted_at,
+  };
 }
 
 export type LabelMaps = {
