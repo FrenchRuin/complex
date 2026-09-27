@@ -10,7 +10,8 @@ type Props = {
 
 /** 설정 화면의 카드 한 장 */
 export function SettingsSection({ title, description, id, children }: Props) {
-  const headingId = `settings-${title}`;
+  // aria-labelledby는 띄어쓰기를 id 구분자로 읽으므로 공백을 - 로 바꾼다
+  const headingId = `settings-${title.replace(/\s+/g, "-")}`;
   return (
     <section id={id} aria-labelledby={headingId} className="scroll-mt-20 rounded-md bg-surface-raised p-5">
       <h2 id={headingId} className="text-heading text-ink">

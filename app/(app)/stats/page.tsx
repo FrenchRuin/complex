@@ -6,6 +6,8 @@ import { SettingsSection } from "@/components/settings/SettingsSection";
 import { CategoryStatsTable } from "@/components/stats/CategoryStatsTable";
 import { MonthlyChart } from "@/components/stats/MonthlyChart";
 import { PersonStats } from "@/components/stats/PersonStats";
+import { SettlementCard } from "@/components/stats/SettlementCard";
+import { getSettlementOverview } from "@/lib/settlement";
 import { getMonthBudgets } from "@/lib/budget";
 import { parseFilters } from "@/lib/calc/filters";
 import { categoryStats, monthlyExpense, personStats, recentMonths, unbudgetedFixedTotal } from "@/lib/calc/stats";
@@ -20,17 +22,19 @@ const hrefFor = (month: MonthString, current: MonthString) => (month === current
 
 /** 통계 (F-23): 최근 6개월 지출, 카테고리별 예산 대비, 사람별, 예산 없는 고정지출 */
 export default async function StatsPage({ searchParams }: PageProps<"/stats">) {
-  await requireMember();
+  const me = await requireMember();
   const current = currentMonthKST();
   const { month } = parseFilters(await searchParams, current);
   const months = recentMonths(month, 6);
 
-  const [rows, budgets, labels, members] = await Promise.all([
+  const [rows, budgets, labels, members, settlement] = await Promise.all([
     getTransactionsInRange({ start: monthRange(months[0]).start, end: monthRange(month).end }),
     getMonthBudgets(month),
     getLabelMaps(),
     getHouseholdMembers(),
+    getSettlementOverview(me.householdId),
   ]);
+  const memberNames = toMemberNames(members);
 
   const thisMonth = rows.filter((r) => monthOf(r.occurredOn) === month);
   const lastMonth = rows.filter((r) => monthOf(r.occurredOn) === shiftMonth(month, -1));
@@ -60,7 +64,10 @@ export default async function StatsPage({ searchParams }: PageProps<"/stats">) {
             <MonthlyChart data={monthlyExpense(rows, months)} currentMonth={current} />
           </SettingsSection>
           <SettingsSection title="사람별 지출">
-            <PersonStats stats={personStats(thisMonth)} names={toMemberNames(members)} categoryNames={labels.categories} />
+            <PersonStats stats={personStats(thisMonth)} names={memberNames} categoryNames={labels.categories} />
+          </SettingsSection>
+          <SettingsSection title="공동 지출 정산" description="공동 지출을 누가 얼마 냈는지 보고 반반으로 나눠요.">
+            <SettlementCard overview={settlement} names={{ a: memberNames.a ?? "A", b: memberNames.b ?? "B" }} />
           </SettingsSection>
         </div>
         <SettingsSection title="카테고리별 지출" description="예산 대비 사용률과 지난달 대비 증감이에요.">

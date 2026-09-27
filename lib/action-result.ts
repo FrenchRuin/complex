@@ -27,6 +27,7 @@ const RPC_ERROR_MESSAGES: Record<string, string> = {
   recurring_not_in_month: "이번 달에는 이 정기지출이 없어요. 새로고침해 주세요",
   already_paid: "이미 납부 체크했어요. 새로고침해 주세요",
   invalid_amount: "금액을 입력해 주세요",
+  nothing_to_settle: "오늘 이미 정산했어요. 내일부터 다시 정산할 수 있어요",
 };
 
 const FALLBACK = "저장하지 못했어요. 잠시 후 다시 시도해 주세요";
