@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   currentMonthKST,
+  formatDayHeader,
   formatMonthDayKST,
+  formatMonthLabel,
   monthRange,
   samePeriodLastMonth,
   shiftMonth,
@@ -23,6 +25,17 @@ describe("currentMonthKST", () => {
   it("월말 밤은 한국에서 다음 달이다", () => {
     // 2026-09-30 16:00 UTC = 2026-10-01 01:00 KST
     expect(currentMonthKST(new Date("2026-09-30T16:00:00Z"))).toBe("2026-10");
+  });
+});
+
+describe("formatDayHeader / formatMonthLabel", () => {
+  it("요일을 붙인다", () => {
+    expect(formatDayHeader("2026-09-27")).toBe("9월 27일 일요일");
+    expect(formatDayHeader("2026-09-01")).toBe("9월 1일 화요일");
+  });
+
+  it("연월", () => {
+    expect(formatMonthLabel("2026-09")).toBe("2026년 9월");
   });
 });
 

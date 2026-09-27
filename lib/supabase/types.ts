@@ -200,6 +200,105 @@ export type Database = {
           },
         ]
       }
+      transactions: {
+        Row: {
+          amount: number
+          category_id: string
+          created_at: string
+          created_by: string
+          deleted_at: string | null
+          household_id: string
+          id: string
+          member_slot: string
+          memo: string | null
+          merchant: string | null
+          occurred_on: string
+          occurred_time: string | null
+          payment_method_id: string | null
+          scope: string
+          source: string
+          type: string
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          amount: number
+          category_id: string
+          created_at?: string
+          created_by: string
+          deleted_at?: string | null
+          household_id: string
+          id?: string
+          member_slot: string
+          memo?: string | null
+          merchant?: string | null
+          occurred_on: string
+          occurred_time?: string | null
+          payment_method_id?: string | null
+          scope: string
+          source?: string
+          type: string
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          amount?: number
+          category_id?: string
+          created_at?: string
+          created_by?: string
+          deleted_at?: string | null
+          household_id?: string
+          id?: string
+          member_slot?: string
+          memo?: string | null
+          merchant?: string | null
+          occurred_on?: string
+          occurred_time?: string | null
+          payment_method_id?: string | null
+          scope?: string
+          source?: string
+          type?: string
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

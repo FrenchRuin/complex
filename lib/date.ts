@@ -45,6 +45,21 @@ export function formatMonthDayKST(timestamp: string | Date): string {
   return format(new TZDate(new Date(timestamp), TIME_ZONE), "M월 d일");
 }
 
+const WEEKDAYS = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+
+/** "2026-09-27" → "9월 27일 일요일" (날짜만 다루므로 시간대와 무관) */
+export function formatDayHeader(date: DateString): string {
+  const { year, month, day } = parseDate(date);
+  const weekday = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+  return `${month}월 ${day}일 ${WEEKDAYS[weekday]}`;
+}
+
+/** "2026-09" → "2026년 9월" */
+export function formatMonthLabel(month: MonthString): string {
+  const { year, month: m } = parseMonth(month);
+  return `${year}년 ${m}월`;
+}
+
 /** 한국 시간 기준 이번 달 */
 export function currentMonthKST(now: Date = new Date()): MonthString {
   return todayKST(now).slice(0, 7);

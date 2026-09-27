@@ -3,7 +3,7 @@
  */
 import { z } from "zod";
 import { CATEGORY_ICON_NAMES } from "./category-icons";
-import { CATEGORY_TYPES, OWNERS, PAYMENT_KINDS } from "./domain";
+import { CATEGORY_TYPES, OWNERS, PAYMENT_KINDS, SCOPES, SLOTS } from "./domain";
 
 export const displayNameSchema = z
   .string()
@@ -50,6 +50,44 @@ export const paymentMethodInputSchema = z.object({
 });
 
 export const moveDirectionSchema = z.enum(["up", "down"]);
+
+/** 빈 문자열은 null로 */
+const optionalText = (max: number, message: string) =>
+  z
+    .string()
+    .trim()
+    .max(max, message)
+    .transform((value) => (value === "" ? null : value));
+
+/** "yyyy-MM-dd" 이고 실제로 있는 날짜 */
+export const dateStringSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "날짜를 확인해 주세요")
+  .refine((value) => {
+    const [y, m, d] = value.split("-").map(Number);
+    const date = new Date(Date.UTC(y, m - 1, d));
+    return date.getUTCFullYear() === y && date.getUTCMonth() === m - 1 && date.getUTCDate() === d;
+  }, "날짜를 확인해 주세요");
+
+/** 내역 추가·수정 (F-10, F-11) */
+export const transactionInputSchema = z.object({
+  id: z.uuid().optional(),
+  type: z.enum(CATEGORY_TYPES),
+  amount: z
+    .number("금액을 입력해 주세요")
+    .int("금액은 원 단위로 입력해 주세요")
+    .min(1, "금액을 입력해 주세요")
+    .max(100_000_000_000, "금액이 너무 커요. 다시 확인해 주세요"),
+  occurredOn: dateStringSchema,
+  categoryId: z.uuid("카테고리를 골라 주세요"),
+  merchant: optionalText(50, "가맹점·내용은 50자까지 쓸 수 있어요"),
+  memo: optionalText(200, "메모는 200자까지 쓸 수 있어요"),
+  paymentMethodId: z.uuid().nullable(),
+  scope: z.enum(SCOPES),
+  memberSlot: z.enum(SLOTS),
+});
+
+export type TransactionInput = z.input<typeof transactionInputSchema>;
 
 /** 첫 번째 오류 문구 */
 export function firstError(error: z.ZodError): string {
