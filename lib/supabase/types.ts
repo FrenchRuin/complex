@@ -449,6 +449,15 @@ export type Database = {
           status: string
         }[]
       }
+      get_usage: {
+        Args: never
+        Returns: {
+          db_size_bytes: number
+          last_activity: string
+          recurring_count: number
+          transaction_count: number
+        }[]
+      }
       my_household_id: { Args: never; Returns: string }
       normalize_merchant: { Args: { p: string }; Returns: string }
       uncheck_recurring: {
