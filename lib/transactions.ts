@@ -15,6 +15,8 @@ export type TransactionRecord = {
   paymentMethodId: string | null;
   scope: Scope;
   memberSlot: Slot;
+  /** manual / sms / recurring / import */
+  source: string;
   createdBy: string;
   updatedBy: string;
   createdAt: string;
@@ -22,7 +24,7 @@ export type TransactionRecord = {
 };
 
 const COLUMNS =
-  "id, type, amount, occurred_on, category_id, merchant, memo, payment_method_id, scope, member_slot, created_by, updated_by, created_at, updated_at";
+  "id, type, amount, occurred_on, category_id, merchant, memo, payment_method_id, scope, member_slot, source, created_by, updated_by, created_at, updated_at";
 
 type Query = Partial<Omit<TransactionFilters, "month" | "day">> & {
   range?: DateRange;
@@ -79,6 +81,7 @@ type Row = {
   payment_method_id: string | null;
   scope: string;
   member_slot: string;
+  source: string;
   created_by: string;
   updated_by: string;
   created_at: string;
@@ -97,6 +100,7 @@ function toRecord(row: Row): TransactionRecord {
     paymentMethodId: row.payment_method_id,
     scope: toScope(row.scope),
     memberSlot: toSlot(row.member_slot),
+    source: row.source,
     createdBy: row.created_by,
     updatedBy: row.updated_by,
     createdAt: row.created_at,
