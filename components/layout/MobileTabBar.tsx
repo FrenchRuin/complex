@@ -4,10 +4,11 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTransactionPanel } from "@/components/transactions/TransactionPanelProvider";
+import { CountBadge } from "@/components/ui/CountBadge";
 import { NAV_ITEMS, isActivePath } from "@/lib/nav";
 
 /** 1024px 미만: 하단 탭바 5개 + 오른쪽 아래 둥근 추가 버튼 (SPEC §4.1) */
-export function MobileTabBar() {
+export function MobileTabBar({ recurringDue }: { recurringDue: number }) {
   const pathname = usePathname();
   const { openNew } = useTransactionPanel();
 
@@ -38,7 +39,12 @@ export function MobileTabBar() {
                     active ? "text-primary" : "text-ink-muted"
                   }`}
                 >
-                  <item.icon size={22} strokeWidth={1.75} aria-hidden />
+                  <span className="relative">
+                    <item.icon size={22} strokeWidth={1.75} aria-hidden />
+                    {item.href === "/recurring" ? (
+                      <CountBadge count={recurringDue} label="미납" className="absolute -top-2 -right-3" />
+                    ) : null}
+                  </span>
                   {item.label}
                 </Link>
               </li>

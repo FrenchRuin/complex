@@ -17,7 +17,7 @@ export function useSyncStatus(): SyncStatus {
 const REFRESH_DEBOUNCE_MS = 300;
 
 /**
- * 실시간 동기화 (F-14). 우리 가구의 내역이 바뀌면 화면을 다시 읽는다.
+ * 실시간 동기화 (F-14). 우리 가구의 내역·정기지출이 바뀌면 화면을 다시 읽는다.
  * 읽기는 서버 컴포넌트가 하므로, 여기서는 router.refresh()만 부른다.
  */
 export function RealtimeProvider({ householdId, children }: { householdId: string; children: ReactNode }) {
@@ -56,6 +56,16 @@ export function RealtimeProvider({ householdId, children }: { householdId: strin
             event: "*",
             schema: "public",
             table: "transactions",
+            filter: `household_id=eq.${householdId}`,
+          },
+          scheduleRefresh,
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "recurring_items",
             filter: `household_id=eq.${householdId}`,
           },
           scheduleRefresh,
