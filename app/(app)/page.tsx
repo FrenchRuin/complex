@@ -61,7 +61,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
         {partner ? null : (
           <p className="rounded-md bg-primary-soft px-4 py-3 text-body text-ink">
             아직 혼자예요.{" "}
-            <Link href="/settings" className="font-semibold text-primary underline-offset-4 hover:underline">
+            <Link href="/settings/household" className="font-semibold text-primary underline-offset-4 hover:underline">
               설정에서 배우자를 초대해 주세요
             </Link>
           </p>

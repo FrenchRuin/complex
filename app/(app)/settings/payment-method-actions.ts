@@ -54,7 +54,7 @@ export async function savePaymentMethod(
     if (error) return fail(dbErrorMessage(error));
   }
 
-  revalidatePath("/settings");
+  revalidatePath("/", "layout");
   return ok();
 }
 
@@ -78,7 +78,7 @@ export async function movePaymentMethod(rawId: string, rawDirection: string): Pr
     if (error) return fail(dbErrorMessage(error));
   }
 
-  revalidatePath("/settings");
+  revalidatePath("/", "layout");
   return ok();
 }
 
@@ -94,6 +94,6 @@ export async function setPaymentMethodHidden(rawId: string, hidden: boolean): Pr
     .eq("id", id.data);
   if (error) return fail(dbErrorMessage(error));
 
-  revalidatePath("/settings");
+  revalidatePath("/", "layout");
   return ok();
 }

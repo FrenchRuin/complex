@@ -50,7 +50,7 @@ export async function saveCategory(_prev: ActionResult, formData: FormData): Pro
     if (error) return fail(dbErrorMessage(error));
   }
 
-  revalidatePath("/settings");
+  revalidatePath("/", "layout");
   return ok();
 }
 
@@ -84,7 +84,7 @@ export async function moveCategory(rawId: string, rawDirection: string): Promise
     if (error) return fail(dbErrorMessage(error));
   }
 
-  revalidatePath("/settings");
+  revalidatePath("/", "layout");
   return ok();
 }
 
@@ -101,6 +101,6 @@ export async function setCategoryHidden(rawId: string, hidden: boolean): Promise
     .eq("id", id.data);
   if (error) return fail(dbErrorMessage(error));
 
-  revalidatePath("/settings");
+  revalidatePath("/", "layout");
   return ok();
 }

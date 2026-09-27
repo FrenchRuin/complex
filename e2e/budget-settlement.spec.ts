@@ -13,7 +13,7 @@ async function addExpense(page: Page, opts: { amount: string; category: string; 
 }
 
 test("예산을 넘으면 홈에 초과 표시 (F-21, F-22)", async ({ page }) => {
-  await login(page, "a", "/settings");
+  await login(page, "a", "/settings/budget");
   await page.getByLabel("의료", { exact: true }).fill("10000");
   await page.getByRole("button", { name: "예산 저장" }).click();
   await expect(page.getByText("예산을 저장했어요")).toBeVisible();

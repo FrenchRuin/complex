@@ -36,7 +36,7 @@ export async function createInvite(): Promise<InviteResult> {
   const { data, error } = await supabase.rpc("create_invite");
   if (error) return fail(dbErrorMessage(error));
 
-  revalidatePath("/settings");
+  revalidatePath("/", "layout");
   return { ...ok(), token: data };
 }
 

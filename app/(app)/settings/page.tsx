@@ -1,133 +1,99 @@
+import { ChevronRight, CreditCard, Gauge, LogOut, Tags, User, Users, Wallet, type LucideIcon } from "lucide-react";
 import type { Metadata } from "next";
-import { headers } from "next/headers";
-import { DisplayNameForm } from "@/components/household/DisplayNameForm";
+import Link from "next/link";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { CategorySection } from "@/components/settings/CategorySection";
-import { HouseholdSection } from "@/components/settings/HouseholdSection";
-import { PaymentMethodSection } from "@/components/settings/PaymentMethodSection";
-import { SettingsSection } from "@/components/settings/SettingsSection";
-import { UsageSection } from "@/components/settings/UsageSection";
-import { Button } from "@/components/ui/Button";
-import { BudgetEditor } from "@/components/settings/BudgetEditor";
 import { getMonthBudgets } from "@/lib/budget";
-import { currentMonthKST, formatMonthDayKST, formatMonthLabel } from "@/lib/date";
-import { toOwner, toPaymentKind } from "@/lib/domain";
-import { getHouseholdMembers, requireMember, toMemberNames } from "@/lib/household";
-import { getVisibleCategories } from "@/lib/household-data";
-import { createClient } from "@/lib/supabase/server";
-import { logout, updateDisplayName } from "./actions";
+import { FREE_DB_LIMIT_BYTES, usagePercent } from "@/lib/calc/usage";
+import { currentMonthKST } from "@/lib/date";
+import { getHouseholdMembers, requireMember } from "@/lib/household";
+import { formatWon } from "@/lib/money";
+import { getAllCategories, getAllPaymentMethods, getUsage } from "@/lib/settings-data";
+import { logout } from "./actions";
 
 export const metadata: Metadata = { title: "설정 · 우리 둘 가계부" };
 
-async function getOrigin(): Promise<string> {
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
-  const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-  return `${proto}://${host}`;
-}
+type MenuItem = { href: string; label: string; icon: LucideIcon; summary: string };
 
-function loadError(error: { message: string }): Error {
-  return new Error(`설정을 불러오지 못했어요: ${error.message}`);
-}
-
+/** 설정 첫 화면: 메뉴 목록 + 각 메뉴의 현재 상태 요약 */
 export default async function SettingsPage() {
   const me = await requireMember();
-  const supabase = await createClient();
-
-  const month = currentMonthKST();
-  const [members, categories, methods, invites, origin, usageRes, visibleCategories, budgets] = await Promise.all([
+  const [members, categories, methods, budgets, usage] = await Promise.all([
     getHouseholdMembers(),
-    supabase.from("categories").select("id, type, name, icon, sort_order, is_hidden"),
-    supabase
-      .from("payment_methods")
-      .select("id, name, kind, owner, sms_aliases, sort_order, is_hidden"),
-    supabase
-      .from("invites")
-      .select("token, expires_at")
-      .is("used_at", null)
-      .gt("expires_at", new Date().toISOString())
-      .order("created_at", { ascending: false })
-      .limit(1),
-    getOrigin(),
-    supabase.rpc("get_usage"),
-    getVisibleCategories(),
-    getMonthBudgets(month),
+    getAllCategories(),
+    getAllPaymentMethods(),
+    getMonthBudgets(currentMonthKST()),
+    getUsage(),
   ]);
 
-  if (categories.error) throw loadError(categories.error);
-  if (methods.error) throw loadError(methods.error);
-  if (invites.error) throw loadError(invites.error);
-  const usageRow = usageRes.data?.[0];
-  const supabaseProjectRef =
-    process.env.NEXT_PUBLIC_SUPABASE_URL?.match(/^https:\/\/([a-z0-9]+)\.supabase\.co/)?.[1] ?? null;
+  const visible = categories.filter((c) => !c.is_hidden);
+  const hidden = categories.length - visible.length;
+  const budgetTotal = budgets.reduce((sum, b) => sum + b.amount, 0);
 
-  const names = toMemberNames(members);
-  const invite = invites.data[0];
+  const items: MenuItem[] = [
+    { href: "/settings/profile", label: "프로필", icon: User, summary: me.displayName },
+    {
+      href: "/settings/household",
+      label: "가구·초대",
+      icon: Users,
+      summary: members.length >= 2 ? members.map((m) => m.displayName).join(" · ") : "혼자예요 · 배우자 초대하기",
+    },
+    {
+      href: "/settings/categories",
+      label: "카테고리",
+      icon: Tags,
+      summary:
+        `지출 ${visible.filter((c) => c.type === "expense").length}개 · 수입 ${visible.filter((c) => c.type === "income").length}개` +
+        (hidden ? ` · 숨김 ${hidden}개` : ""),
+    },
+    {
+      href: "/settings/payment-methods",
+      label: "계좌·카드",
+      icon: CreditCard,
+      summary: `${methods.filter((m) => !m.is_hidden).length}개`,
+    },
+    {
+      href: "/settings/budget",
+      label: "예산",
+      icon: Wallet,
+      summary: budgets.length ? `이번 달 ${budgets.length}개 · ${formatWon(budgetTotal)}` : "아직 없어요",
+    },
+    {
+      href: "/settings/usage",
+      label: "서비스 사용량",
+      icon: Gauge,
+      summary: usage ? `DB ${usagePercent(usage.dbSizeBytes, FREE_DB_LIMIT_BYTES)}% 사용` : "",
+    },
+  ];
 
   return (
     <>
-    <PageHeader title="설정" />
-    <div className="flex w-full max-w-[720px] flex-col gap-4 px-5 py-6 lg:px-8">
+      <PageHeader title="설정" />
+      <div className="flex w-full max-w-[720px] flex-col gap-4 px-5 py-6 lg:px-8">
+        <nav aria-label="설정 메뉴" className="rounded-md bg-surface-raised">
+          <ul>
+            {items.map((item) => (
+              <li key={item.href} className="border-b border-line last:border-b-0">
+                <Link href={item.href} className="flex min-h-14 items-center gap-3 px-5 py-3 hover:bg-surface-sunken/60">
+                  <item.icon size={22} strokeWidth={1.75} className="shrink-0 text-ink-muted" aria-hidden />
+                  <span className="flex-1 text-body text-ink">{item.label}</span>
+                  <span className="max-w-[55%] truncate text-caption text-ink-muted tabular-nums">{item.summary}</span>
+                  <ChevronRight size={18} strokeWidth={1.75} className="shrink-0 text-ink-muted" aria-hidden />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
 
-      <SettingsSection title="프로필" description="앱의 모든 곳에서 이 이름으로 불러요.">
-        <DisplayNameForm
-          action={updateDisplayName}
-          defaultValue={me.displayName}
-          submitLabel="저장"
-          pendingLabel="저장하는 중"
-          successMessage="저장했어요"
-        />
-      </SettingsSection>
-
-      <HouseholdSection
-        members={members}
-        origin={origin}
-        activeInvite={
-          invite ? { token: invite.token, expiresLabel: formatMonthDayKST(invite.expires_at) } : null
-        }
-      />
-
-      <CategorySection
-        categories={categories.data.map((c) => ({
-          ...c,
-          type: c.type === "income" ? "income" : "expense",
-        }))}
-      />
-
-      <PaymentMethodSection
-        names={names}
-        methods={methods.data.map((m) => ({
-          ...m,
-          kind: toPaymentKind(m.kind),
-          owner: toOwner(m.owner),
-        }))}
-      />
-
-      <BudgetEditor
-        monthLabel={formatMonthLabel(month)}
-        monthFirst={`${month}-01`}
-        categories={visibleCategories}
-        budgets={budgets}
-      />
-
-      {usageRow ? (
-        <UsageSection
-          usage={{
-            dbSizeBytes: usageRow.db_size_bytes,
-            transactionCount: usageRow.transaction_count,
-            recurringCount: usageRow.recurring_count,
-            lastActivity: usageRow.last_activity,
-          }}
-          supabaseProjectRef={supabaseProjectRef}
-        />
-      ) : null}
-
-      <form action={logout}>
-        <Button type="submit" variant="secondary" className="w-full">
-          로그아웃
-        </Button>
-      </form>
-    </div>
+        <form action={logout}>
+          <button
+            type="submit"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-md bg-surface-raised text-body font-semibold text-ink"
+          >
+            <LogOut size={20} strokeWidth={1.75} aria-hidden />
+            로그아웃
+          </button>
+        </form>
+      </div>
     </>
   );
 }
