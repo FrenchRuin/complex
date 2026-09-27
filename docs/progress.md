@@ -18,8 +18,7 @@
 - 기본 결제수단 "현금"의 소유는 공동
 - Supabase 명령어 도구는 `.env.local`의 `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`로 동작
 
-### 남은 일 / 확인 필요
-- Supabase 프로젝트에 이전(Prisma) 앱의 테이블 8개가 RLS 꺼진 채 남아 있음 → 처리 방법 사용자 결정 필요
+- 이전(Prisma) 앱이 남긴 테이블 8개(RLS 꺼짐, 12행) 삭제. 삭제 전 로컬 `tmp/old-prisma-backup-20260927.json`에 백업 (저장소 밖)
 
 ### 폰에서 확인할 것
 - [ ] A: 로그인 → 가구 만들기 (표시 이름 입력)
