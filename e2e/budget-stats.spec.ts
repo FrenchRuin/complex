@@ -1,13 +1,12 @@
 import { expect, test, type Page } from "@playwright/test";
 import { login } from "./support/login";
 
-async function addExpense(page: Page, opts: { amount: string; category: string; merchant: string; joint?: boolean }) {
+async function addExpense(page: Page, opts: { amount: string; category: string; merchant: string }) {
   await page.getByRole("button", { name: "내역 추가" }).first().click();
   const panel = page.getByRole("dialog", { name: "내역 추가" });
   await panel.getByLabel("금액").fill(opts.amount);
   await panel.getByLabel("가맹점·내용 (선택)").fill(opts.merchant);
   await panel.getByRole("radio", { name: opts.category }).click();
-  if (opts.joint) await panel.getByRole("group", { name: "구분" }).getByText("공동").click();
   await panel.getByRole("button", { name: "저장" }).click();
   await expect(panel).toBeHidden();
 }
@@ -34,15 +33,8 @@ test("통계 화면: 6개월 그래프, 카테고리별, 사람별 (F-23)", asyn
   await expect(page.getByRole("heading", { name: "사람별 지출" })).toBeVisible();
 });
 
-test("공동 지출 정산 → 기록하면 새로 계산 (F-24)", async ({ page }) => {
+test("정산 칸은 없다 (F-24 제거, 2026-09-27)", async ({ page }) => {
   await login(page, "a", "/stats");
-  await addExpense(page, { amount: "30000", category: "식비", merchant: "E2E 공동 장보기", joint: true });
-
-  const settle = page.getByRole("region", { name: "공동 지출 정산" });
-  await expect(settle.getByText(/반반으로 나누면/)).toBeVisible();
-  await settle.getByRole("button", { name: "정산 완료로 기록" }).click();
-  await settle.getByRole("button", { name: "한 번 더 누르면 기록돼요" }).click();
-  await expect(page.getByText("정산 완료로 기록했어요")).toBeVisible();
-  await expect(settle.getByText("지난 정산")).toBeVisible();
-  await expect(settle.getByRole("button", { name: "정산 완료로 기록" })).toBeDisabled();
+  await expect(page.getByRole("heading", { name: "카테고리별 지출" })).toBeVisible();
+  await expect(page.getByText("공동 지출 정산")).toHaveCount(0);
 });
