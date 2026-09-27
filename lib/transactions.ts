@@ -45,7 +45,11 @@ async function fetchTransactions(q: Query): Promise<TransactionRecord[]> {
   if (q.type && q.type !== "all") query = query.eq("type", q.type);
   if (q.categories?.length) query = query.in("category_id", q.categories);
   if (q.paymentMethods?.length) query = query.in("payment_method_id", q.paymentMethods);
-  if (q.q) query = query.or(`merchant.ilike.*${q.q}*,memo.ilike.*${q.q}*`);
+  if (q.q) {
+    // 가맹점·메모 부분 일치, 검색어가 금액이면 그 금액인 내역도
+    const amount = q.amount ? `,amount.eq.${q.amount}` : "";
+    query = query.or(`merchant.ilike.*${q.q}*,memo.ilike.*${q.q}*${amount}`);
+  }
 
   query = query.order("occurred_on", { ascending: false }).order("created_at", { ascending: false });
   if (q.limit) query = query.limit(q.limit);
@@ -58,6 +62,11 @@ async function fetchTransactions(q: Query): Promise<TransactionRecord[]> {
 /** 한 달치 내역. 캘린더 합계도 같은 목록으로 내므로 day 필터는 여기서 쓰지 않는다. */
 export function getMonthTransactions(filters: TransactionFilters): Promise<TransactionRecord[]> {
   return fetchTransactions({ ...filters, range: monthRange(filters.month) });
+}
+
+/** 전체 기간 검색: 날짜 제한 없이 최근 것부터 최대 2000건 (요약 합계용), 화면에는 limit건만 */
+export function searchAllTransactions(filters: TransactionFilters): Promise<TransactionRecord[]> {
+  return fetchTransactions({ ...filters, limit: 2000 });
 }
 
 /** 기간 안의 모든 내역 (사람 필터 없음 — 홈에서 나눠 계산) */

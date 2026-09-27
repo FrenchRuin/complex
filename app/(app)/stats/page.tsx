@@ -6,10 +6,11 @@ import { SettingsSection } from "@/components/settings/SettingsSection";
 import { CategoryStatsTable } from "@/components/stats/CategoryStatsTable";
 import { MonthlyChart } from "@/components/stats/MonthlyChart";
 import { PersonStats } from "@/components/stats/PersonStats";
+import { MonthPicker } from "@/components/transactions/MonthPicker";
 import { getMonthBudgets } from "@/lib/budget";
 import { parseFilters } from "@/lib/calc/filters";
 import { categoryStats, monthlyExpense, personStats, recentMonths, unbudgetedFixedTotal } from "@/lib/calc/stats";
-import { currentMonthKST, formatMonthLabel, monthOf, monthRange, shiftMonth, type MonthString } from "@/lib/date";
+import { currentMonthKST, monthOf, monthRange, shiftMonth, type MonthString } from "@/lib/date";
 import { getHouseholdMembers, requireMember, toMemberNames } from "@/lib/household";
 import { formatWon } from "@/lib/money";
 import { getLabelMaps, getTransactionsInRange } from "@/lib/transactions";
@@ -54,7 +55,11 @@ export default async function StatsPage({ searchParams }: PageProps<"/stats">) {
 
   return (
     <>
-      <PageHeader title={formatMonthLabel(month)} titleStart={monthNav(-1)} titleEnd={monthNav(1)} />
+      <PageHeader
+        title={<MonthPicker month={month} currentMonth={current} path="/stats" query="" />}
+        titleStart={monthNav(-1)}
+        titleEnd={monthNav(1)}
+      />
       <div className="grid gap-4 px-5 py-6 lg:grid-cols-2 lg:items-start lg:px-8">
         <div className="flex flex-col gap-4">
           <SettingsSection title="최근 6개월 지출">

@@ -1,5 +1,6 @@
 "use client";
 
+import { DatePicker } from "@/components/ui/DatePicker";
 import { SCOPE_LABEL, SCOPES, SLOTS, ownerLabel, type MemberNames, type Scope, type Slot } from "@/lib/domain";
 import type { CategoryOption, PaymentMethodOption } from "@/lib/household-data";
 import { formatNumber, parseWon } from "@/lib/money";
@@ -42,10 +43,7 @@ export function SmsReviewRow({ row, index, categories, paymentMethods, names, on
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-2">
-        <label className={label}>
-          날짜
-          <input type="date" value={row.date} onChange={(e) => onChange({ date: e.target.value })} className={field} />
-        </label>
+        <DatePicker label="날짜" value={row.date} onChange={(date) => onChange({ date })} compact />
         <label className={label}>
           금액
           <input

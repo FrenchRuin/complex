@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  addDays,
+  formatFullDate,
   currentMonthKST,
   formatDayHeader,
   formatMonthDayKST,
@@ -32,6 +34,21 @@ describe("formatDayHeader / formatMonthLabel", () => {
   it("요일을 붙인다", () => {
     expect(formatDayHeader("2026-09-27")).toBe("9월 27일 일요일");
     expect(formatDayHeader("2026-09-01")).toBe("9월 1일 화요일");
+  });
+
+  it("올해가 아니면 연도를 붙인다", () => {
+    expect(formatDayHeader("2025-12-31", 2026)).toBe("2025년 12월 31일 수요일");
+    expect(formatDayHeader("2026-09-27", 2026)).toBe("9월 27일 일요일");
+  });
+
+  it("날짜 선택 버튼 표기", () => {
+    expect(formatFullDate("2026-09-27")).toBe("2026년 9월 27일 (일)");
+  });
+
+  it("n일 앞뒤로 (달·해를 넘어)", () => {
+    expect(addDays("2026-09-30", 1)).toBe("2026-10-01");
+    expect(addDays("2026-01-01", -1)).toBe("2025-12-31");
+    expect(addDays("2026-09-27", 7)).toBe("2026-10-04");
   });
 
   it("연월", () => {
