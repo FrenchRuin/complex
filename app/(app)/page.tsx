@@ -9,7 +9,6 @@ import { TransactionList } from "@/components/transactions/TransactionList";
 import { compareWithLastMonth, matchesPerson, splitByOwner } from "@/lib/calc/dashboard";
 import { parseFilters, type PersonFilter } from "@/lib/calc/filters";
 import { groupByDay, sumTotals } from "@/lib/calc/group";
-import { summarize } from "@/lib/calc/recurring";
 import { currentMonthKST, monthRange, samePeriodLastMonth, todayKST } from "@/lib/date";
 import { getHouseholdMembers, requireMember, toMemberNames } from "@/lib/household";
 import { getRecurringOverview } from "@/lib/recurring";
@@ -75,7 +74,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
           <div className="flex flex-col gap-4">
             <SettingsSection title="이번 달 정기지출">
               <RecurringChecklist
-                overview={{ rows: recurringRows, summary: summarize(recurringRows) }}
+                overview={{ rows: recurringRows }}
                 names={names}
                 paymentMethodNames={labels.paymentMethods}
               />

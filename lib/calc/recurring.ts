@@ -54,6 +54,18 @@ export function statusLabel(status: RecurringStatus): string {
   }
 }
 
+/**
+ * 납부 여부를 바꾼 행 (화면에 먼저 보여주는 낙관적 업데이트용).
+ * 금액이 null이면 미납으로 되돌리고 상태를 다시 계산한다.
+ */
+export function withPaidAmount<T extends { due: DateString; status: RecurringStatus; paidAmount: number | null }>(
+  row: T,
+  paidAmount: number | null,
+  today: DateString,
+): T {
+  return { ...row, paidAmount, status: recurringStatus(row.due, today, paidAmount !== null) };
+}
+
 /** 미납 배지: 결제일이 오늘이거나 지난 미납 항목 수 */
 export function dueUnpaidCount(statuses: readonly RecurringStatus[]): number {
   return statuses.filter((s) => s.kind === "today" || s.kind === "overdue").length;

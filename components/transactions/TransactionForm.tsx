@@ -94,10 +94,11 @@ export function TransactionForm({ record, data, onDone }: Props) {
 
   function remove() {
     if (!record) return;
+    // 패널은 바로 닫고, 삭제는 뒤에서 한다 (실패하면 알림으로 알려준다)
+    onDone();
     startTransition(async () => {
       const result = await deleteTransaction(record.id);
-      if (result.error) return setError(result.error);
-      onDone();
+      if (result.error) return toast(result.error);
       toast("삭제했어요", {
         durationMs: 5000,
         action: {

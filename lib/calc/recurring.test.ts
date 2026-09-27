@@ -7,6 +7,7 @@ import {
   statusLabel,
   summarize,
   summaryText,
+  withPaidAmount,
 } from "./recurring";
 
 describe("dueDate", () => {
@@ -51,6 +52,23 @@ describe("recurringStatus / statusLabel", () => {
 
   it("달이 바뀌어도 날짜 차이를 정확히 센다", () => {
     expect(recurringStatus("2026-10-01", "2026-09-30", false)).toEqual({ kind: "upcoming", days: 1 });
+  });
+});
+
+describe("withPaidAmount", () => {
+  const row = { due: "2026-09-25", status: { kind: "overdue", days: 2 } as const, paidAmount: null };
+
+  it("체크하면 납부 완료", () => {
+    expect(withPaidAmount(row, 180000, "2026-09-27")).toEqual({
+      due: "2026-09-25",
+      status: { kind: "paid" },
+      paidAmount: 180000,
+    });
+  });
+
+  it("해제하면 상태를 다시 계산한다", () => {
+    const paid = withPaidAmount(row, 180000, "2026-09-27");
+    expect(withPaidAmount(paid, null, "2026-09-27").status).toEqual({ kind: "overdue", days: 2 });
   });
 });
 
