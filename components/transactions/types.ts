@@ -11,4 +11,6 @@ export type PanelData = {
   members: HouseholdMember[];
   names: MemberNames;
   mySlot: Slot;
+  /** 가맹점 규칙 (카테고리 자동 추천) */
+  rules: Record<string, string>;
 };

@@ -8,6 +8,7 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["lib/**/*.test.ts"],
+    // fixtures/sms/*.txt 는 테스트에서 직접 읽는다
     env: { TZ: "UTC" },
   },
 });

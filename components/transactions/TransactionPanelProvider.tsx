@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { normalizeMerchant } from "@/lib/calc/merchant";
 import { TransactionPanel } from "./TransactionPanel";
 import type { PanelData, TransactionRecord } from "./types";
 
@@ -31,6 +32,13 @@ export function TransactionPanelProvider({ data, children }: { data: PanelData; 
   const [state, setState] = useState<PanelState>({ mode: "closed" });
   // 같은 모드로 다시 열 때도 폼을 새로 만들기 위한 번호
   const [openCount, setOpenCount] = useState(0);
+  // 방금 저장한 가맹점 규칙. 서버 새로고침을 기다리지 않고 다음 입력부터 바로 쓴다 (F-16)
+  const [learned, setLearned] = useState<Record<string, string>>({});
+  const panelData = useMemo(() => ({ ...data, rules: { ...data.rules, ...learned } }), [data, learned]);
+  const learn = useCallback((merchant: string, categoryId: string) => {
+    const key = normalizeMerchant(merchant);
+    if (key) setLearned((current) => ({ ...current, [key]: categoryId }));
+  }, []);
 
   const openNew = useCallback(() => {
     setOpenCount((n) => n + 1);
@@ -59,7 +67,7 @@ export function TransactionPanelProvider({ data, children }: { data: PanelData; 
   return (
     <PanelContext.Provider value={api}>
       {children}
-      <TransactionPanel key={openCount} state={state} data={data} onClose={close} />
+      <TransactionPanel key={openCount} state={state} data={panelData} onClose={close} onLearn={learn} />
     </PanelContext.Provider>
   );
 }

@@ -5,7 +5,11 @@ import { RealtimeProvider } from "@/components/realtime/RealtimeProvider";
 import { TransactionPanelProvider } from "@/components/transactions/TransactionPanelProvider";
 import { ToastProvider } from "@/components/ui/Toast";
 import { getHouseholdMembers, requireMember, toMemberNames } from "@/lib/household";
-import { getVisibleCategories, getVisiblePaymentMethods } from "@/lib/household-data";
+import {
+  getMerchantRules,
+  getVisibleCategories,
+  getVisiblePaymentMethods,
+} from "@/lib/household-data";
 import { getRecurringOverview } from "@/lib/recurring";
 
 /**
@@ -14,11 +18,12 @@ import { getRecurringOverview } from "@/lib/recurring";
  */
 export default async function AppLayout({ children }: LayoutProps<"/">) {
   const me = await requireMember();
-  const [members, categories, paymentMethods, recurring] = await Promise.all([
+  const [members, categories, paymentMethods, recurring, rules] = await Promise.all([
     getHouseholdMembers(),
     getVisibleCategories(),
     getVisiblePaymentMethods(),
     getRecurringOverview(),
+    getMerchantRules(),
   ]);
   const names = toMemberNames(members);
   const meMember = { id: me.id, slot: me.slot, displayName: me.displayName };
@@ -27,7 +32,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
     <ToastProvider>
       <RealtimeProvider householdId={me.householdId}>
         <TransactionPanelProvider
-          data={{ categories, paymentMethods, members, names, mySlot: me.slot }}
+          data={{ categories, paymentMethods, members, names, mySlot: me.slot, rules }}
         >
           <div className="lg:flex lg:h-dvh">
             <Sidebar
