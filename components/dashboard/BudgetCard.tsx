@@ -18,7 +18,7 @@ export function BudgetCard({ summary, top, categoryNames }: Props) {
         <h2 className="text-heading text-ink">변동지출 예산</h2>
         <p className="mt-1 text-body text-ink-muted">
           아직 예산이 없어요.{" "}
-          <Link href="/settings#budget" className="font-semibold text-primary underline-offset-4 hover:underline">
+          <Link href="/settings/budget" className="font-semibold text-primary underline-offset-4 hover:underline">
             설정에서 카테고리별 예산을 정해 보세요
           </Link>
         </p>

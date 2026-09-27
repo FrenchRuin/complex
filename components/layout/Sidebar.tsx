@@ -119,7 +119,7 @@ export function Sidebar({ me, members, names, paymentMethods, recurringDue }: Pr
             함께 보는 계좌·카드
           </h2>
           <Link
-            href="/settings"
+            href="/settings/payment-methods"
             aria-label="계좌·카드 추가"
             className="inline-flex size-7 items-center justify-center rounded-sm text-ink-muted hover:bg-surface-sunken"
           >
