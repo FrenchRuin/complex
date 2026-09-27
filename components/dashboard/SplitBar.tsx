@@ -17,7 +17,7 @@ export function SplitBar({ split, names }: { split: Split; names: MemberNames })
   return (
     <div>
       <div
-        className="flex h-2 overflow-hidden rounded-full bg-surface-sunken"
+        className={`flex h-2 gap-[2px] overflow-hidden rounded-full ${total > 0 ? "" : "bg-surface-sunken"}`}
         role="img"
         aria-label={OWNERS.map((o) => `${ownerLabel(o, names)} ${percents[o]}%`).join(", ")}
       >

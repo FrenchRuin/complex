@@ -14,6 +14,77 @@ export type Database = {
   }
   public: {
     Tables: {
+      budget_months: {
+        Row: {
+          created_at: string
+          household_id: string
+          month: string
+        }
+        Insert: {
+          created_at?: string
+          household_id: string
+          month: string
+        }
+        Update: {
+          created_at?: string
+          household_id?: string
+          month?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_months_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      budgets: {
+        Row: {
+          amount: number
+          category_id: string
+          created_at: string
+          household_id: string
+          id: string
+          month: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          category_id: string
+          created_at?: string
+          household_id: string
+          id?: string
+          month: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category_id?: string
+          created_at?: string
+          household_id?: string
+          id?: string
+          month?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budgets_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budgets_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           created_at: string
@@ -315,6 +386,66 @@ export type Database = {
           },
         ]
       }
+      settlements: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string
+          from_slot: string | null
+          household_id: string
+          id: string
+          memo: string | null
+          paid_a: number
+          paid_b: number
+          period_end: string
+          share_a: number
+          to_slot: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by: string
+          from_slot?: string | null
+          household_id: string
+          id?: string
+          memo?: string | null
+          paid_a: number
+          paid_b: number
+          period_end: string
+          share_a: number
+          to_slot?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string
+          from_slot?: string | null
+          household_id?: string
+          id?: string
+          memo?: string | null
+          paid_a?: number
+          paid_b?: number
+          period_end?: string
+          share_a?: number
+          to_slot?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "settlements_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "settlements_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transactions: {
         Row: {
           amount: number
@@ -442,6 +573,7 @@ export type Database = {
       }
       create_household: { Args: { p_display_name: string }; Returns: string }
       create_invite: { Args: never; Returns: string }
+      ensure_month_budgets: { Args: { p_month: string }; Returns: undefined }
       get_invite: {
         Args: { p_token: string }
         Returns: {
@@ -460,6 +592,10 @@ export type Database = {
       }
       my_household_id: { Args: never; Returns: string }
       normalize_merchant: { Args: { p: string }; Returns: string }
+      record_settlement: {
+        Args: { p_memo?: string; p_period_end: string }
+        Returns: string
+      }
       uncheck_recurring: {
         Args: { p_item_id: string; p_month: string }
         Returns: undefined

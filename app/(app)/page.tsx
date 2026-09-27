@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { ActivityLine } from "@/components/dashboard/ActivityLine";
+import { BudgetCard } from "@/components/dashboard/BudgetCard";
+import { getMonthBudgets } from "@/lib/budget";
+import { budgetSummary, categoryBudgetRows, spentByCategory } from "@/lib/calc/budget";
 import { MonthSummary } from "@/components/dashboard/MonthSummary";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { RecurringChecklist } from "@/components/recurring/RecurringChecklist";
@@ -30,14 +33,16 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
   const members = await getHouseholdMembers();
   const partner = members.find((m) => m.id !== me.id) ?? null;
 
-  const [thisMonthRows, lastPeriodRows, recent, recurring, labels, activity] = await Promise.all([
+  const [thisMonthRows, lastPeriodRows, recent, recurring, labels, activity, budgets] = await Promise.all([
     getTransactionsInRange(monthRange(month)),
     getTransactionsInRange(samePeriodLastMonth(today)),
     getRecentTransactions(who, 6),
     getRecurringOverview(),
     getLabelMaps(),
     partner ? getLatestActivityBy(partner.id) : Promise.resolve(null),
+    getMonthBudgets(month),
   ]);
+  const budgetRows = who === "all" ? categoryBudgetRows(budgets, spentByCategory(thisMonthRows)) : null;
 
   const names = toMemberNames(members);
   const mine = thisMonthRows.filter((r) => matchesPerson(r, who));
@@ -63,13 +68,23 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
         )}
 
         <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
-          <MonthSummary
-            monthLabel={`${Number(month.slice(5, 7))}월`}
-            totals={totals}
-            compareText={compareWithLastMonth(totals.expense, lastExpense)}
-            split={who === "all" ? splitByOwner(thisMonthRows) : null}
-            names={names}
-          />
+          <div className="flex flex-col gap-4">
+            <MonthSummary
+              monthLabel={`${Number(month.slice(5, 7))}월`}
+              totals={totals}
+              compareText={compareWithLastMonth(totals.expense, lastExpense)}
+              split={who === "all" ? splitByOwner(thisMonthRows) : null}
+              names={names}
+            />
+            {/* 예산은 가구 전체 기준이라 "전체"일 때만 보여준다 */}
+            {budgetRows ? (
+              <BudgetCard
+                summary={budgetSummary(budgetRows, month, today)}
+                top={budgetRows.slice(0, 5)}
+                categoryNames={labels.categories}
+              />
+            ) : null}
+          </div>
 
           <div className="flex flex-col gap-4">
             <SettingsSection title="이번 달 정기지출">
