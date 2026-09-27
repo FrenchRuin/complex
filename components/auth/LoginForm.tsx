@@ -5,9 +5,9 @@ import { login, type LoginState } from "@/app/(auth)/login/actions";
 import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/TextField";
 
-type Props = { initialError: string | null };
+type Props = { initialError: string | null; next: string | null };
 
-export function LoginForm({ initialError }: Props) {
+export function LoginForm({ initialError, next }: Props) {
   const [state, formAction, pending] = useActionState<LoginState, FormData>(login, {
     error: initialError,
     email: "",
@@ -15,6 +15,7 @@ export function LoginForm({ initialError }: Props) {
 
   return (
     <form action={formAction} className="flex flex-col gap-4" noValidate>
+      {next ? <input type="hidden" name="next" value={next} /> : null}
       <TextField
         label="이메일"
         name="email"
