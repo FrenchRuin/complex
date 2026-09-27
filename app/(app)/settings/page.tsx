@@ -1,4 +1,15 @@
-import { ChevronRight, CreditCard, Gauge, LogOut, Tags, User, Users, Wallet, type LucideIcon } from "lucide-react";
+import {
+  ChevronRight,
+  CreditCard,
+  Gauge,
+  LogOut,
+  Smartphone,
+  Tags,
+  User,
+  Users,
+  Wallet,
+  type LucideIcon,
+} from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -57,6 +68,7 @@ export default async function SettingsPage() {
       icon: Wallet,
       summary: budgets.length ? `이번 달 ${budgets.length}개 · ${formatWon(budgetTotal)}` : "아직 없어요",
     },
+    { href: "/settings/app", label: "앱으로 설치", icon: Smartphone, summary: "홈 화면에 추가" },
     {
       href: "/settings/usage",
       label: "서비스 사용량",

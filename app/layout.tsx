@@ -5,6 +5,10 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "우리 둘 가계부",
   description: "둘이 함께 쓰는 가계부",
+  applicationName: "우리 둘 가계부",
+  // 아이폰 홈 화면에 추가했을 때 주소창 없이 열기
+  appleWebApp: { capable: true, title: "우리 가계부", statusBarStyle: "default" },
+  formatDetection: { telephone: false },
 };
 
 export const viewport: Viewport = {
