@@ -131,19 +131,16 @@ export type Database = {
           created_at: string
           id: string
           name: string
-          settlement_share_a: number
         }
         Insert: {
           created_at?: string
           id?: string
           name?: string
-          settlement_share_a?: number
         }
         Update: {
           created_at?: string
           id?: string
           name?: string
-          settlement_share_a?: number
         }
         Relationships: []
       }
@@ -386,66 +383,6 @@ export type Database = {
           },
         ]
       }
-      settlements: {
-        Row: {
-          amount: number
-          created_at: string
-          created_by: string
-          from_slot: string | null
-          household_id: string
-          id: string
-          memo: string | null
-          paid_a: number
-          paid_b: number
-          period_end: string
-          share_a: number
-          to_slot: string | null
-        }
-        Insert: {
-          amount: number
-          created_at?: string
-          created_by: string
-          from_slot?: string | null
-          household_id: string
-          id?: string
-          memo?: string | null
-          paid_a: number
-          paid_b: number
-          period_end: string
-          share_a: number
-          to_slot?: string | null
-        }
-        Update: {
-          amount?: number
-          created_at?: string
-          created_by?: string
-          from_slot?: string | null
-          household_id?: string
-          id?: string
-          memo?: string | null
-          paid_a?: number
-          paid_b?: number
-          period_end?: string
-          share_a?: number
-          to_slot?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "settlements_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "members"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "settlements_household_id_fkey"
-            columns: ["household_id"]
-            isOneToOne: false
-            referencedRelation: "households"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       transactions: {
         Row: {
           amount: number
@@ -592,10 +529,6 @@ export type Database = {
       }
       my_household_id: { Args: never; Returns: string }
       normalize_merchant: { Args: { p: string }; Returns: string }
-      record_settlement: {
-        Args: { p_memo?: string; p_period_end: string }
-        Returns: string
-      }
       uncheck_recurring: {
         Args: { p_item_id: string; p_month: string }
         Returns: undefined
