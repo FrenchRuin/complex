@@ -3,7 +3,14 @@ import { toOwner, toPaymentKind, type CategoryType, type Owner, type PaymentKind
 import { createClient } from "./supabase/server";
 
 export type CategoryOption = { id: string; type: CategoryType; name: string; icon: string };
-export type PaymentMethodOption = { id: string; name: string; kind: PaymentKind; owner: Owner };
+export type PaymentMethodOption = {
+  id: string;
+  name: string;
+  kind: PaymentKind;
+  owner: Owner;
+  /** 문자 인식용 별칭 (F-15) */
+  smsAliases: string[];
+};
 
 /** 숨기지 않은 카테고리 (종류별 순서대로). 내역 입력·필터에 쓴다. */
 export const getVisibleCategories = cache(async (): Promise<CategoryOption[]> => {
@@ -31,9 +38,15 @@ export const getVisiblePaymentMethods = cache(async (): Promise<PaymentMethodOpt
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("payment_methods")
-    .select("id, name, kind, owner")
+    .select("id, name, kind, owner, sms_aliases")
     .eq("is_hidden", false)
     .order("sort_order");
   if (error) throw new Error(`결제수단을 불러오지 못했어요: ${error.message}`);
-  return data.map((m) => ({ ...m, kind: toPaymentKind(m.kind), owner: toOwner(m.owner) }));
+  return data.map((m) => ({
+    id: m.id,
+    name: m.name,
+    kind: toPaymentKind(m.kind),
+    owner: toOwner(m.owner),
+    smsAliases: m.sms_aliases,
+  }));
 });

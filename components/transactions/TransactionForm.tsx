@@ -6,7 +6,6 @@ import {
   restoreTransaction,
   saveTransaction,
 } from "@/app/(app)/transactions/actions";
-import { Button } from "@/components/ui/Button";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { TextField } from "@/components/ui/TextField";
 import { useToast } from "@/components/ui/Toast";
@@ -18,14 +17,19 @@ import { AmountInput } from "./AmountInput";
 import { AssignmentFields } from "./AssignmentFields";
 import { CategoryGrid } from "./CategoryGrid";
 import { PaymentMethodSelect } from "./PaymentMethodSelect";
-import { AuthorLine, DeleteButton } from "./TransactionMeta";
+import { AuthorLine, FormFooter } from "./TransactionMeta";
 import type { PanelData, TransactionRecord } from "./types";
 
 const TYPE_OPTIONS = CATEGORY_TYPES.map((value) => ({ value, label: CATEGORY_TYPE_LABEL[value] }));
 
-type Props = { record: TransactionRecord | null; data: PanelData; onDone: () => void };
+type Props = {
+  record: TransactionRecord | null;
+  data: PanelData;
+  onDone: () => void;
+  onLearn: (merchant: string, categoryId: string) => void;
+};
 
-export function TransactionForm({ record, data, onDone }: Props) {
+export function TransactionForm({ record, data, onDone, onLearn }: Props) {
   const toast = useToast();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -94,7 +98,7 @@ export function TransactionForm({ record, data, onDone }: Props) {
         memberSlot,
       });
       if (result.error) return setError(result.error);
-
+      if (categoryId) onLearn(merchant, categoryId);
       toast("저장했어요");
       if (keepOpen && !record) {
         setAmount(null);
@@ -184,28 +188,13 @@ export function TransactionForm({ record, data, onDone }: Props) {
         {record ? <AuthorLine record={record} members={data.members} /> : null}
       </div>
 
-      <div className="flex flex-col gap-3 border-t border-line px-5 pt-3 pb-[calc(16px+env(safe-area-inset-bottom,0px))]">
-        <p role="alert" className="min-h-[18px] text-caption text-danger">
-          {error}
-        </p>
-        {record ? null : (
-          <label className="flex items-center gap-2 text-body text-ink">
-            <input
-              type="checkbox"
-              checked={keepOpen}
-              onChange={(e) => setKeepOpen(e.target.checked)}
-              className="size-5 accent-[var(--primary)]"
-            />
-            계속 추가
-          </label>
-        )}
-        <div className="flex gap-2">
-          {record ? <DeleteButton disabled={pending} onDelete={remove} /> : null}
-          <Button type="submit" disabled={pending} className="flex-1">
-            {pending ? "저장하는 중" : "저장"}
-          </Button>
-        </div>
-      </div>
+      <FormFooter
+        error={error}
+        pending={pending}
+        keepOpen={record ? null : keepOpen}
+        onKeepOpenChange={setKeepOpen}
+        onDelete={record ? remove : null}
+      />
     </form>
   );
 }
