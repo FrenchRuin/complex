@@ -48,10 +48,24 @@ export function formatMonthDayKST(timestamp: string | Date): string {
 const WEEKDAYS = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
 
 /** "2026-09-27" → "9월 27일 일요일" (날짜만 다루므로 시간대와 무관) */
-export function formatDayHeader(date: DateString): string {
+export function formatDayHeader(date: DateString, currentYear?: number): string {
   const { year, month, day } = parseDate(date);
   const weekday = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
-  return `${month}월 ${day}일 ${WEEKDAYS[weekday]}`;
+  const yearText = currentYear !== undefined && year !== currentYear ? `${year}년 ` : "";
+  return `${yearText}${month}월 ${day}일 ${WEEKDAYS[weekday]}`;
+}
+
+/** "2026-09-27" → "2026년 9월 27일 (일)" (날짜 선택 버튼용) */
+export function formatFullDate(date: DateString): string {
+  const { year, month, day } = parseDate(date);
+  const weekday = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+  return `${year}년 ${month}월 ${day}일 (${WEEKDAYS[weekday].slice(0, 1)})`;
+}
+
+/** 날짜를 n일 앞뒤로 */
+export function addDays(date: DateString, days: number): DateString {
+  const { year, month, day } = parseDate(date);
+  return new Date(Date.UTC(year, month - 1, day + days)).toISOString().slice(0, 10);
 }
 
 /** "2026-09" → "2026년 9월" */

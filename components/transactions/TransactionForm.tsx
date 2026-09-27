@@ -6,6 +6,7 @@ import {
   restoreTransaction,
   saveTransaction,
 } from "@/app/(app)/transactions/actions";
+import { DatePicker } from "@/components/ui/DatePicker";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { TextField } from "@/components/ui/TextField";
 import { useToast } from "@/components/ui/Toast";
@@ -152,13 +153,7 @@ export function TransactionForm({ record, data, onDone, onLearn }: Props) {
       <div className="flex flex-1 flex-col gap-5 overflow-y-auto px-5 pt-2 pb-4">
         <SegmentedControl legend="유형" options={TYPE_OPTIONS} value={type} onChange={changeType} />
         <AmountInput ref={amountRef} value={amount} onChange={setAmount} />
-        <TextField
-          label="날짜"
-          type="date"
-          value={occurredOn}
-          onChange={(e) => setOccurredOn(e.target.value)}
-          required
-        />
+        <DatePicker label="날짜" value={occurredOn} onChange={setOccurredOn} />
         <TextField
           label="가맹점·내용 (선택)"
           value={merchant}

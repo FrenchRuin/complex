@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { activeFilterCount, filtersToHref, parseFilters, sanitizeSearch } from "./filters";
+import { activeFilterCount, filtersToHref, isSearchAll, parseFilters, sanitizeSearch } from "./filters";
 
 const ID1 = "7b6c0a1e-4a4f-4b8e-9d7a-2f1d3c5b6a70";
 const ID2 = "1f2e3d4c-5b6a-4978-8a6b-5c4d3e2f1a0b";
@@ -13,8 +13,30 @@ describe("parseFilters", () => {
       categories: [],
       paymentMethods: [],
       q: "",
+      amount: null,
+      thisMonthOnly: false,
+      limit: 100,
       day: null,
     });
+  });
+
+  it("검색어가 있으면 전체 기간, period=month면 이번 달만", () => {
+    expect(isSearchAll(parseFilters({ q: "스타벅스" }, "2026-09"))).toBe(true);
+    expect(isSearchAll(parseFilters({ q: "스타벅스", period: "month" }, "2026-09"))).toBe(false);
+    expect(isSearchAll(parseFilters({}, "2026-09"))).toBe(false);
+  });
+
+  it("숫자로만 된 검색어는 금액으로도 찾는다", () => {
+    expect(parseFilters({ q: "12,000" }, "2026-09")).toMatchObject({ q: "12000", amount: 12000 });
+    expect(parseFilters({ q: "12000원" }, "2026-09")).toMatchObject({ amount: 12000 });
+    expect(parseFilters({ q: "GS25" }, "2026-09")).toMatchObject({ q: "GS25", amount: null });
+    expect(parseFilters({ q: "0" }, "2026-09").amount).toBeNull();
+  });
+
+  it("더 보기 개수는 100 단위, 최대 2000", () => {
+    expect(parseFilters({ q: "a", limit: "200" }, "2026-09").limit).toBe(200);
+    expect(parseFilters({ q: "a", limit: "99999" }, "2026-09").limit).toBe(2000);
+    expect(parseFilters({ q: "a", limit: "abc" }, "2026-09").limit).toBe(100);
   });
 
   it("잘못된 값은 기본값으로", () => {
@@ -50,6 +72,14 @@ describe("filtersToHref", () => {
     expect(filtersToHref(base, "2026-09", { who: "a", month: "2026-08" })).toBe(
       "/transactions?month=2026-08&who=a",
     );
+  });
+
+  it("검색 옵션(이번 달만, 더 보기)도 주소에 남는다", () => {
+    const f = parseFilters({ q: "커피" }, "2026-09");
+    expect(filtersToHref(f, "2026-09", { thisMonthOnly: true })).toBe(
+      "/transactions?q=%EC%BB%A4%ED%94%BC&period=month",
+    );
+    expect(filtersToHref(f, "2026-09", { limit: 200 })).toBe("/transactions?q=%EC%BB%A4%ED%94%BC&limit=200");
   });
 
   it("주소 → 필터 → 주소가 같다", () => {

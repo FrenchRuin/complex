@@ -1,43 +1,53 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { FilterBar } from "@/components/transactions/FilterBar";
-import { MonthCalendar } from "@/components/transactions/MonthCalendar";
 import { MonthLink } from "@/components/transactions/MonthLinks";
+import { MonthPicker } from "@/components/transactions/MonthPicker";
+import { MonthView } from "@/components/transactions/MonthView";
 import { PersonFilterLinks } from "@/components/transactions/PersonFilterLinks";
-import { TransactionList } from "@/components/transactions/TransactionList";
-import { activeFilterCount, filtersToHref, parseFilters } from "@/lib/calc/filters";
-import { dailyTotals, groupByDay } from "@/lib/calc/group";
-import { currentMonthKST, formatMonthLabel, todayKST } from "@/lib/date";
+import { SearchResults } from "@/components/transactions/SearchResults";
+import { filtersToHref, isSearchAll, parseFilters } from "@/lib/calc/filters";
+import { currentMonthKST } from "@/lib/date";
 import { getHouseholdMembers, requireMember, toMemberNames } from "@/lib/household";
 import { getVisibleCategories, getVisiblePaymentMethods } from "@/lib/household-data";
-import { getLabelMaps, getMonthTransactions } from "@/lib/transactions";
+import { getLabelMaps, getMonthTransactions, searchAllTransactions } from "@/lib/transactions";
 
 export const metadata: Metadata = { title: "내역 · 우리 둘 가계부" };
 
-/** 내역 화면: 월 이동, 사람 필터, 검색·필터, 캘린더 + 날짜별 목록 (F-12, F-13) */
+/**
+ * 내역 화면: 월 이동, 사람 필터, 검색·필터, 캘린더 + 날짜별 목록 (F-12, F-13).
+ * 검색어가 있으면 전체 기간에서 찾는다 ("이번 달만 보기"로 좁힐 수 있음).
+ */
 export default async function TransactionsPage({ searchParams }: PageProps<"/transactions">) {
   await requireMember();
   const currentMonth = currentMonthKST();
   const filters = parseFilters(await searchParams, currentMonth);
+  const searchAll = isSearchAll(filters);
 
   const [rows, labels, members, categories, paymentMethods] = await Promise.all([
-    getMonthTransactions(filters),
+    searchAll ? searchAllTransactions(filters) : getMonthTransactions(filters),
     getLabelMaps(),
     getHouseholdMembers(),
     getVisibleCategories(),
     getVisiblePaymentMethods(),
   ]);
-
   const names = toMemberNames(members);
-  const visibleRows = filters.day ? rows.filter((r) => r.occurredOn === filters.day) : rows;
-  const filtered = activeFilterCount(filters) > 0 || filters.who !== "all" || filters.q !== "";
+
+  // 월 이동·연월 선택용: 이번 달 기준으로 만든 주소에서 쿼리만 떼어 쓴다
+  const monthQuery = (month: string) => filtersToHref(filters, currentMonth, { month, day: null }).split("?")[1] ?? "";
 
   return (
     <>
       <PageHeader
-        title={formatMonthLabel(filters.month)}
-        titleStart={<MonthLink filters={filters} currentMonth={currentMonth} direction="prev" />}
-        titleEnd={<MonthLink filters={filters} currentMonth={currentMonth} direction="next" />}
+        title={
+          searchAll ? (
+            "전체 기간 검색"
+          ) : (
+            <MonthPicker month={filters.month} currentMonth={currentMonth} path="/transactions" query={monthQuery(currentMonth)} />
+          )
+        }
+        titleStart={searchAll ? null : <MonthLink filters={filters} currentMonth={currentMonth} direction="prev" />}
+        titleEnd={searchAll ? null : <MonthLink filters={filters} currentMonth={currentMonth} direction="next" />}
       >
         <PersonFilterLinks
           current={filters.who}
@@ -47,32 +57,12 @@ export default async function TransactionsPage({ searchParams }: PageProps<"/tra
       </PageHeader>
 
       <div className="flex flex-col gap-4 px-5 py-4 lg:px-8">
-        <FilterBar
-          filters={filters}
-          currentMonth={currentMonth}
-          categories={categories}
-          paymentMethods={paymentMethods}
-        />
-        <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(300px,360px)_1fr] lg:items-start lg:gap-6">
-          <MonthCalendar
-            filters={filters}
-            currentMonth={currentMonth}
-            today={todayKST()}
-            totals={dailyTotals(rows)}
-          />
-          <TransactionList
-            groups={groupByDay(visibleRows)}
-            labels={labels}
-            names={names}
-            emptyMessage={
-              filters.day
-                ? "이 날은 내역이 없어요."
-                : filtered
-                  ? "조건에 맞는 내역이 없어요. 필터를 바꿔 보세요."
-                  : "이번 달 내역이 없어요. 내역 추가 버튼으로 시작해 보세요."
-            }
-          />
-        </div>
+        <FilterBar filters={filters} currentMonth={currentMonth} categories={categories} paymentMethods={paymentMethods} />
+        {searchAll ? (
+          <SearchResults filters={filters} currentMonth={currentMonth} rows={rows} labels={labels} names={names} />
+        ) : (
+          <MonthView filters={filters} currentMonth={currentMonth} rows={rows} labels={labels} names={names} />
+        )}
       </div>
     </>
   );

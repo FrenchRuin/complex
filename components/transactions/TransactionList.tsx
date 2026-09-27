@@ -15,10 +15,12 @@ type Props = {
   labels: LabelMaps;
   names: MemberNames;
   emptyMessage: string;
+  /** 주면 올해가 아닌 날짜에 연도를 붙인다 (전체 기간 검색) */
+  currentYear?: number;
 };
 
 /** 날짜별로 묶은 내역 목록 (F-12). 행을 누르면 편집 패널이 열린다 (F-11) */
-export function TransactionList({ groups, labels, names, emptyMessage }: Props) {
+export function TransactionList({ groups, labels, names, emptyMessage, currentYear }: Props) {
   const { openEdit } = useTransactionPanel();
 
   if (groups.length === 0) {
@@ -32,9 +34,9 @@ export function TransactionList({ groups, labels, names, emptyMessage }: Props) 
   return (
     <div className="flex flex-col gap-4">
       {groups.map((group) => (
-        <section key={group.date} aria-label={formatDayHeader(group.date)} className="rounded-md bg-surface-raised">
+        <section key={group.date} aria-label={formatDayHeader(group.date, currentYear)} className="rounded-md bg-surface-raised">
           <header className="flex items-baseline justify-between gap-2 border-b border-line px-5 py-3">
-            <h2 className="text-caption font-semibold text-ink">{formatDayHeader(group.date)}</h2>
+            <h2 className="text-caption font-semibold text-ink">{formatDayHeader(group.date, currentYear)}</h2>
             <p className="text-caption text-ink-muted tabular-nums">
               {group.total.expense ? `지출 ${formatWon(group.total.expense)}` : null}
               {group.total.expense && group.total.income ? " · " : null}
