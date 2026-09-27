@@ -1,19 +1,26 @@
 "use client";
 
 import { Check } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useOptimistic, useState, useTransition } from "react";
 import { checkRecurring, uncheckRecurring } from "@/app/(app)/recurring/actions";
 import { PersonChip } from "@/components/ui/PersonChip";
 import { useToast } from "@/components/ui/Toast";
 import { ownerOfTransaction } from "@/lib/calc/assignment";
-import { statusLabel, summaryText, type RecurringStatus } from "@/lib/calc/recurring";
+import {
+  statusLabel,
+  summarize,
+  summaryText,
+  withPaidAmount,
+  type RecurringStatus,
+} from "@/lib/calc/recurring";
+import { todayKST } from "@/lib/date";
 import { ownerLabel, type MemberNames } from "@/lib/domain";
 import { formatWon } from "@/lib/money";
 import type { MonthlyRecurring, RecurringOverview } from "@/lib/recurring";
 import { AmountPrompt } from "./AmountPrompt";
 
 type Props = {
-  overview: Pick<RecurringOverview, "rows" | "summary">;
+  overview: Pick<RecurringOverview, "rows">;
   names: MemberNames;
   paymentMethodNames: Record<string, string>;
 };
@@ -25,36 +32,40 @@ const STATUS_STYLE: Record<RecurringStatus["kind"], string> = {
   upcoming: "text-ink-muted",
 };
 
-/** 이번 달 정기지출 체크리스트 (F-31). 홈과 정기지출 화면에서 쓴다. */
+type Change = { id: string; paidAmount: number | null };
+
+/**
+ * 이번 달 정기지출 체크리스트 (F-31). 홈과 정기지출 화면에서 쓴다.
+ * 누르는 즉시 화면에 먼저 반영하고(낙관적 업데이트), 저장이 실패하면 원래대로 돌아간다.
+ */
 export function RecurringChecklist({ overview, names, paymentMethodNames }: Props) {
   const toast = useToast();
-  const [pending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const [prompt, setPrompt] = useState<MonthlyRecurring | null>(null);
-  const [promptError, setPromptError] = useState<string | null>(null);
+  const [rows, applyChange] = useOptimistic(overview.rows, (current: MonthlyRecurring[], change: Change) =>
+    current.map((r) => (r.item.id === change.id ? withPaidAmount(r, change.paidAmount, todayKST()) : r)),
+  );
 
   function check(row: MonthlyRecurring, amount: number | null) {
+    setPrompt(null);
     startTransition(async () => {
+      applyChange({ id: row.item.id, paidAmount: amount ?? row.expectedAmount });
       const result = await checkRecurring(row.item.id, amount);
-      if (result.error) {
-        if (prompt) setPromptError(result.error);
-        else toast(result.error);
-        return;
-      }
-      setPrompt(null);
-      toast(`${row.item.name} 납부를 기록했어요`);
+      toast(result.error ?? `${row.item.name} 납부를 기록했어요`);
     });
   }
 
   function uncheck(row: MonthlyRecurring) {
     const paid = row.paidAmount;
     startTransition(async () => {
+      applyChange({ id: row.item.id, paidAmount: null });
       const result = await uncheckRecurring(row.item.id);
       if (result.error) return toast(result.error);
       toast(`${row.item.name} 체크를 풀었어요`, {
         durationMs: 5000,
         action: {
           label: "되돌리기",
-          onClick: () => void checkRecurring(row.item.id, row.item.isVariable ? paid : null),
+          onClick: () => check({ ...row, paidAmount: null }, row.item.isVariable ? paid : null),
         },
       });
     });
@@ -62,18 +73,15 @@ export function RecurringChecklist({ overview, names, paymentMethodNames }: Prop
 
   function onToggle(row: MonthlyRecurring) {
     if (row.paidAmount !== null) return uncheck(row);
-    if (row.item.isVariable) {
-      setPromptError(null);
-      return setPrompt(row);
-    }
+    if (row.item.isVariable) return setPrompt(row);
     check(row, null);
   }
 
   return (
     <div>
-      <p className="text-caption text-ink-muted tabular-nums">{summaryText(overview.summary)}</p>
+      <p className="text-caption text-ink-muted tabular-nums">{summaryText(summarize(rows))}</p>
       <ul className="mt-2">
-        {overview.rows.map((row) => {
+        {rows.map((row) => {
           const paid = row.paidAmount !== null;
           const owner = ownerOfTransaction(row.item.scope, row.item.memberSlot);
           const method = row.item.paymentMethodId ? paymentMethodNames[row.item.paymentMethodId] : null;
@@ -84,9 +92,8 @@ export function RecurringChecklist({ overview, names, paymentMethodNames }: Prop
                 role="checkbox"
                 aria-checked={paid}
                 aria-label={`${row.item.name} 납부 ${paid ? "완료" : "안 함"}`}
-                disabled={pending}
                 onClick={() => onToggle(row)}
-                className={`inline-flex size-8 shrink-0 items-center justify-center rounded-full border-2 disabled:opacity-60 ${
+                className={`inline-flex size-8 shrink-0 items-center justify-center rounded-full border-2 transition-colors duration-150 ${
                   paid ? "border-primary bg-primary text-on-primary" : "border-line-strong text-transparent"
                 }`}
               >
@@ -116,8 +123,8 @@ export function RecurringChecklist({ overview, names, paymentMethodNames }: Prop
         key={prompt?.item.id ?? "none"}
         name={prompt?.item.name ?? null}
         defaultAmount={prompt?.expectedAmount ?? 0}
-        pending={pending}
-        error={promptError}
+        pending={false}
+        error={null}
         onSubmit={(amount) => prompt && check(prompt, amount)}
         onClose={() => setPrompt(null)}
       />
