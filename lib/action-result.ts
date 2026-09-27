@@ -26,7 +26,8 @@ const RPC_ERROR_MESSAGES: Record<string, string> = {
   invalid_recurring_item: "정기지출을 찾을 수 없어요. 새로고침해 주세요",
   recurring_not_in_month: "이번 달에는 이 정기지출이 없어요. 새로고침해 주세요",
   already_paid: "이미 납부 체크했어요. 새로고침해 주세요",
-  invalid_amount: "금액을 입력해 주세요",};
+  invalid_amount: "금액을 입력해 주세요",
+  invalid_goal: "저축 목표를 찾을 수 없어요. 새로고침해 주세요",};
 
 const FALLBACK = "저장하지 못했어요. 잠시 후 다시 시도해 주세요";
 

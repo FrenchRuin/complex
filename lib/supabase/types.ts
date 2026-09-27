@@ -14,6 +14,56 @@ export type Database = {
   }
   public: {
     Tables: {
+      assets: {
+        Row: {
+          amount: number
+          created_at: string
+          deleted_at: string | null
+          household_id: string
+          id: string
+          is_liability: boolean
+          kind: string
+          memo: string | null
+          name: string
+          owner: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          deleted_at?: string | null
+          household_id: string
+          id?: string
+          is_liability?: boolean
+          kind: string
+          memo?: string | null
+          name: string
+          owner: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          deleted_at?: string | null
+          household_id?: string
+          id?: string
+          is_liability?: boolean
+          kind?: string
+          memo?: string | null
+          name?: string
+          owner?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assets_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       budget_months: {
         Row: {
           created_at: string
@@ -119,6 +169,114 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "categories_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_contributions: {
+        Row: {
+          amount: number
+          contributed_on: string
+          created_at: string
+          created_by: string
+          deleted_at: string | null
+          goal_id: string
+          household_id: string
+          id: string
+          member_slot: string
+          memo: string | null
+        }
+        Insert: {
+          amount: number
+          contributed_on: string
+          created_at?: string
+          created_by: string
+          deleted_at?: string | null
+          goal_id: string
+          household_id: string
+          id?: string
+          member_slot: string
+          memo?: string | null
+        }
+        Update: {
+          amount?: number
+          contributed_on?: string
+          created_at?: string
+          created_by?: string
+          deleted_at?: string | null
+          goal_id?: string
+          household_id?: string
+          id?: string
+          member_slot?: string
+          memo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_contributions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_contributions_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_contributions_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goals: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          done_at: string | null
+          due_date: string | null
+          household_id: string
+          id: string
+          is_done: boolean
+          name: string
+          target_amount: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          done_at?: string | null
+          due_date?: string | null
+          household_id: string
+          id?: string
+          is_done?: boolean
+          name: string
+          target_amount: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          done_at?: string | null
+          due_date?: string | null
+          household_id?: string
+          id?: string
+          is_done?: boolean
+          name?: string
+          target_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goals_household_id_fkey"
             columns: ["household_id"]
             isOneToOne: false
             referencedRelation: "households"
@@ -259,6 +417,41 @@ export type Database = {
           },
           {
             foreignKeyName: "merchant_rules_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      net_worth_snapshots: {
+        Row: {
+          created_at: string
+          household_id: string
+          id: string
+          month: string
+          total_assets: number
+          total_liabilities: number
+        }
+        Insert: {
+          created_at?: string
+          household_id: string
+          id?: string
+          month: string
+          total_assets: number
+          total_liabilities: number
+        }
+        Update: {
+          created_at?: string
+          household_id?: string
+          id?: string
+          month?: string
+          total_assets?: number
+          total_liabilities?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "net_worth_snapshots_household_id_fkey"
             columns: ["household_id"]
             isOneToOne: false
             referencedRelation: "households"
@@ -511,6 +704,10 @@ export type Database = {
       create_household: { Args: { p_display_name: string }; Returns: string }
       create_invite: { Args: never; Returns: string }
       ensure_month_budgets: { Args: { p_month: string }; Returns: undefined }
+      ensure_net_worth_snapshot: {
+        Args: { p_current_month: string }
+        Returns: undefined
+      }
       get_invite: {
         Args: { p_token: string }
         Returns: {
