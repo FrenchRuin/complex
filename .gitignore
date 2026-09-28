@@ -54,3 +54,6 @@ next-env.d.ts
 /e2e/.auth/
 /test-results/
 /playwright-report/
+
+# Claude Code 개인 설정
+.claude/settings.local.json
