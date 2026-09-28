@@ -3,7 +3,6 @@ import {
   CreditCard,
   Gauge,
   LogOut,
-  PiggyBank,
   Smartphone,
   SunMoon,
   Tags,
@@ -70,7 +69,6 @@ export default async function SettingsPage() {
       icon: Wallet,
       summary: budgets.length ? `이번 달 ${budgets.length}개 · ${formatWon(budgetTotal)}` : "아직 없어요",
     },
-    { href: "/assets", label: "자산·목표", icon: PiggyBank, summary: "순자산·저축 목표" },
     { href: "/settings/theme", label: "화면 모드", icon: SunMoon, summary: "시스템·라이트·다크" },
     { href: "/settings/app", label: "앱으로 설치", icon: Smartphone, summary: "홈 화면에 추가" },
     {
