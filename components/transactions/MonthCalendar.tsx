@@ -7,10 +7,25 @@ import { WEEKDAY_LABELS, calendarWeeks } from "@/lib/calc/calendar";
 import { filtersToHref, type TransactionFilters } from "@/lib/calc/filters";
 import type { DayTotal } from "@/lib/calc/group";
 import { formatDayHeader, type DateString, type MonthString } from "@/lib/date";
-import { formatWon, formatWonShort } from "@/lib/money";
+import { formatWon, formatWonShort, formatWonTiny } from "@/lib/money";
 
-/** 날짜 칸 금액. 웹(lg 이상)은 칸이 넓어서 "+807.8만"도 한 줄로 둔다 */
-const AMOUNT = "text-[11px] leading-4 lg:whitespace-nowrap xl:text-[12px]";
+/** 날짜 칸 금액. 항상 한 줄. 폰(640px 미만)은 칸이 좁아 더 짧은 표기(172만, 1.2억) */
+const AMOUNT = "block max-w-full whitespace-nowrap text-[11px] leading-4 xl:text-[12px]";
+
+function DayAmount({ amount, prefix = "", className }: { amount: number; prefix?: string; className: string }) {
+  return (
+    <span className={`${AMOUNT} ${className}`}>
+      <span className="sm:hidden">
+        {prefix}
+        {formatWonTiny(amount)}
+      </span>
+      <span className="hidden sm:inline">
+        {prefix}
+        {formatWonShort(amount)}
+      </span>
+    </span>
+  );
+}
 
 type Props = {
   filters: TransactionFilters;
@@ -52,7 +67,7 @@ export function MonthCalendar({ filters, currentMonth, today, totals }: Props) {
             <span key={label}>{label}</span>
           ))}
         </div>
-        <div className="grid grid-cols-7 gap-1">
+        <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
           {weeks.flat().map((date, index) => {
             if (!date) return <span key={`empty-${index}`} aria-hidden />;
             const total = totals[date];
@@ -73,7 +88,7 @@ export function MonthCalendar({ filters, currentMonth, today, totals }: Props) {
                 scroll={false}
                 aria-label={label}
                 aria-current={selected ? "date" : undefined}
-                className={`flex min-h-14 flex-col items-center rounded-sm xl:min-h-16 px-0.5 pt-1 pb-1 tabular-nums ${
+                className={`flex min-h-14 min-w-0 flex-col items-center rounded-sm px-0 pt-1 pb-1 tabular-nums sm:px-0.5 xl:min-h-16 ${
                   selected ? "bg-primary-soft" : "hover:bg-surface-sunken"
                 }`}
               >
@@ -82,16 +97,8 @@ export function MonthCalendar({ filters, currentMonth, today, totals }: Props) {
                 >
                   {Number(date.slice(8))}
                 </span>
-                {total?.expense ? (
-                  <span className={`${AMOUNT} text-expense`}>
-                    {formatWonShort(total.expense)}
-                  </span>
-                ) : null}
-                {total?.income ? (
-                  <span className={`${AMOUNT} text-primary`}>
-                    +{formatWonShort(total.income)}
-                  </span>
-                ) : null}
+                {total?.expense ? <DayAmount amount={total.expense} className="text-expense" /> : null}
+                {total?.income ? <DayAmount amount={total.income} prefix="+" className="text-primary" /> : null}
               </Link>
             );
           })}
