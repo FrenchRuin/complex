@@ -34,7 +34,7 @@ export function MonthView({ filters, currentMonth, rows, labels, names }: Props)
           </Link>
         </p>
       ) : null}
-      <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(300px,360px)_1fr] lg:items-start lg:gap-6">
+      <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(340px,400px)_1fr] xl:grid-cols-[460px_1fr] lg:items-start lg:gap-6">
         <MonthCalendar filters={filters} currentMonth={currentMonth} today={todayKST()} totals={dailyTotals(rows)} />
         <TransactionList
           groups={groupByDay(visibleRows)}
