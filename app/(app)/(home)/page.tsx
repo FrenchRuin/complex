@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { ActivityLine } from "@/components/dashboard/ActivityLine";
 import { AssetsCard } from "@/components/dashboard/AssetsCard";
 import { BudgetCard } from "@/components/dashboard/BudgetCard";
 import { getAssetsOverview } from "@/lib/assets";
@@ -19,7 +18,6 @@ import { getHouseholdMembers, requireMember, toMemberNames } from "@/lib/househo
 import { getRecurringOverview } from "@/lib/recurring";
 import {
   getLabelMaps,
-  getLatestActivityBy,
   getRecentTransactions,
   getTransactionsInRange,
 } from "@/lib/transactions";
@@ -35,13 +33,12 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
   const members = await getHouseholdMembers();
   const partner = members.find((m) => m.id !== me.id) ?? null;
 
-  const [thisMonthRows, lastPeriodRows, recent, recurring, labels, activity, budgets, assets] = await Promise.all([
+  const [thisMonthRows, lastPeriodRows, recent, recurring, labels, budgets, assets] = await Promise.all([
     getTransactionsInRange(monthRange(month)),
     getTransactionsInRange(samePeriodLastMonth(today)),
     getRecentTransactions(who, 6),
     getRecurringOverview(),
     getLabelMaps(),
-    partner ? getLatestActivityBy(partner.id) : Promise.resolve(null),
     getMonthBudgets(month),
     getAssetsOverview(),
   ]);
@@ -60,7 +57,6 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
       </PageHeader>
 
       <div className="flex flex-col gap-4 px-5 py-6 lg:px-8">
-        <ActivityLine activity={activity} partnerName={partner?.displayName ?? null} categoryNames={labels.categories} />
         {partner ? null : (
           <p className="rounded-md bg-primary-soft px-4 py-3 text-body text-ink">
             아직 혼자예요.{" "}
@@ -70,7 +66,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
           </p>
         )}
 
-        <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-start">
           <div className="flex flex-col gap-4">
             <MonthSummary
               monthLabel={`${Number(month.slice(5, 7))}월`}
