@@ -113,6 +113,7 @@ export const recurringInputSchema = z.object({
   scope: z.enum(SCOPES),
   memberSlot: z.enum(SLOTS),
   isVariable: z.boolean(),
+  hasVariableDate: z.boolean(),
 });
 
 export type RecurringInput = z.input<typeof recurringInputSchema>;

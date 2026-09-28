@@ -533,6 +533,7 @@ export type Database = {
           created_at: string
           day_of_month: number
           end_month: string | null
+          has_variable_date: boolean
           household_id: string
           id: string
           is_variable: boolean
@@ -549,6 +550,7 @@ export type Database = {
           created_at?: string
           day_of_month: number
           end_month?: string | null
+          has_variable_date?: boolean
           household_id: string
           id?: string
           is_variable?: boolean
@@ -565,6 +567,7 @@ export type Database = {
           created_at?: string
           day_of_month?: number
           end_month?: string | null
+          has_variable_date?: boolean
           household_id?: string
           id?: string
           is_variable?: boolean
@@ -721,7 +724,12 @@ export type Database = {
         Returns: string
       }
       check_recurring: {
-        Args: { p_amount?: number; p_item_id: string; p_month: string }
+        Args: {
+          p_amount?: number
+          p_item_id: string
+          p_month: string
+          p_occurred_on?: string
+        }
         Returns: string
       }
       create_household: { Args: { p_display_name: string }; Returns: string }

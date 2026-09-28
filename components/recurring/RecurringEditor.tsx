@@ -45,6 +45,7 @@ export function RecurringEditor({ open, item, data, onClose }: Props) {
   const [scope, setScope] = useState<Scope>(first.scope);
   const [memberSlot, setMemberSlot] = useState<Slot>(first.memberSlot);
   const [isVariable, setIsVariable] = useState(item?.isVariable ?? false);
+  const [hasVariableDate, setHasVariableDate] = useState(item?.hasVariableDate ?? false);
 
   function changePaymentMethod(id: string | null) {
     setPaymentMethodId(id);
@@ -68,6 +69,7 @@ export function RecurringEditor({ open, item, data, onClose }: Props) {
         scope,
         memberSlot,
         isVariable,
+        hasVariableDate,
       });
       if (result.error) return setError(result.error);
       toast("저장했어요");
@@ -97,6 +99,15 @@ export function RecurringEditor({ open, item, data, onClose }: Props) {
             className="size-5 accent-[var(--primary)]"
           />
           매달 금액이 달라요
+        </label>
+        <label className="flex items-center gap-2 text-body text-ink">
+          <input
+            type="checkbox"
+            checked={hasVariableDate}
+            onChange={(e) => setHasVariableDate(e.target.checked)}
+            className="size-5 accent-[var(--primary)]"
+          />
+          매달 결제일도 달라요
         </label>
         <TextField
           label="매월 결제일 (1~31, 없는 날은 말일)"

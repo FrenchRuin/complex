@@ -17,7 +17,7 @@ import { todayKST } from "@/lib/date";
 import { ownerLabel, type MemberNames } from "@/lib/domain";
 import { formatWon } from "@/lib/money";
 import type { MonthlyRecurring, RecurringOverview } from "@/lib/recurring";
-import { AmountPrompt } from "./AmountPrompt";
+import { PaymentPrompt } from "./PaymentPrompt";
 
 type Props = {
   overview: Pick<RecurringOverview, "rows">;
@@ -46,11 +46,11 @@ export function RecurringChecklist({ overview, names, paymentMethodNames }: Prop
     current.map((r) => (r.item.id === change.id ? withPaidAmount(r, change.paidAmount, todayKST()) : r)),
   );
 
-  function check(row: MonthlyRecurring, amount: number | null) {
+  function check(row: MonthlyRecurring, amount: number | null, occurredOn: string | null) {
     setPrompt(null);
     startTransition(async () => {
       applyChange({ id: row.item.id, paidAmount: amount ?? row.expectedAmount });
-      const result = await checkRecurring(row.item.id, amount);
+      const result = await checkRecurring(row.item.id, amount, occurredOn);
       toast(result.error ?? `${row.item.name} 납부를 기록했어요`);
     });
   }
@@ -65,7 +65,7 @@ export function RecurringChecklist({ overview, names, paymentMethodNames }: Prop
         durationMs: 5000,
         action: {
           label: "되돌리기",
-          onClick: () => check({ ...row, paidAmount: null }, row.item.isVariable ? paid : null),
+          onClick: () => check({ ...row, paidAmount: null }, row.item.isVariable ? paid : null, null),
         },
       });
     });
@@ -73,8 +73,8 @@ export function RecurringChecklist({ overview, names, paymentMethodNames }: Prop
 
   function onToggle(row: MonthlyRecurring) {
     if (row.paidAmount !== null) return uncheck(row);
-    if (row.item.isVariable) return setPrompt(row);
-    check(row, null);
+    if (row.item.isVariable || row.item.hasVariableDate) return setPrompt(row);
+    check(row, null, null);
   }
 
   return (
@@ -104,6 +104,7 @@ export function RecurringChecklist({ overview, names, paymentMethodNames }: Prop
                 <span className="block truncate text-caption text-ink-muted">
                   매월 {row.item.dayOfMonth}일{method ? ` · ${method}` : ""}
                   {row.item.isVariable && !paid ? " · 금액 매달 다름" : ""}
+                  {row.item.hasVariableDate && !paid ? " · 날짜 매달 다름" : ""}
                 </span>
               </span>
               <span className="flex shrink-0 flex-col items-end gap-1">
@@ -119,13 +120,16 @@ export function RecurringChecklist({ overview, names, paymentMethodNames }: Prop
           );
         })}
       </ul>
-      <AmountPrompt
+      <PaymentPrompt
         key={prompt?.item.id ?? "none"}
         name={prompt?.item.name ?? null}
+        askAmount={prompt?.item.isVariable ?? false}
         defaultAmount={prompt?.expectedAmount ?? 0}
+        askDate={prompt?.item.hasVariableDate ?? false}
+        defaultDate={prompt?.due ?? todayKST()}
         pending={false}
         error={null}
-        onSubmit={(amount) => prompt && check(prompt, amount)}
+        onSubmit={(amount, occurredOn) => prompt && check(prompt, amount, occurredOn)}
         onClose={() => setPrompt(null)}
       />
     </div>

@@ -22,6 +22,7 @@ export type RecurringItem = {
   memberSlot: Slot;
   paymentMethodId: string | null;
   isVariable: boolean;
+  hasVariableDate: boolean;
   startMonth: DateString;
   endMonth: DateString | null;
 };
@@ -56,7 +57,7 @@ export const getRecurringOverview = cache(async (): Promise<RecurringOverview> =
     supabase
       .from("recurring_items")
       .select(
-        "id, name, amount, day_of_month, category_id, scope, member_slot, payment_method_id, is_variable, start_month, end_month",
+        "id, name, amount, day_of_month, category_id, scope, member_slot, payment_method_id, is_variable, has_variable_date, start_month, end_month",
       )
       .order("day_of_month")
       .order("created_at"),
@@ -81,6 +82,7 @@ export const getRecurringOverview = cache(async (): Promise<RecurringOverview> =
     memberSlot: toSlot(r.member_slot),
     paymentMethodId: r.payment_method_id,
     isVariable: r.is_variable,
+    hasVariableDate: r.has_variable_date,
     startMonth: r.start_month,
     endMonth: r.end_month,
   }));

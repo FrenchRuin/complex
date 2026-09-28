@@ -101,7 +101,8 @@ function ManagerRow({ item, names, monthFirst, pending, onEdit, onToggleStop }: 
         <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-caption text-ink-muted tabular-nums">
           <PersonChip owner={owner} label={ownerLabel(owner, names)} />
           매월 {item.dayOfMonth}일 · {formatWon(item.amount)}
-          {item.isVariable ? " (매달 다름)" : ""}
+          {item.isVariable ? " (금액 매달 다름)" : ""}
+          {item.hasVariableDate ? " (결제일 매달 다름)" : ""}
         </span>
         {isStopped ? (
           <span className="mt-1 block text-caption text-ink-muted">

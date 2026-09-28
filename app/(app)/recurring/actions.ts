@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { dbErrorMessage, fail, ok, type ActionResult } from "@/lib/action-result";
 import { currentMonthKST } from "@/lib/date";
 import { requireMember } from "@/lib/household";
-import { firstError, idSchema, recurringInputSchema, type RecurringInput } from "@/lib/schemas";
+import { dateStringSchema, firstError, idSchema, recurringInputSchema, type RecurringInput } from "@/lib/schemas";
 import { createClient } from "@/lib/supabase/server";
 
 const thisMonthFirst = () => `${currentMonthKST()}-01`;
@@ -26,6 +26,7 @@ export async function saveRecurringItem(input: RecurringInput): Promise<ActionRe
     scope: v.scope,
     member_slot: v.memberSlot,
     is_variable: v.isVariable,
+    has_variable_date: v.hasVariableDate,
   };
 
   const { error } = id
@@ -61,12 +62,22 @@ async function setEndMonth(rawId: string, endMonth: string | null): Promise<Acti
   return ok();
 }
 
-/** 납부 체크 (F-31): 이번 달 결제일로 내역을 만든다. amount는 금액이 매달 다른 항목만 */
-export async function checkRecurring(rawId: string, amount: number | null): Promise<ActionResult> {
+/**
+ * 납부 체크 (F-31): 이번 달 결제일로 내역을 만든다.
+ * amount는 금액이 매달 다른 항목만, occurredOn은 결제일이 매달 다른 항목만 전달한다.
+ */
+export async function checkRecurring(
+  rawId: string,
+  amount: number | null,
+  occurredOn: string | null,
+): Promise<ActionResult> {
   const id = idSchema.safeParse(rawId);
   if (!id.success) return fail(firstError(id.error));
   if (amount !== null && (!Number.isSafeInteger(amount) || amount <= 0)) {
     return fail("금액을 입력해 주세요");
+  }
+  if (occurredOn !== null && !dateStringSchema.safeParse(occurredOn).success) {
+    return fail("날짜를 확인해 주세요");
   }
 
   await requireMember();
@@ -75,6 +86,7 @@ export async function checkRecurring(rawId: string, amount: number | null): Prom
     p_item_id: id.data,
     p_month: thisMonthFirst(),
     ...(amount !== null ? { p_amount: amount } : {}),
+    ...(occurredOn !== null ? { p_occurred_on: occurredOn } : {}),
   });
   if (error) return fail(dbErrorMessage(error));
 
