@@ -83,7 +83,7 @@ export function MonthCalendar({ filters, currentMonth, today, totals }: Props) {
                   {Number(date.slice(8))}
                 </span>
                 {total?.expense ? (
-                  <span className={`${AMOUNT} text-ink-muted`}>
+                  <span className={`${AMOUNT} text-expense`}>
                     {formatWonShort(total.expense)}
                   </span>
                 ) : null}
