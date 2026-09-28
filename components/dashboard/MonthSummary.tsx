@@ -13,10 +13,8 @@ type Props = {
   names: MemberNames;
 };
 
-/** 이번 달 지출(큰 숫자) + 지난달 비교 + 분할 막대 + 수입 (F-20) */
+/** 이번 달 지출(큰 숫자) + 지난달 비교 + 분할 막대 + 수입·지출 (F-20) */
 export function MonthSummary({ monthLabel, totals, compareText, split, names }: Props) {
-  const net = totals.income - totals.expense;
-
   return (
     <div className="flex flex-col gap-4">
       <section className="rounded-md bg-surface-raised p-5">
@@ -31,17 +29,17 @@ export function MonthSummary({ monthLabel, totals, compareText, split, names }: 
       </section>
 
       <section className="rounded-md bg-surface-raised p-5">
-        <h2 className="text-heading text-ink">{monthLabel} 수입</h2>
+        <h2 className="text-heading text-ink">{monthLabel} 수입·지출</h2>
         <dl className="mt-3 flex flex-col gap-2 tabular-nums">
           <div className="flex items-center justify-between">
             <dt className="text-body text-ink-muted">수입</dt>
             <dd className="text-amount text-income">+{formatWon(totals.income)}</dd>
           </div>
           <div className="flex items-center justify-between">
-            <dt className="text-body text-ink-muted">수입 − 지출</dt>
-            <dd className={`text-amount ${net >= 0 ? "text-income" : "text-expense"}`}>
-              {net >= 0 ? "+" : "−"}
-              {formatWon(Math.abs(net))}
+            <dt className="text-body text-ink-muted">지출</dt>
+            <dd className="text-amount text-expense">
+              {totals.expense > 0 ? "−" : ""}
+              {formatWon(totals.expense)}
             </dd>
           </div>
         </dl>
