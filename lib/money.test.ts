@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatNumber, formatWon, formatWonShort, parseWon } from "./money";
+import { formatNumber, formatWon, formatWonShort, formatWonTiny, parseWon } from "./money";
 
 describe("formatWon", () => {
   it("쉼표와 원을 붙인다", () => {
@@ -36,6 +36,30 @@ describe("formatWonShort", () => {
 
   it("큰 금액은 쉼표를 붙인다", () => {
     expect(formatWonShort(123456789)).toBe("12,345.7만");
+  });
+});
+
+describe("formatWonTiny", () => {
+  it("100만 미만은 formatWonShort와 같다", () => {
+    expect(formatWonTiny(8050)).toBe("8,050");
+    expect(formatWonTiny(265000)).toBe("26.5만");
+    expect(formatWonTiny(999999)).toBe("100만");
+  });
+
+  it("100만 이상은 소수 없이 만 단위", () => {
+    expect(formatWonTiny(1716000)).toBe("172만");
+    expect(formatWonTiny(8078000)).toBe("808만");
+    expect(formatWonTiny(12345678)).toBe("1,235만");
+  });
+
+  it("1억 이상(반올림해서 1억 포함)은 억 단위 소수 첫째 자리", () => {
+    expect(formatWonTiny(123456789)).toBe("1.2억");
+    expect(formatWonTiny(99995000)).toBe("1억");
+    expect(formatWonTiny(250000000)).toBe("2.5억");
+  });
+
+  it("음수도 부호를 붙인다", () => {
+    expect(formatWonTiny(-1716000)).toBe("-172만");
   });
 });
 

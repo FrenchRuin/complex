@@ -32,6 +32,24 @@ export function formatWonShort(amount: number): string {
 }
 
 /**
+ * 폰 달력 칸처럼 아주 좁은 곳용. formatWonShort보다 짧게:
+ * 100만 이상은 소수 없이 "172만", 1억 이상은 "1.2억". 그 아래는 formatWonShort와 같다.
+ */
+export function formatWonTiny(amount: number): string {
+  const sign = amount < 0 ? "-" : "";
+  const abs = Math.abs(amount);
+  const man = Math.round(abs / 10_000);
+  // 반올림해서 1억이 되는 금액(9,999.5만 이상)도 억으로
+  if (man >= 10_000) {
+    return `${sign}${manFormatter.format(Math.round(abs / 10_000_000) / 10)}억`;
+  }
+  if (abs >= 1_000_000) {
+    return `${sign}${wonFormatter.format(man)}만`;
+  }
+  return formatWonShort(amount);
+}
+
+/**
  * 사용자가 입력한 금액 문자열을 정수로 바꾼다. 숫자가 없으면 null.
  * "12,000원" → 12000, " 3 500 " → 3500
  */
