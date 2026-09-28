@@ -164,6 +164,26 @@ export const contributionInputSchema = z.object({
 });
 export type ContributionInput = z.input<typeof contributionInputSchema>;
 
+/** 공유 메모 (F-18). 빈 항목은 저장 전에 뺀다 */
+export const noteInputSchema = z
+  .object({
+    id: z.uuid().optional(),
+    kind: z.enum(["text", "checklist"]),
+    body: z.string().max(5000, "메모는 5,000자까지 쓸 수 있어요"),
+    items: z
+      .array(
+        z.object({
+          id: z.string().min(1).max(40),
+          text: z.string().trim().max(200, "항목 하나는 200자까지 쓸 수 있어요"),
+          done: z.boolean(),
+        }),
+      )
+      .max(100, "항목은 100개까지 넣을 수 있어요")
+      .transform((items) => items.filter((item) => item.text !== "")),
+  })
+  .refine((note) => note.body.trim() !== "" || note.items.length > 0, "메모 내용을 입력해 주세요");
+export type NoteInput = z.input<typeof noteInputSchema>;
+
 /** "yyyy-MM-01" */
 export const monthFirstSchema = dateStringSchema.refine(
   (value) => value.endsWith("-01"),
