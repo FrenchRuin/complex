@@ -60,7 +60,7 @@ export default async function StatsPage({ searchParams }: PageProps<"/stats">) {
         titleStart={monthNav(-1)}
         titleEnd={monthNav(1)}
       />
-      <div className="grid gap-4 px-5 py-6 lg:grid-cols-2 lg:items-start lg:px-8">
+      <div className="grid grid-cols-1 gap-4 px-5 py-6 lg:grid-cols-2 lg:items-start lg:px-8">
         <div className="flex flex-col gap-4">
           <SettingsSection title="최근 6개월 지출">
             <MonthlyChart data={monthlyExpense(rows, months)} currentMonth={current} />
