@@ -125,7 +125,7 @@ export function SmsImport({ data, onDone, onLearn }: Props) {
           <Button variant="secondary" onClick={() => setRows(null)} disabled={pending}>
             다시 붙여넣기
           </Button>
-          <Button onClick={save} disabled={pending || selectedCount === 0} className="flex-1">
+          <Button onClick={save} pending={pending} disabled={selectedCount === 0} className="flex-1">
             {pending ? "저장하는 중" : `${selectedCount}건 저장`}
           </Button>
         </div>

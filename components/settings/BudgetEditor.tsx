@@ -71,7 +71,7 @@ export function BudgetEditor({ monthLabel, monthFirst, categories, budgets }: Pr
       <p role="alert" className="min-h-[18px] text-caption text-danger">
         {error}
       </p>
-      <Button onClick={save} disabled={pending} className="w-full">
+      <Button onClick={save} pending={pending} className="w-full">
         {pending ? "저장하는 중" : "예산 저장"}
       </Button>
     </SettingsSection>

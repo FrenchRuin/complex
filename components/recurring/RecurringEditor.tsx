@@ -150,7 +150,7 @@ export function RecurringEditor({ open, item, data, onClose }: Props) {
         <p role="alert" className="min-h-[18px] text-caption text-danger">
           {error}
         </p>
-        <Button type="submit" disabled={pending} className="w-full">
+        <Button type="submit" pending={pending} className="w-full">
           {pending ? "저장하는 중" : "저장"}
         </Button>
       </form>

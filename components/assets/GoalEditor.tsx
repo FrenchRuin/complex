@@ -68,7 +68,7 @@ export function GoalEditor({ goal, onClose }: Props) {
         </p>
         <div className="flex gap-2">
           {goal ? <DeleteButton disabled={pending} onDelete={remove} /> : null}
-          <Button type="submit" disabled={pending} className="flex-1">
+          <Button type="submit" pending={pending} className="flex-1">
             {pending ? "저장하는 중" : "저장"}
           </Button>
         </div>

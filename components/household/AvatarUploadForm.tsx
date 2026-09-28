@@ -55,8 +55,8 @@ export function AvatarUploadForm({ slot, name, avatarUrl }: Props) {
           <Button
             type="button"
             variant="secondary"
+            pending={pending}
             onClick={() => inputRef.current?.click()}
-            disabled={pending}
             className="h-10 px-4"
           >
             {pending ? "처리하는 중" : "사진 바꾸기"}

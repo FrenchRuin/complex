@@ -83,7 +83,7 @@ export function AssetValueHistory({ item }: Props) {
         <p role="alert" className="min-h-[18px] text-caption text-danger">
           {error}
         </p>
-        <Button type="button" variant="secondary" onClick={add} disabled={pending}>
+        <Button type="button" variant="secondary" onClick={add} pending={pending}>
           {pending ? "기록하는 중" : "금액 기록 추가"}
         </Button>
       </div>
