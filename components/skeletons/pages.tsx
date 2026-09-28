@@ -8,7 +8,7 @@ export function HomeSkeleton() {
   return (
     <PageSkeleton title="홈" withFilter className="flex flex-col gap-4 px-5 py-6 lg:px-8">
       <Skeleton className="h-4 w-2/3" />
-      <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-start">
         <div className="flex flex-col gap-4">
           <CardSkeleton hero lines={3} />
           <CardSkeleton lines={4} />
@@ -48,7 +48,7 @@ export function RecurringSkeleton() {
 
 export function StatsSkeleton() {
   return (
-    <PageSkeleton title={null} className="grid gap-4 px-5 py-6 lg:grid-cols-2 lg:items-start lg:px-8">
+    <PageSkeleton title={null} className="grid grid-cols-1 gap-4 px-5 py-6 lg:grid-cols-2 lg:items-start lg:px-8">
       <div className="flex flex-col gap-4">
         <CardSkeleton block />
         <CardSkeleton lines={3} />
@@ -60,7 +60,7 @@ export function StatsSkeleton() {
 
 export function AssetsSkeleton() {
   return (
-    <PageSkeleton title="자산·목표" className="grid gap-4 px-5 py-6 lg:grid-cols-2 lg:items-start lg:px-8">
+    <PageSkeleton title="자산·목표" className="grid grid-cols-1 gap-4 px-5 py-6 lg:grid-cols-2 lg:items-start lg:px-8">
       <div className="flex flex-col gap-4">
         <CardSkeleton hero lines={1} />
         <CardSkeleton rows={4} />
