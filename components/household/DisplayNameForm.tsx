@@ -41,7 +41,7 @@ export function DisplayNameForm({
         required
       />
       <FormMessage state={state} successMessage={successMessage} />
-      <Button type="submit" disabled={pending} className="w-full">
+      <Button type="submit" pending={pending} className="w-full">
         {pending ? pendingLabel : submitLabel}
       </Button>
     </form>

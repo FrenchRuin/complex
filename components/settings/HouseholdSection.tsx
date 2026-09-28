@@ -79,7 +79,7 @@ export function HouseholdSection({ members, origin, activeInvite }: Props) {
               </div>
             </>
           ) : (
-            <Button disabled={pending} onClick={() => run(createInvite)} className="w-full">
+            <Button pending={pending} onClick={() => run(createInvite)} className="w-full">
               {pending ? "만드는 중" : "초대 링크 만들기"}
             </Button>
           )}

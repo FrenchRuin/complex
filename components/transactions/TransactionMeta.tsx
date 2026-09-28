@@ -53,7 +53,7 @@ export function FormFooter({ error, pending, keepOpen, onKeepOpenChange, onDelet
       )}
       <div className="flex gap-2">
         {onDelete ? <DeleteButton disabled={pending} onDelete={onDelete} /> : null}
-        <Button type="submit" disabled={pending} className="flex-1">
+        <Button type="submit" pending={pending} className="flex-1">
           {pending ? "저장하는 중" : "저장"}
         </Button>
       </div>

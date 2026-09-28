@@ -54,7 +54,7 @@ export function ContributeDialog({ goal, names, mySlot, onClose }: Props) {
         <p role="alert" className="min-h-[18px] text-caption text-danger">
           {error}
         </p>
-        <Button type="submit" disabled={pending} className="w-full">
+        <Button type="submit" pending={pending} className="w-full">
           {pending ? "기록하는 중" : "적립하기"}
         </Button>
       </form>

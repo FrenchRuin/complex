@@ -55,7 +55,7 @@ export function PaymentPrompt({
         <p role="alert" className="min-h-[18px] text-caption text-danger">
           {error ?? (askAmount && !amount ? "금액을 입력해 주세요" : null)}
         </p>
-        <Button type="submit" disabled={pending || (askAmount && !amount)} className="w-full">
+        <Button type="submit" pending={pending} disabled={askAmount && !amount} className="w-full">
           {pending ? "기록하는 중" : "납부 기록"}
         </Button>
       </form>

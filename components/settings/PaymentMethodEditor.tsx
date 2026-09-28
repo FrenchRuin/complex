@@ -87,7 +87,7 @@ export function PaymentMethodEditor({ names, method, onDone }: Props) {
       />
       <FormMessage state={state} />
       <div className="flex gap-2">
-        <Button type="submit" disabled={pending} className="flex-1">
+        <Button type="submit" pending={pending} className="flex-1">
           {pending ? "저장하는 중" : "저장"}
         </Button>
         <Button variant="secondary" onClick={onDone} className="flex-1">

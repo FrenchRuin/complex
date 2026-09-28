@@ -37,7 +37,7 @@ export function LoginForm({ initialError, next }: Props) {
         {state.error}
       </p>
 
-      <Button type="submit" disabled={pending} className="w-full">
+      <Button type="submit" pending={pending} className="w-full">
         {pending ? "로그인하는 중" : "로그인"}
       </Button>
     </form>
