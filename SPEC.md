@@ -84,6 +84,7 @@
 | F-15 | 카드 문자 붙여넣기로 추가 | 2차 |
 | F-16 | 가맹점별 카테고리 자동 추천 | 2차 |
 | F-17 | 앱 안 알림 (사용자 요청, 2026-09-28 추가) | 개선 |
+| F-18 | 공유 메모 (사용자 요청, 2026-09-28 추가) | 개선 |
 
 **F-10 내역 추가**
 - 입력 항목:
@@ -143,6 +144,14 @@
 - 누르면 최근 30일 알림 목록(최대 50개). 안 읽은 알림은 굵게 + 파란 점, "모두 읽음".
 - 알림을 누르면 읽음 처리 후 내역 화면의 그 날짜로 가서 편집 창을 연다. 삭제된 내역은 날짜만, 문자 묶음은 그 달만.
 - 받는 사람만 볼 수 있고 읽음 표시만 바꿀 수 있다(RLS). 폰 잠금 화면 푸시 알림은 여전히 범위 밖(§11).
+
+**F-18 공유 메모** (2026-09-28 추가)
+- 두 사람이 함께 보는 메모. 형식은 글 또는 체크리스트(제목 + 항목, 100개까지). 글 ↔ 체크리스트를 바꾸면 줄과 항목을 서로 옮겨 내용을 잃지 않는다.
+- 메모 화면(`/notes`): 검색, 메모 추가, 카드 목록(고정 먼저, 그다음 최근에 바뀐 순). 카드에 마지막으로 고친 사람 칩과 시각. 체크리스트 카드에서 바로 체크할 수 있다.
+- 쓰기·고치기 창: 웹은 오른쪽 패널, 폰은 바텀시트. 고정, 삭제(되돌리기 가능, 소프트 삭제).
+- 들어가는 길: 웹은 사이드바 "메모". 폰은 탭바가 꽉 차 있어 홈의 "메모" 카드(고정 먼저 3개, 메모 추가).
+- 알림(F-17): 상대가 메모를 쓰기·고치기(내용)·지우기·되돌리기하면 알림. 고정과 항목 체크는 알림 없음. 같은 메모를 여러 번 고치면 안 읽은 알림 하나로. 누르면 그 메모가 열린다.
+- 항목 체크는 `toggle_note_item()`으로 한 항목만 바꿔 두 사람이 동시에 체크해도 서로 덮어쓰지 않는다. 내용을 동시에 고치면 나중에 저장한 쪽이 남는다.
 
 ### 3.3 요약·예산·통계
 
@@ -420,7 +429,22 @@
 | count | int | 문자 묶음의 건수, 그 밖에는 1 |
 | read_at | timestamptz null | 읽은 시각 |
 
-인덱스: `(recipient_id, created_at desc)`. 행은 사용자가 직접 만들 수 없고 transactions의 트리거(`notify_transactions_inserted`, `notify_transaction_updated`)만 만든다.
+인덱스: `(recipient_id, created_at desc)`. 행은 사용자가 직접 만들 수 없고 transactions의 트리거(`notify_transactions_inserted`, `notify_transaction_updated`)와 notes의 트리거(`notify_note_changed`)만 만든다. 메모 알림은 `kind`가 `'note_created'` / `'note_updated'` / `'note_deleted'` / `'note_restored'`이고 `note_id`(uuid fk null)를 채운다.
+
+**notes** (F-18, 2026-09-28 추가)
+| 컬럼 | 타입 | 설명 |
+| --- | --- | --- |
+| household_id | uuid fk | |
+| kind | text | `'text'` / `'checklist'` |
+| body | text | 글 메모의 내용, 체크리스트의 제목 (5,000자까지) |
+| items | jsonb | 체크리스트 항목 `[{id, text, done}]` (100개까지) |
+| is_pinned | bool | 고정 |
+| created_by / updated_by | uuid fk → members | DB가 로그인한 사람으로 채운다 |
+| updated_at | timestamptz | 어떤 변경이든 (정렬용) |
+| edited_at | timestamptz | 내용(글·형식·항목 글자)이 바뀐 때만. 알림 기준 |
+| deleted_at | timestamptz null | 소프트 삭제 |
+
+인덱스: `(household_id, deleted_at, updated_at desc)`. 같은 가구만 조회·추가·수정, 진짜 삭제 금지.
 
 ---
 
