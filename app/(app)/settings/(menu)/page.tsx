@@ -20,7 +20,7 @@ import { currentMonthKST } from "@/lib/date";
 import { getHouseholdMembers, requireMember } from "@/lib/household";
 import { formatWon } from "@/lib/money";
 import { getAllCategories, getAllPaymentMethods, getUsage } from "@/lib/settings-data";
-import { logout } from "./actions";
+import { logout } from "../actions";
 
 export const metadata: Metadata = { title: "설정 · 우리 둘 가계부" };
 
