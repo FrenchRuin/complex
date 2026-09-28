@@ -50,7 +50,7 @@ export function Sidebar({ me, members, names, paymentMethods, recurringDue }: Pr
       <div className="flex items-center gap-3 px-4 pt-5 pb-4">
         <span className="flex -space-x-2">
           {members.map((m) => (
-            <Avatar key={m.id} slot={m.slot} name={m.displayName} />
+            <Avatar key={m.id} slot={m.slot} name={m.displayName} avatarUrl={m.avatarUrl} />
           ))}
         </span>
         <span className="min-w-0">
@@ -152,7 +152,7 @@ export function Sidebar({ me, members, names, paymentMethods, recurringDue }: Pr
           설정
         </Link>
         <div className="flex items-center gap-2 px-3 pt-2">
-          <Avatar slot={me.slot} name={me.displayName} />
+          <Avatar slot={me.slot} name={me.displayName} avatarUrl={me.avatarUrl} />
           <span className="min-w-0">
             <span className="block truncate text-body text-ink">{me.displayName}</span>
             <span className="block text-caption text-ink-muted">{SYNC_LABEL[status]}</span>

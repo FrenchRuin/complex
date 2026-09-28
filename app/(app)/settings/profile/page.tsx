@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AvatarUploadForm } from "@/components/household/AvatarUploadForm";
 import { DisplayNameForm } from "@/components/household/DisplayNameForm";
 import { SettingsSection } from "@/components/settings/SettingsSection";
 import { SettingsSubpage } from "@/components/settings/SettingsSubpage";
@@ -11,6 +12,9 @@ export default async function ProfileSettingsPage() {
   const me = await requireMember();
   return (
     <SettingsSubpage title="프로필">
+      <SettingsSection title="프로필 사진" description="jpg, png, webp · 5MB까지">
+        <AvatarUploadForm slot={me.slot} name={me.displayName} avatarUrl={me.avatarUrl} />
+      </SettingsSection>
       <SettingsSection title="표시 이름" description="앱의 모든 곳에서 이 이름으로 불러요.">
         <DisplayNameForm
           action={updateDisplayName}

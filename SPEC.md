@@ -70,6 +70,7 @@
 **F-03 프로필**
 - 표시 이름(최대 10자)을 바꿀 수 있다. 앱의 모든 곳에서 이 이름으로 부른다.
 - 사람 색은 A = 청록(`member-a`), B = 주황(`member-b`), 공동 = 슬레이트(`joint`)로 고정한다.
+- 프로필 사진(2026-09-28 추가): jpg/png/webp, 5MB까지. 새로 올리면 이전 사진을 지운다. 사진이 없으면 이름 첫 글자 아바타. 사이드바 아바타에 반영된다(모바일은 아바타를 쓰는 곳이 아직 없음).
 
 ### 3.2 내역
 
@@ -296,6 +297,7 @@
 | user_id | uuid fk → auth.users | unique |
 | slot | text | `'a'` 또는 `'b'`, (household_id, slot) unique |
 | display_name | text | 표시 이름 |
+| avatar_path | text null | 프로필 사진의 storage 경로 (2026-09-28 추가) |
 
 **invites**
 | 컬럼 | 타입 | 설명 |

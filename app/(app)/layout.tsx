@@ -26,7 +26,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
     getMerchantRules(),
   ]);
   const names = toMemberNames(members);
-  const meMember = { id: me.id, slot: me.slot, displayName: me.displayName };
+  const meMember = { id: me.id, slot: me.slot, displayName: me.displayName, avatarUrl: me.avatarUrl };
 
   return (
     <ToastProvider>
