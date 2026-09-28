@@ -27,6 +27,7 @@
   --danger: #c2362b;
   --danger-soft: #fbe6e4;
   --online: #1f9d55;
+  --expense: #cc2f2f;
 
   --shadow-float-value: 0 2px 6px #151b2314, 0 10px 24px -4px #151b2324;
   --shadow-sheet-value: 0 -8px 32px #151b2329;
@@ -58,6 +59,7 @@
   --danger: #ff8a7e;
   --danger-soft: #3a1714;
   --online: #4ade80;
+  --expense: #ff7a7a;
 
   --shadow-float-value: 0 10px 24px -4px #000000cc;
   --shadow-sheet-value: 0 -8px 32px #000000e6;
@@ -86,6 +88,7 @@
     --danger: #ff8a7e;
     --danger-soft: #3a1714;
     --online: #4ade80;
+    --expense: #ff7a7a;
 
     --shadow-float-value: 0 10px 24px -4px #000000cc;
     --shadow-sheet-value: 0 -8px 32px #000000e6;
@@ -116,7 +119,7 @@
   --color-danger-soft: var(--danger-soft);
   --color-online: var(--online);
   --color-income: var(--primary);
-  --color-expense: var(--ink);
+  --color-expense: var(--expense);
 
   --font-sans: "Pretendard Variable", "Pretendard", "IBM Plex Sans KR", -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
 
