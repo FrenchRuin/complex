@@ -107,7 +107,7 @@ export function FilterBar({ filters, currentMonth, categories, paymentMethods }:
               type="button"
               onClick={() => apply({ type: "all", categories: [], paymentMethods: [] })}
               disabled={count === 0}
-              className="h-11 rounded-md border border-line-strong text-body font-semibold text-ink disabled:opacity-40"
+              className="h-11 rounded-md border border-line-strong text-body font-semibold text-ink hover:bg-surface-sunken disabled:opacity-40 disabled:hover:bg-transparent"
             >
               필터 초기화
             </button>

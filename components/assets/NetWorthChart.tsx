@@ -63,7 +63,7 @@ export function NetWorthChart({ points }: { points: TrendPoint[] }) {
         </ResponsiveContainer>
       </div>
       <details className="mt-2">
-        <summary className="cursor-pointer text-caption text-ink-muted">표로 보기</summary>
+        <summary className="text-caption text-ink-muted hover:text-ink">표로 보기</summary>
         <table className="mt-2 w-full text-body tabular-nums">
           <caption className="sr-only">순자산 추이</caption>
           <tbody>

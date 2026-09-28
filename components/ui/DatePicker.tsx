@@ -161,7 +161,7 @@ export function DatePicker({ label, value, onChange, compact = false }: Props) {
                   type="button"
                   onClick={() => pick(q.date)}
                   className={`h-10 flex-1 rounded-sm text-body font-semibold ${
-                    q.date === value ? "bg-primary-soft text-primary" : "border border-line-strong text-ink"
+                    q.date === value ? "bg-primary-soft text-primary" : "border border-line-strong text-ink hover:bg-surface-sunken"
                   }`}
                 >
                   {q.label}

@@ -74,7 +74,7 @@ export function DeleteButton({ disabled, onDelete }: DeleteProps) {
       onClick={() => (confirming ? onDelete() : setConfirming(true))}
       onBlur={() => setConfirming(false)}
       className={`inline-flex h-12 items-center justify-center rounded-md px-4 text-body font-semibold disabled:opacity-60 ${
-        confirming ? "bg-danger text-on-primary" : "bg-danger-soft text-danger"
+        confirming ? "bg-danger text-on-primary hover:bg-danger/90" : "bg-danger-soft text-danger hover:bg-danger/20"
       }`}
     >
       {confirming ? "한 번 더 누르면 삭제돼요" : "삭제"}

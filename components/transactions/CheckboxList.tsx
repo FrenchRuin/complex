@@ -20,7 +20,7 @@ export function CheckboxList({ legend, options, selected, onChange }: Props) {
         {options.map((option) => (
           <label
             key={option.value}
-            className="inline-flex h-9 cursor-pointer items-center rounded-full border border-line-strong px-3 text-caption text-ink has-[:checked]:border-primary has-[:checked]:bg-primary-soft has-[:checked]:font-semibold has-[:checked]:text-primary has-[:focus-visible]:shadow-[0_0_0_2px_var(--surface),0_0_0_4px_var(--primary)]"
+            className="inline-flex h-9 cursor-pointer items-center rounded-full border border-line-strong px-3 text-caption text-ink hover:bg-surface-sunken has-[:checked]:hover:bg-primary-soft has-[:checked]:border-primary has-[:checked]:bg-primary-soft has-[:checked]:font-semibold has-[:checked]:text-primary has-[:focus-visible]:shadow-[0_0_0_2px_var(--surface),0_0_0_4px_var(--primary)]"
           >
             <input
               type="checkbox"

@@ -66,7 +66,7 @@ export function AvatarUploadForm({ slot, name, avatarUrl }: Props) {
               type="button"
               onClick={remove}
               disabled={pending}
-              className="h-10 text-caption text-ink-muted underline underline-offset-2 disabled:opacity-60"
+              className="h-10 text-caption text-ink-muted underline underline-offset-2 hover:text-ink disabled:opacity-60"
             >
               사진 삭제
             </button>

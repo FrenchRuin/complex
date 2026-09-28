@@ -29,7 +29,7 @@ export function PersonFilterLinks({ current, names, hrefFor }: Props) {
             aria-current={active ? "true" : undefined}
             scroll={false}
             className={`flex h-9 min-w-14 items-center justify-center rounded-[6px] px-3 text-body ${
-              active ? "bg-surface-raised font-semibold text-ink" : "text-ink-muted"
+              active ? "bg-surface-raised font-semibold text-ink" : "text-ink-muted hover:text-ink"
             }`}
           >
             {option.label}

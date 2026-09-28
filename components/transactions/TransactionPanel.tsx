@@ -60,7 +60,7 @@ export function TransactionPanel({ state, data, onClose, onLearn }: Props) {
                   aria-selected={tab === t.id}
                   onClick={() => setTab(t.id)}
                   className={`flex h-10 flex-1 items-center justify-center rounded-[6px] text-body ${
-                    tab === t.id ? "bg-surface-raised font-semibold text-ink" : "text-ink-muted"
+                    tab === t.id ? "bg-surface-raised font-semibold text-ink" : "text-ink-muted hover:text-ink"
                   }`}
                 >
                   {t.label}

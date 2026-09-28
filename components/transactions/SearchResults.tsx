@@ -57,7 +57,7 @@ export function SearchResults({ filters, currentMonth, rows, labels, names }: Pr
         <Link
           href={filtersToHref(filters, currentMonth, { limit: filters.limit + SEARCH_PAGE_SIZE })}
           scroll={false}
-          className="flex h-12 items-center justify-center rounded-md border border-line-strong text-body font-semibold text-ink"
+          className="flex h-12 items-center justify-center rounded-md border border-line-strong text-body font-semibold text-ink hover:bg-surface-sunken"
         >
           더 보기 ({(rows.length - filters.limit).toLocaleString("ko-KR")}건 더)
         </Link>
