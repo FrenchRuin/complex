@@ -10,7 +10,8 @@ test("정기지출 등록 → 납부 체크 → 내역·홈에 반영 → 체크
   await editor.getByLabel("이름").fill("E2E 넷플릭스");
   await editor.getByLabel("금액", { exact: true }).fill("17000");
   await editor.getByLabel(/매월 결제일/).fill("1");
-  await editor.getByLabel("카테고리").selectOption({ label: "구독" });
+  await editor.getByRole("combobox", { name: "카테고리" }).click();
+  await page.getByRole("option", { name: "구독", exact: true }).click();
   await editor.getByRole("button", { name: "저장" }).click();
   await expect(editor).toBeHidden();
 
