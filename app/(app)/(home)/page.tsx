@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AssetsCard } from "@/components/dashboard/AssetsCard";
 import { BudgetCard } from "@/components/dashboard/BudgetCard";
 import { NotesCard } from "@/components/dashboard/NotesCard";
+import { UpcomingEventsCard } from "@/components/dashboard/UpcomingEventsCard";
 import { getAssetsOverview } from "@/lib/assets";
 import { getMonthBudgets } from "@/lib/budget";
 import { budgetSummary, categoryBudgetRows, spentByCategory } from "@/lib/calc/budget";
@@ -16,6 +17,7 @@ import { parseFilters, type PersonFilter } from "@/lib/calc/filters";
 import { groupByDay, sumTotals } from "@/lib/calc/group";
 import { currentMonthKST, monthRange, samePeriodLastMonth, todayKST } from "@/lib/date";
 import { getHouseholdMembers, requireMember, toMemberNames } from "@/lib/household";
+import { getEvents } from "@/lib/events";
 import { getNotes } from "@/lib/notes";
 import { getRecurringOverview } from "@/lib/recurring";
 import {
@@ -35,7 +37,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
   const members = await getHouseholdMembers();
   const partner = members.find((m) => m.id !== me.id) ?? null;
 
-  const [thisMonthRows, lastPeriodRows, recent, recurring, labels, budgets, assets, notes] = await Promise.all([
+  const [thisMonthRows, lastPeriodRows, recent, recurring, labels, budgets, assets, notes, events] = await Promise.all([
     getTransactionsInRange(monthRange(month)),
     getTransactionsInRange(samePeriodLastMonth(today)),
     getRecentTransactions(who, 6),
@@ -44,6 +46,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
     getMonthBudgets(month),
     getAssetsOverview(),
     getNotes(),
+    getEvents(),
   ]);
   const budgetRows = who === "all" ? categoryBudgetRows(budgets, spentByCategory(thisMonthRows)) : null;
 
@@ -89,6 +92,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
           </div>
 
           <div className="flex flex-col gap-4">
+            <UpcomingEventsCard events={events} today={today} names={names} />
             <NotesCard notes={notes} />
             {who === "all" ? <AssetsCard overview={assets} /> : null}
             <SettingsSection title="이번 달 정기지출">
