@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { notificationHref, notificationSentence, notificationTimeLabel, toNotificationKind } from "./notifications";
+import { notificationHref, notificationSentence, notificationTimeLabel, objectParticle, toNotificationKind } from "./notifications";
 
 const base = { subject: "다이소", amount: 12000, count: 1 };
 
@@ -27,6 +27,31 @@ describe("notificationSentence", () => {
     expect(notificationSentence({ subject: null, amount: 3000, count: 1, kind: "created" }, "서연")).toBe(
       "서연님이 내역 3,000원을 추가했어요",
     );
+  });
+});
+
+describe("메모 알림 (F-18)", () => {
+  it("문장: 받침에 따라 을/를", () => {
+    expect(notificationSentence({ subject: "장보기", amount: null, count: 1, kind: "note_created" }, "서연")).toBe(
+      "서연님이 메모 ‘장보기’를 썼어요",
+    );
+    expect(notificationSentence({ subject: "여행 준비물", amount: null, count: 1, kind: "note_updated" }, "서연")).toBe(
+      "서연님이 메모 ‘여행 준비물’을 고쳤어요",
+    );
+    expect(notificationSentence({ subject: null, amount: null, count: 1, kind: "note_deleted" }, "지훈")).toBe(
+      "지훈님이 메모 ‘제목 없는 메모’를 지웠어요",
+    );
+  });
+
+  it("누르면 그 메모, 지운 메모는 메모 화면", () => {
+    expect(notificationHref({ kind: "note_updated", transactionId: null, occurredOn: null, noteId: "n1" })).toBe("/notes?note=n1");
+    expect(notificationHref({ kind: "note_deleted", transactionId: null, occurredOn: null, noteId: "n1" })).toBe("/notes");
+  });
+
+  it("을/를", () => {
+    expect(objectParticle("월세")).toBe("를");
+    expect(objectParticle("장보기 목록")).toBe("을");
+    expect(objectParticle("Netflix")).toBe("를");
   });
 });
 
