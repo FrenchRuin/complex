@@ -13,7 +13,11 @@ export type NotificationKind =
   | "note_created"
   | "note_updated"
   | "note_deleted"
-  | "note_restored";
+  | "note_restored"
+  | "event_created"
+  | "event_updated"
+  | "event_deleted"
+  | "event_restored";
 
 export type NotificationItem = {
   id: string;
@@ -22,6 +26,7 @@ export type NotificationItem = {
   actorId: string;
   transactionId: string | null;
   noteId: string | null;
+  eventId: string | null;
   occurredOn: DateString | null;
   subject: string | null;
   amount: number | null;
@@ -40,7 +45,22 @@ const KINDS: readonly NotificationKind[] = [
   "note_updated",
   "note_deleted",
   "note_restored",
+  "event_created",
+  "event_updated",
+  "event_deleted",
+  "event_restored",
 ];
+
+const EVENT_ACTION_TEXT = {
+  event_created: "추가했어요",
+  event_updated: "수정했어요",
+  event_deleted: "삭제했어요",
+  event_restored: "되돌렸어요",
+} as const;
+
+function isEventKind(kind: NotificationKind): kind is keyof typeof EVENT_ACTION_TEXT {
+  return kind in EVENT_ACTION_TEXT;
+}
 
 const NOTE_ACTION_TEXT = {
   note_created: "썼어요",
@@ -75,6 +95,10 @@ export function notificationSentence(item: Pick<NotificationItem, "kind" | "subj
     const title = item.subject ?? "제목 없는 메모";
     return `${who} 메모 ‘${title}’${objectParticle(title)} ${NOTE_ACTION_TEXT[item.kind]}`;
   }
+  if (isEventKind(item.kind)) {
+    const title = item.subject ?? "일정";
+    return `${who} 일정 ‘${title}’${objectParticle(title)} ${EVENT_ACTION_TEXT[item.kind]}`;
+  }
   if (item.kind === "sms_batch") return `${who} 문자로 ${item.count}건을 추가했어요`;
 
   // 문자 묶음이 아니면 DB가 금액을 항상 채운다. 그래서 "…원을"로 끝나 조사가 늘 "을"
@@ -95,8 +119,15 @@ export function objectParticle(word: string): "을" | "를" {
  * 메모는 그 메모를 연다 (지운 메모는 메모 화면만).
  */
 export function notificationHref(
-  item: Pick<NotificationItem, "kind" | "transactionId" | "occurredOn"> & { noteId?: string | null },
+  item: Pick<NotificationItem, "kind" | "transactionId" | "occurredOn"> & { noteId?: string | null; eventId?: string | null },
 ): string {
+  if (isEventKind(item.kind)) {
+    const params = new URLSearchParams();
+    if (item.occurredOn) params.set("month", monthOf(item.occurredOn));
+    if (item.eventId && item.kind !== "event_deleted") params.set("event", item.eventId);
+    const query = params.toString();
+    return query ? `/schedule?${query}` : "/schedule";
+  }
   if (isNoteKind(item.kind)) {
     return item.noteId && item.kind !== "note_deleted" ? `/notes?note=${item.noteId}` : "/notes";
   }

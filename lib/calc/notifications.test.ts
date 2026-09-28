@@ -30,6 +30,26 @@ describe("notificationSentence", () => {
   });
 });
 
+describe("일정 알림 (F-19)", () => {
+  it("문장", () => {
+    expect(notificationSentence({ subject: "친구 결혼식", amount: null, count: 1, kind: "event_created" }, "서연")).toBe(
+      "서연님이 일정 ‘친구 결혼식’을 추가했어요",
+    );
+    expect(notificationSentence({ subject: "치과", amount: null, count: 1, kind: "event_deleted" }, "지훈")).toBe(
+      "지훈님이 일정 ‘치과’를 삭제했어요",
+    );
+  });
+
+  it("누르면 그 달 일정 화면에서 그 일정, 삭제면 그 달만", () => {
+    expect(notificationHref({ kind: "event_updated", transactionId: null, occurredOn: "2026-10-03", eventId: "e1" })).toBe(
+      "/schedule?month=2026-10&event=e1",
+    );
+    expect(notificationHref({ kind: "event_deleted", transactionId: null, occurredOn: "2026-10-03", eventId: "e1" })).toBe(
+      "/schedule?month=2026-10",
+    );
+  });
+});
+
 describe("메모 알림 (F-18)", () => {
   it("문장: 받침에 따라 을/를", () => {
     expect(notificationSentence({ subject: "장보기", amount: null, count: 1, kind: "note_created" }, "서연")).toBe(

@@ -13,7 +13,7 @@ export const getMyNotifications = cache(async (): Promise<NotificationItem[]> =>
   const since = `${addDays(todayKST(), -DAYS)}T00:00:00+09:00`;
   const { data, error } = await supabase
     .from("notifications")
-    .select("id, created_at, kind, actor_id, transaction_id, note_id, occurred_on, subject, amount, count, read_at")
+    .select("id, created_at, kind, actor_id, transaction_id, note_id, event_id, occurred_on, subject, amount, count, read_at")
     .gte("created_at", since)
     .order("created_at", { ascending: false })
     .limit(LIMIT);
@@ -27,6 +27,7 @@ export const getMyNotifications = cache(async (): Promise<NotificationItem[]> =>
     actorId: n.actor_id,
     transactionId: n.transaction_id,
     noteId: n.note_id,
+    eventId: n.event_id,
     occurredOn: n.occurred_on,
     subject: n.subject,
     amount: n.amount,
