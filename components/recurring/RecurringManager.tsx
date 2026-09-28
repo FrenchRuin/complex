@@ -115,7 +115,7 @@ function ManagerRow({ item, names, monthFirst, pending, onEdit, onToggleStop }: 
         type="button"
         disabled={pending}
         onClick={() => onToggleStop(item)}
-        className="h-9 shrink-0 rounded-sm border border-line-strong px-3 text-caption font-semibold text-ink disabled:opacity-60"
+        className="h-9 shrink-0 rounded-sm border border-line-strong px-3 text-caption font-semibold text-ink hover:bg-surface-sunken disabled:opacity-60 disabled:hover:bg-transparent"
       >
         {isStopped ? "다시 시작" : "중지"}
       </button>

@@ -34,7 +34,7 @@ export function MonthCalendar({ filters, currentMonth, today, totals }: Props) {
         aria-expanded={open}
         aria-controls="month-calendar-grid"
         onClick={() => setOpen((v) => !v)}
-        className="flex h-10 w-full items-center gap-2 rounded-sm px-2 text-body text-ink lg:hidden"
+        className="flex h-10 w-full items-center gap-2 rounded-sm px-2 text-body text-ink hover:bg-surface-sunken lg:hidden"
       >
         <CalendarDays size={18} strokeWidth={1.75} aria-hidden />
         <span className="flex-1 text-left">달력</span>

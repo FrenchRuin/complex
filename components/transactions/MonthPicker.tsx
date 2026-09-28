@@ -107,7 +107,7 @@ export function MonthPicker({ month, currentMonth, path, query }: Props) {
               href={hrefFor(currentMonth)}
               scroll={false}
               onClick={() => setOpen(false)}
-              className="mt-3 flex h-10 items-center justify-center rounded-sm border border-line-strong text-body font-semibold text-ink"
+              className="mt-3 flex h-10 items-center justify-center rounded-sm border border-line-strong text-body font-semibold text-ink hover:bg-surface-sunken"
             >
               이번 달로
             </Link>

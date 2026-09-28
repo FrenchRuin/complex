@@ -101,7 +101,7 @@ export default async function SettingsPage() {
         <form action={logout}>
           <button
             type="submit"
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-md bg-surface-raised text-body font-semibold text-ink"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-md bg-surface-raised text-body font-semibold text-ink hover:bg-surface-sunken"
           >
             <LogOut size={20} strokeWidth={1.75} aria-hidden />
             로그아웃

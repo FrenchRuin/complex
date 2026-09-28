@@ -67,7 +67,7 @@ export function GoalList({ goals, names, mySlot }: Props) {
         </div>
         {g.contributions.length ? (
           <details className="mt-3">
-            <summary className="cursor-pointer text-caption text-ink-muted">적립 기록 {g.contributions.length}건</summary>
+            <summary className="text-caption text-ink-muted hover:text-ink">적립 기록 {g.contributions.length}건</summary>
             <ul className="mt-1">
               {g.contributions.map((c) => (
                 <li key={c.id} className="flex items-center justify-between gap-2 border-b border-line py-1 text-caption tabular-nums last:border-b-0">
@@ -107,7 +107,7 @@ export function GoalList({ goals, names, mySlot }: Props) {
       </Button>
       {done.length ? (
         <details>
-          <summary className="cursor-pointer text-label text-ink-muted">달성한 목표 {done.length}개</summary>
+          <summary className="text-label text-ink-muted hover:text-ink">달성한 목표 {done.length}개</summary>
           <ul className="mt-2 flex flex-col gap-3">{done.map(card)}</ul>
         </details>
       ) : null}

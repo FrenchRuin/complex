@@ -94,7 +94,9 @@ export function RecurringChecklist({ overview, names, paymentMethodNames }: Prop
                 aria-label={`${row.item.name} 납부 ${paid ? "완료" : "안 함"}`}
                 onClick={() => onToggle(row)}
                 className={`inline-flex size-8 shrink-0 items-center justify-center rounded-full border-2 transition-colors duration-150 ${
-                  paid ? "border-primary bg-primary text-on-primary" : "border-line-strong text-transparent"
+                  paid
+                    ? "border-primary bg-primary text-on-primary hover:bg-primary/90"
+                    : "border-line-strong text-transparent hover:border-primary"
                 }`}
               >
                 <Check size={18} strokeWidth={2.5} aria-hidden />

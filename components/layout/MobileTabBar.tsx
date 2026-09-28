@@ -36,7 +36,7 @@ export function MobileTabBar({ recurringDue }: { recurringDue: number }) {
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   className={`flex h-16 flex-col items-center justify-center gap-1 text-label ${
-                    active ? "text-primary" : "text-ink-muted"
+                    active ? "text-primary" : "text-ink-muted hover:text-ink"
                   }`}
                 >
                   <span className="relative">

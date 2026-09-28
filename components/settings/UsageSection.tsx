@@ -85,7 +85,7 @@ function ExternalButton({ href, children }: { href: string; children: string }) 
       href={href}
       target="_blank"
       rel="noreferrer"
-      className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-md border border-line-strong px-4 text-body font-semibold text-ink"
+      className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-md border border-line-strong px-4 text-body font-semibold text-ink hover:bg-surface-sunken"
     >
       {children}
       <ExternalLink size={16} strokeWidth={1.75} aria-hidden />

@@ -195,6 +195,14 @@
     scrollbar-color: color-mix(in srgb, var(--line-strong) 55%, transparent) transparent;
   }
 
+  /* 누를 수 있는 것에는 손가락 모양 포인터 (Tailwind 4는 버튼 기본값이 화살표) */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  summary,
+  label:has(> input[type="radio"], > input[type="checkbox"]) {
+    cursor: pointer;
+  }
+
   /* 모든 컨트롤에 같은 포커스 링 */
   :focus-visible {
     outline: none;
