@@ -26,6 +26,7 @@
   --member-b-soft: #fbebdd;
   --danger: #c2362b;
   --danger-soft: #fbe6e4;
+  --online: #1f9d55;
 
   --shadow-float-value: 0 2px 6px #151b2314, 0 10px 24px -4px #151b2324;
   --shadow-sheet-value: 0 -8px 32px #151b2329;
@@ -56,6 +57,7 @@
   --member-b-soft: #33200f;
   --danger: #ff8a7e;
   --danger-soft: #3a1714;
+  --online: #4ade80;
 
   --shadow-float-value: 0 10px 24px -4px #000000cc;
   --shadow-sheet-value: 0 -8px 32px #000000e6;
@@ -83,6 +85,7 @@
     --member-b-soft: #33200f;
     --danger: #ff8a7e;
     --danger-soft: #3a1714;
+    --online: #4ade80;
 
     --shadow-float-value: 0 10px 24px -4px #000000cc;
     --shadow-sheet-value: 0 -8px 32px #000000e6;
@@ -111,6 +114,7 @@
   --color-member-b-soft: var(--member-b-soft);
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
+  --color-online: var(--online);
   --color-income: var(--primary);
   --color-expense: var(--ink);
 
