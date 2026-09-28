@@ -184,6 +184,37 @@ export const noteInputSchema = z
   .refine((note) => note.body.trim() !== "" || note.items.length > 0, "메모 내용을 입력해 주세요");
 export type NoteInput = z.input<typeof noteInputSchema>;
 
+const timeSchema = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "시각을 다시 골라 주세요");
+
+/** 공유 일정 (F-19) */
+export const eventInputSchema = z
+  .object({
+    id: z.uuid().optional(),
+    title: z.string().trim().min(1, "일정 이름을 입력해 주세요").max(50, "일정 이름은 50자까지 쓸 수 있어요"),
+    memo: z.string().max(1000, "메모는 1,000자까지 쓸 수 있어요"),
+    owner: z.enum(OWNERS),
+    startDate: dateStringSchema,
+    endDate: dateStringSchema,
+    allDay: z.boolean(),
+    startTime: timeSchema.nullable(),
+    endTime: timeSchema.nullable(),
+    repeat: z.enum(["none", "weekly", "monthly", "yearly"]),
+    repeatUntil: dateStringSchema.nullable(),
+  })
+  .refine((e) => e.endDate >= e.startDate, { message: "끝나는 날은 시작하는 날과 같거나 뒤여야 해요" })
+  .refine((e) => e.allDay || e.startTime !== null, { message: "시작 시각을 골라 주세요" })
+  .refine((e) => e.allDay || !e.endTime || !e.startTime || e.endDate > e.startDate || e.endTime > e.startTime, {
+    message: "끝나는 시각은 시작 시각보다 뒤여야 해요",
+  })
+  .refine((e) => !e.repeatUntil || e.repeatUntil >= e.startDate, { message: "반복 끝나는 날은 시작하는 날 뒤여야 해요" })
+  .transform((e) => ({
+    ...e,
+    startTime: e.allDay ? null : e.startTime,
+    endTime: e.allDay ? null : e.endTime,
+    repeatUntil: e.repeat === "none" ? null : e.repeatUntil,
+  }));
+export type EventInput = z.input<typeof eventInputSchema>;
+
 /** "yyyy-MM-01" */
 export const monthFirstSchema = dateStringSchema.refine(
   (value) => value.endsWith("-01"),
