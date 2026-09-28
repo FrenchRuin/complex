@@ -40,34 +40,42 @@ export function AvatarUploadForm({ slot, name, avatarUrl }: Props) {
   }
 
   return (
-    <div className="flex items-center gap-4">
-      <Avatar slot={slot} name={name} avatarUrl={avatarUrl} size="lg" />
-      <div className="flex flex-col items-start gap-2">
-        <input
-          ref={inputRef}
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          onChange={onChange}
-          className="sr-only"
-          aria-label="프로필 사진 파일 선택"
-        />
-        <Button type="button" onClick={() => inputRef.current?.click()} disabled={pending} className="h-10 px-4">
-          {pending ? "처리하는 중" : "사진 바꾸기"}
-        </Button>
-        {avatarUrl ? (
-          <button
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center gap-4">
+        <Avatar slot={slot} name={name} avatarUrl={avatarUrl} size="lg" />
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={onChange}
+            className="sr-only"
+            aria-label="프로필 사진 파일 선택"
+          />
+          <Button
             type="button"
-            onClick={remove}
+            variant="secondary"
+            onClick={() => inputRef.current?.click()}
             disabled={pending}
-            className="text-caption text-ink-muted underline underline-offset-2"
+            className="h-10 px-4"
           >
-            사진 삭제
-          </button>
-        ) : null}
-        <p role="alert" className="min-h-[18px] text-caption text-danger">
-          {error}
-        </p>
+            {pending ? "처리하는 중" : "사진 바꾸기"}
+          </Button>
+          {avatarUrl ? (
+            <button
+              type="button"
+              onClick={remove}
+              disabled={pending}
+              className="h-10 text-caption text-ink-muted underline underline-offset-2 disabled:opacity-60"
+            >
+              사진 삭제
+            </button>
+          ) : null}
+        </div>
       </div>
+      <p role="alert" className="text-caption text-danger empty:hidden">
+        {error}
+      </p>
     </div>
   );
 }
