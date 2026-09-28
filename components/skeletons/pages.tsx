@@ -118,3 +118,15 @@ export function SettingsSubpageSkeleton({ title }: { title: string }) {
     </div>
   );
 }
+
+export function ScheduleSkeleton() {
+  return (
+    <PageSkeleton title={null} className="grid grid-cols-1 items-start gap-4 px-5 py-4 lg:grid-cols-[1fr_360px] lg:px-8 lg:py-6">
+      <CardSkeleton block />
+      <div className="flex flex-col gap-4">
+        <CardSkeleton rows={2} />
+        <CardSkeleton rows={3} />
+      </div>
+    </PageSkeleton>
+  );
+}

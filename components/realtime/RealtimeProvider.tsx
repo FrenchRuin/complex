@@ -95,6 +95,12 @@ export function RealtimeProvider({ householdId, children }: { householdId: strin
           { event: "*", schema: "public", table: "asset_values", filter: `household_id=eq.${householdId}` },
           scheduleRefresh,
         )
+        // 일정 (F-19)
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "events", filter: `household_id=eq.${householdId}` },
+          scheduleRefresh,
+        )
         // 메모 (F-18)
         .on(
           "postgres_changes",
