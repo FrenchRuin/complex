@@ -117,39 +117,6 @@ function toRecord(row: Row): TransactionRecord {
   };
 }
 
-export type PartnerActivity = {
-  memberId: string;
-  subjectMerchant: string | null;
-  categoryId: string;
-  amount: number;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
-};
-
-/** 상대가 마지막으로 추가·수정·삭제한 내역 1건 (F-14). 삭제된 것도 포함한다. */
-export async function getLatestActivityBy(memberId: string): Promise<PartnerActivity | null> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("transactions")
-    .select("merchant, category_id, amount, created_at, updated_at, deleted_at")
-    .eq("updated_by", memberId)
-    .order("updated_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (error) throw new Error(`최근 활동을 불러오지 못했어요: ${error.message}`);
-  if (!data) return null;
-  return {
-    memberId,
-    subjectMerchant: data.merchant,
-    categoryId: data.category_id,
-    amount: data.amount,
-    createdAt: data.created_at,
-    updatedAt: data.updated_at,
-    deletedAt: data.deleted_at,
-  };
-}
-
 export type LabelMaps = {
   categories: Record<string, { name: string; icon: string }>;
   paymentMethods: Record<string, string>;

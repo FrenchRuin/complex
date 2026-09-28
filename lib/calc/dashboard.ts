@@ -71,28 +71,3 @@ export function relativeDayLabel(date: DateString, today: DateString): string {
   const [, m, d] = date.split("-").map(Number);
   return `${m}월 ${d}일`;
 }
-
-export type ActivityAction = "added" | "edited" | "deleted";
-
-const ACTION_TEXT: Record<ActivityAction, string> = {
-  added: "추가했어요",
-  edited: "수정했어요",
-  deleted: "삭제했어요",
-};
-
-/** "서연님이 어제 다이소 12,000원을 추가했어요" (F-14) */
-export function activitySentence(input: {
-  name: string;
-  when: string;
-  subject: string;
-  amount: number;
-  action: ActivityAction;
-}): string {
-  return `${input.name}님이 ${input.when} ${input.subject} ${formatWon(input.amount)}을 ${ACTION_TEXT[input.action]}`;
-}
-
-/** 수정 시각과 추가 시각이 1분 넘게 차이 나면 수정으로 본다 */
-export function activityAction(row: { createdAt: string; updatedAt: string; deletedAt: string | null }): ActivityAction {
-  if (row.deletedAt) return "deleted";
-  return new Date(row.updatedAt).getTime() - new Date(row.createdAt).getTime() > 60_000 ? "edited" : "added";
-}

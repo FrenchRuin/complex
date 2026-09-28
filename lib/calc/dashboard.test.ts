@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  activityAction,
-  activitySentence,
   compareWithLastMonth,
   matchesPerson,
   relativeDayLabel,
@@ -88,20 +86,5 @@ describe("relativeDayLabel", () => {
 
   it("달을 넘어서도 정확히 센다", () => {
     expect(relativeDayLabel("2026-09-30", "2026-10-01")).toBe("어제");
-  });
-});
-
-describe("activitySentence / activityAction", () => {
-  it("문장을 만든다", () => {
-    expect(
-      activitySentence({ name: "서연", when: "어제", subject: "다이소", amount: 12000, action: "added" }),
-    ).toBe("서연님이 어제 다이소 12,000원을 추가했어요");
-  });
-
-  it("추가 직후 갱신은 추가, 1분 넘게 뒤면 수정, 삭제 시각이 있으면 삭제", () => {
-    const t = "2026-09-27T01:00:00Z";
-    expect(activityAction({ createdAt: t, updatedAt: "2026-09-27T01:00:05Z", deletedAt: null })).toBe("added");
-    expect(activityAction({ createdAt: t, updatedAt: "2026-09-27T02:00:00Z", deletedAt: null })).toBe("edited");
-    expect(activityAction({ createdAt: t, updatedAt: t, deletedAt: "2026-09-27T03:00:00Z" })).toBe("deleted");
   });
 });
