@@ -3,13 +3,20 @@
 import { useOptimistic, useTransition } from "react";
 import { toggleNoteItem } from "@/app/(app)/notes/actions";
 import { Checkbox } from "@/components/ui/Checkbox";
+import { LinkifiedText } from "@/components/ui/LinkifiedText";
 import { useToast } from "@/components/ui/Toast";
 import type { NoteItem } from "@/lib/calc/notes";
 
-type Props = { noteId: string; items: readonly NoteItem[]; max?: number };
+type Props = {
+  noteId: string;
+  items: readonly NoteItem[];
+  max?: number;
+  /** 항목 글 속 주소를 링크로 (보기 화면) */
+  linkify?: boolean;
+};
 
-/** 카드 안 체크리스트: 바로 체크할 수 있다 (알림 없음, F-18) */
-export function NoteChecklist({ noteId, items, max }: Props) {
+/** 체크리스트: 바로 체크할 수 있다 (알림 없음, F-18). 카드와 보기 화면에서 쓴다 */
+export function NoteChecklist({ noteId, items, max, linkify = false }: Props) {
   const toast = useToast();
   const [, startTransition] = useTransition();
   const [optimistic, setOptimistic] = useOptimistic(
@@ -33,7 +40,9 @@ export function NoteChecklist({ noteId, items, max }: Props) {
       {shown.map((item) => (
         <li key={item.id}>
           <Checkbox checked={item.done} onChange={(done) => toggle(item.id, done)}>
-            <span className={item.done ? "text-ink-muted line-through" : ""}>{item.text}</span>
+            <span className={`min-w-0 break-words ${item.done ? "text-ink-muted line-through" : ""}`}>
+              {linkify ? <LinkifiedText text={item.text} /> : item.text}
+            </span>
           </Checkbox>
         </li>
       ))}

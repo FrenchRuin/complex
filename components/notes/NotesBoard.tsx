@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/Button";
 import { noteMatches, type Note } from "@/lib/calc/notes";
 import type { HouseholdMember } from "@/lib/household";
 import { NoteCard } from "./NoteCard";
-import { NoteEditor } from "./NoteEditor";
+import { NotePanel } from "./NotePanel";
 
 type Props = { notes: Note[]; members: HouseholdMember[] };
-type EditorState = { open: false } | { open: true; note: Note | null; key: number };
+/** 연 메모는 id로 들고, 그릴 때마다 목록에서 찾는다 (저장 뒤 새 내용이 바로 보이게) */
+type EditorState = { open: false } | { open: true; noteId: string | null; key: number };
 
 /**
  * 메모 화면 (F-18): 검색, 메모 추가, 카드 목록.
@@ -23,7 +24,8 @@ export function NotesBoard({ notes, members }: Props) {
   const [query, setQuery] = useState("");
   const [editor, setEditor] = useState<EditorState>({ open: false });
 
-  const open = (note: Note | null) => setEditor({ open: true, note, key: Date.now() });
+  const open = (note: Note | null) => setEditor({ open: true, noteId: note?.id ?? null, key: Date.now() });
+  const openNote = editor.open && editor.noteId ? (notes.find((n) => n.id === editor.noteId) ?? null) : null;
 
   // 주소로 연 창: 닫으면 주소에서 지운다 (지운 메모 id면 아무것도 열지 않는다)
   const noteParam = params.get("note");
@@ -69,10 +71,10 @@ export function NotesBoard({ notes, members }: Props) {
         </ul>
       )}
 
-      {editor.open ? (
-        <NoteEditor key={editor.key} note={editor.note} onClose={() => setEditor({ open: false })} />
+      {editor.open && (editor.noteId === null || openNote) ? (
+        <NotePanel key={editor.key} note={openNote} members={members} onClose={() => setEditor({ open: false })} />
       ) : queryOpen ? (
-        <NoteEditor key={`query-${noteParam ?? "new"}`} note={fromQuery} onClose={closeQuery} />
+        <NotePanel key={`query-${noteParam ?? "new"}`} note={fromQuery} members={members} onClose={closeQuery} />
       ) : null}
     </div>
   );
