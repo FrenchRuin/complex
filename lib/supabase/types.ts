@@ -234,6 +234,88 @@ export type Database = {
           },
         ]
       }
+      events: {
+        Row: {
+          all_day: boolean
+          created_at: string
+          created_by: string
+          deleted_at: string | null
+          end_date: string
+          end_time: string | null
+          household_id: string
+          id: string
+          memo: string
+          owner: string
+          repeat: string
+          repeat_until: string | null
+          start_date: string
+          start_time: string | null
+          title: string
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          all_day?: boolean
+          created_at?: string
+          created_by: string
+          deleted_at?: string | null
+          end_date: string
+          end_time?: string | null
+          household_id: string
+          id?: string
+          memo?: string
+          owner?: string
+          repeat?: string
+          repeat_until?: string | null
+          start_date: string
+          start_time?: string | null
+          title: string
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          all_day?: boolean
+          created_at?: string
+          created_by?: string
+          deleted_at?: string | null
+          end_date?: string
+          end_time?: string | null
+          household_id?: string
+          id?: string
+          memo?: string
+          owner?: string
+          repeat?: string
+          repeat_until?: string | null
+          start_date?: string
+          start_time?: string | null
+          title?: string
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goal_contributions: {
         Row: {
           amount: number
@@ -558,6 +640,7 @@ export type Database = {
           amount: number | null
           count: number
           created_at: string
+          event_id: string | null
           household_id: string
           id: string
           kind: string
@@ -574,6 +657,7 @@ export type Database = {
           amount?: number | null
           count?: number
           created_at?: string
+          event_id?: string | null
           household_id: string
           id?: string
           kind: string
@@ -590,6 +674,7 @@ export type Database = {
           amount?: number | null
           count?: number
           created_at?: string
+          event_id?: string | null
           household_id?: string
           id?: string
           kind?: string
@@ -607,6 +692,13 @@ export type Database = {
             columns: ["actor_id"]
             isOneToOne: false
             referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
             referencedColumns: ["id"]
           },
           {
