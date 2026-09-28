@@ -85,6 +85,7 @@
 | F-16 | 가맹점별 카테고리 자동 추천 | 2차 |
 | F-17 | 앱 안 알림 (사용자 요청, 2026-09-28 추가) | 개선 |
 | F-18 | 공유 메모 (사용자 요청, 2026-09-28 추가) | 개선 |
+| F-19 | 공유 일정 (사용자 요청, 2026-09-28 추가) | 개선 |
 
 **F-10 내역 추가**
 - 입력 항목:
@@ -153,6 +154,14 @@
 - 들어가는 길: 웹은 사이드바 "메모". 폰은 탭바가 꽉 차 있어 홈의 "메모" 카드(고정 먼저 3개, 메모 추가).
 - 알림(F-17): 상대가 메모를 쓰기·고치기(내용)·지우기·되돌리기하면 알림. 고정과 항목 체크는 알림 없음. 같은 메모를 여러 번 고치면 안 읽은 알림 하나로. 누르면 그 메모가 열린다.
 - 항목 체크는 `toggle_note_item()`으로 한 항목만 바꿔 두 사람이 동시에 체크해도 서로 덮어쓰지 않는다. 내용을 동시에 고치면 나중에 저장한 쪽이 남는다.
+
+**F-19 공유 일정** (2026-09-28 추가)
+- 두 사람이 함께 보는 일정. 제목(50자), 누구(공동 / 사람 A / 사람 B), 날짜(여러 날이면 31일까지), 하루 종일 또는 시작 시각(끝 시각은 선택, 30분 단위), 반복(안 함 / 매주 / 매달 / 매년, 끝나는 날 선택), 메모(링크 인식).
+- 매달·매년 반복에서 그 달에 없는 날은 말일로(2월 29일 → 평년 28일). 반복 일정을 고치거나 지우면 모든 회차에 적용된다("이번만 고치기"는 없음).
+- 일정 화면(`/schedule`): 월 달력(웹은 칸마다 제목 3개까지 + 외 N, 폰은 사람 색 점), 고른 날 목록, 다가오는 일정(60일 안, 5개). 정기지출 결제일도 달력·목록에 회색으로 함께(읽기만, 누르면 정기지출 화면).
+- 일정 창은 메모와 같다: 먼저 보기, "수정"으로 편집, 삭제(되돌리기 가능, 소프트 삭제).
+- 들어가는 길: 웹 사이드바와 폰 ☰ 메뉴의 "일정", 홈 "다가오는 일정" 카드(가까운 3개 + 일정 추가).
+- 알림(F-17): 상대가 일정을 추가·수정·삭제·되돌리면. 바뀐 게 없으면 알림 없음, 여러 번 고치면 안 읽은 알림 하나로. 누르면 그 달 일정 화면에서 그 일정이 열린다.
 
 ### 3.3 요약·예산·통계
 
@@ -279,7 +288,7 @@
 1. 가구 표시: 두 사람 아바타 + 앱 이름 + 알림 종 (두 사람 이름 줄은 종에 가려 2026-09-28 뺐다. 폰 ☰ 메뉴에서는 종 대신 닫기)
 2. 검색 (`⌘K`로 포커스, 웹만)
 3. **내역 추가** 버튼 (primary)
-4. 메뉴: 홈, 내역, 통계, 정기지출(미납 개수 배지), 메모, 자산·목표
+4. 메뉴: 홈, 내역, 통계, 정기지출(미납 개수 배지), 일정, 메모, 자산·목표
 5. 섹션 "함께 보는 계좌·카드": 결제수단 목록, 소유 색 점 + 소유자 이름, `+` 로 추가
 6. 하단: 설정, 로그인한 사람 이름 + 동기화 상태
 
@@ -430,7 +439,7 @@
 | count | int | 문자 묶음의 건수, 그 밖에는 1 |
 | read_at | timestamptz null | 읽은 시각 |
 
-인덱스: `(recipient_id, created_at desc)`. 행은 사용자가 직접 만들 수 없고 transactions의 트리거(`notify_transactions_inserted`, `notify_transaction_updated`)와 notes의 트리거(`notify_note_changed`)만 만든다. 메모 알림은 `kind`가 `'note_created'` / `'note_updated'` / `'note_deleted'` / `'note_restored'`이고 `note_id`(uuid fk null)를 채운다.
+인덱스: `(recipient_id, created_at desc)`. 행은 사용자가 직접 만들 수 없고 transactions의 트리거(`notify_transactions_inserted`, `notify_transaction_updated`)와 notes의 트리거(`notify_note_changed`)만 만든다. 메모 알림은 `kind`가 `'note_created'` / `'note_updated'` / `'note_deleted'` / `'note_restored'`이고 `note_id`(uuid fk null)를 채운다. 일정 알림은 `'event_created'` / `'event_updated'` / `'event_deleted'` / `'event_restored'`이고 `event_id`와 `occurred_on`(일정 시작일)을 채운다 (events의 트리거 `notify_event_changed`).
 
 **notes** (F-18, 2026-09-28 추가)
 | 컬럼 | 타입 | 설명 |
@@ -446,6 +455,24 @@
 | deleted_at | timestamptz null | 소프트 삭제 |
 
 인덱스: `(household_id, deleted_at, updated_at desc)`. 같은 가구만 조회·추가·수정, 진짜 삭제 금지.
+
+**events** (F-19, 2026-09-28 추가)
+| 컬럼 | 타입 | 설명 |
+| --- | --- | --- |
+| household_id | uuid fk | |
+| title | text | 1~50자 (앞뒤 공백은 DB가 뺀다) |
+| memo | text | 1,000자까지 |
+| owner | text | `joint` / `a` / `b` |
+| start_date / end_date | date | 끝 ≥ 시작, 31일까지 |
+| all_day | bool | 하루 종일이면 시각 없음 |
+| start_time / end_time | time null | 하루 종일이 아니면 시작 시각 필수, 같은 날이면 끝 > 시작 |
+| repeat | text | `none` / `weekly` / `monthly` / `yearly` |
+| repeat_until | date null | 반복 끝나는 날 (반복일 때만) |
+| created_by / updated_by | uuid fk → members | DB가 로그인한 사람으로 채운다 |
+| updated_at | timestamptz | |
+| deleted_at | timestamptz null | 소프트 삭제 |
+
+인덱스: `(household_id, deleted_at, start_date)`. 같은 가구만 조회·추가·수정, 진짜 삭제 금지. 반복은 한 행으로 두고 화면에서 달마다 펼친다(`lib/calc/events.ts`).
 
 ---
 

@@ -44,7 +44,7 @@ app/
   (auth)/login, (auth)/invite/[token], onboarding
   (app)/layout.tsx          # 사이드바 + 메인 스크롤 영역 / 모바일 탭바
   (app)/(home)/page.tsx     # 홈 (loading.tsx를 홈에만 걸려고 그룹으로 감쌈)
-  (app)/transactions, recurring, stats, notes, assets, settings
+  (app)/transactions, recurring, stats, schedule, notes, assets, settings
 components/
   ui/                       # 버튼, 칩, 세그먼트, 진행바 등 디자인 시스템 부품
   layout/                   # Sidebar, MobileTabBar, PageHeader
