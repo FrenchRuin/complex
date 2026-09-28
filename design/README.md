@@ -32,6 +32,7 @@
 - 카드는 `radius-md`에 그림자 없이 `surface` 위에 놓습니다. 그림자는 떠 있는 것에만: 추가 버튼·탭바 `shadow-float`, 바텀시트 `shadow-sheet`.
 - 칩, 점, 아바타, 진행바, 둥근 추가 버튼은 `radius-full`. 입력창·세그먼트는 `radius-sm`. 바텀시트 윗모서리는 `radius-lg`.
 - 키보드 포커스는 모든 컨트롤에 `focus-ring`.
+- 스크롤바는 없애지 않고 얇게, 트랙 없이 손잡이만 `line-strong`을 옅게 칠합니다(웹). 폰은 OS 기본 표시를 씁니다.
 
 ## 화면 구조
 

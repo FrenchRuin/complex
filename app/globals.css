@@ -189,6 +189,12 @@
     overflow-wrap: anywhere;
   }
 
+  /* 스크롤바: 얇게, 트랙 없이 손잡이만 (line-strong을 옅게). 폰은 OS 스크롤 표시를 그대로 쓴다 */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--line-strong) 55%, transparent) transparent;
+  }
+
   /* 모든 컨트롤에 같은 포커스 링 */
   :focus-visible {
     outline: none;
