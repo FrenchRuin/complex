@@ -26,7 +26,7 @@ function adminClient(): SupabaseClient {
   return createClient(url, service, { auth: { persistSession: false } });
 }
 
-async function userClient(email: string, password: string): Promise<SupabaseClient> {
+export async function userClient(email: string, password: string): Promise<SupabaseClient> {
   const { url, key } = loadEnv();
   const client = createClient(url, key, { auth: { persistSession: false } });
   const { error } = await client.auth.signInWithPassword({ email, password });

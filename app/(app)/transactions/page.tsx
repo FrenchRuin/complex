@@ -4,6 +4,7 @@ import { FilterBar } from "@/components/transactions/FilterBar";
 import { MonthLink } from "@/components/transactions/MonthLinks";
 import { MonthPicker } from "@/components/transactions/MonthPicker";
 import { MonthView } from "@/components/transactions/MonthView";
+import { OpenFromQuery } from "@/components/transactions/OpenFromQuery";
 import { PersonFilterLinks } from "@/components/transactions/PersonFilterLinks";
 import { SearchResults } from "@/components/transactions/SearchResults";
 import { filtersToHref, isSearchAll, parseFilters } from "@/lib/calc/filters";
@@ -64,6 +65,7 @@ export default async function TransactionsPage({ searchParams }: PageProps<"/tra
           <MonthView filters={filters} currentMonth={currentMonth} rows={rows} labels={labels} names={names} />
         )}
       </div>
+      <OpenFromQuery rows={rows} />
     </>
   );
 }

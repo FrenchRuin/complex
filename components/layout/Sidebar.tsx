@@ -4,6 +4,7 @@ import { Plus, Search, Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { useSyncStatus } from "@/components/realtime/RealtimeProvider";
 import { useTransactionPanel } from "@/components/transactions/TransactionPanelProvider";
 import { Avatar } from "@/components/ui/Avatar";
@@ -59,12 +60,13 @@ export function Sidebar({ me, members, names, paymentMethods, recurringDue }: Pr
             <Avatar key={m.id} slot={m.slot} name={m.displayName} avatarUrl={m.avatarUrl} />
           ))}
         </span>
-        <span className="min-w-0">
+        <span className="min-w-0 flex-1">
           <span className="block text-heading text-ink">우리 둘 가계부</span>
           <span className="block truncate text-caption text-ink-muted">
             {members.map((m) => m.displayName).join(" · ")}
           </span>
         </span>
+        <NotificationBell className="-mr-1" />
       </div>
 
       <form

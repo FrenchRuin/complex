@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 type Props = {
   title: ReactNode;
@@ -13,10 +14,13 @@ export function PageHeader({ title, titleStart, titleEnd, children }: Props) {
   return (
     <header className="sticky top-[env(safe-area-inset-top,0px)] z-20 border-b border-line bg-surface/95 px-5 py-3 backdrop-blur lg:top-0 lg:px-8">
       <div className="flex min-h-11 flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-1">
+        {/* 폰: 제목 줄이 한 줄을 다 쓰고(오른쪽 끝 종), 필터 같은 children은 다음 줄로 */}
+        <div className="flex w-full min-w-0 items-center gap-1 lg:w-auto lg:flex-1">
           {titleStart}
           <h1 className="text-title text-ink tabular-nums">{title}</h1>
           {titleEnd}
+          {/* 폰: 알림 종은 제목 줄 오른쪽 끝 (웹은 사이드바에 있음) */}
+          <NotificationBell className="-mr-2 ml-auto lg:hidden" />
         </div>
         {children}
       </div>
