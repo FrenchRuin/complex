@@ -35,9 +35,16 @@ test("메모: A가 체크리스트를 쓰면 B에게 알림, 누르면 열리고
   await expect(bellB).toHaveAccessibleName("알림, 안 읽은 알림 1건", { timeout: 8000 });
   await bellB.click();
   await pageB.getByRole("link", { name: new RegExp(`${E2E_NAMES.a}님이 메모 ‘E2E 장보기’를 썼어요`) }).click();
-  const opened = pageB.getByRole("dialog", { name: "메모 고치기" });
+  // 먼저 보기로 열린다 (편집 칸 없음). "수정"을 눌러야 편집
+  const opened = pageB.getByRole("dialog", { name: "E2E 장보기" });
   await expect(opened).toBeVisible();
-  await expect(opened.getByLabel("제목 (선택)")).toHaveValue("E2E 장보기");
+  await expect(opened.getByRole("checkbox", { name: "우유" })).toBeVisible();
+  await expect(opened.getByLabel("제목 (선택)")).toBeHidden();
+  await opened.getByRole("button", { name: "수정" }).click();
+  const editing = pageB.getByRole("dialog", { name: "메모 고치기" });
+  await expect(editing.getByLabel("제목 (선택)")).toHaveValue("E2E 장보기");
+  await editing.getByRole("button", { name: "취소" }).click();
+  await expect(pageB.getByRole("dialog", { name: "E2E 장보기" })).toBeVisible();
   await pageB.keyboard.press("Escape");
 
   // B: 카드에서 바로 체크 → A 화면에도 반영
@@ -101,4 +108,28 @@ test("메모 규칙: 고정·체크는 알림 없음, 내용 고침은 하나로
   // 없는 항목 체크는 오류
   const bad = await a.rpc("toggle_note_item", { p_note_id: note!.id, p_item_id: "nope", p_done: true });
   expect(bad.error?.message).toBe("invalid_note");
+});
+
+test("메모 보기: 주소는 새 창 링크, 수정 → 저장하면 다시 보기 (F-18)", async ({ page }) => {
+  await login(page, "a", "/notes");
+  await page.getByRole("button", { name: "메모 추가" }).click();
+  const editor = page.getByRole("dialog", { name: "메모 쓰기" });
+  await editor.getByLabel("메모 내용").fill("E2E 링크 메모\n여기서 사요 https://example.com/item?id=1. 그리고 www.example.org");
+  await editor.getByRole("button", { name: "저장" }).click();
+  await expect(editor).toBeHidden();
+
+  await page.getByRole("article").filter({ hasText: "E2E 링크 메모" }).getByRole("button").first().click();
+  const view = page.getByRole("dialog", { name: "E2E 링크 메모" });
+  const link = view.getByRole("link", { name: /https:\/\/example\.com\/item\?id=1/ });
+  await expect(link).toHaveAttribute("href", "https://example.com/item?id=1");
+  await expect(link).toHaveAttribute("target", "_blank");
+  await expect(link).toHaveAttribute("rel", "noopener noreferrer");
+  await expect(view.getByRole("link", { name: /www\.example\.org/ })).toHaveAttribute("href", "https://www.example.org/");
+
+  // 수정 → 저장 → 같은 창이 보기로 돌아오고 새 내용이 보인다
+  await view.getByRole("button", { name: "수정" }).click();
+  const editing = page.getByRole("dialog", { name: "메모 고치기" });
+  await editing.getByLabel("메모 내용").fill("E2E 링크 메모\n고친 내용");
+  await editing.getByRole("button", { name: "저장" }).click();
+  await expect(page.getByRole("dialog", { name: "E2E 링크 메모" })).toContainText("고친 내용");
 });
