@@ -18,7 +18,7 @@ export function MobileTabBar({ recurringDue }: { recurringDue: number }) {
         type="button"
         aria-label="내역 추가"
         onClick={openNew}
-        className="fixed right-5 bottom-[calc(76px+env(safe-area-inset-bottom,0px))] z-30 inline-flex size-14 items-center justify-center rounded-full bg-primary text-on-primary shadow-float lg:hidden"
+        className="fixed right-5 bottom-[calc(76px+env(safe-area-inset-bottom,0px))] z-30 inline-flex size-14 items-center justify-center rounded-full bg-primary text-on-primary shadow-float transition-colors hover:bg-primary/90 lg:hidden"
       >
         <Plus size={26} strokeWidth={1.75} aria-hidden />
       </button>

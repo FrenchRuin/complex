@@ -6,8 +6,9 @@ const base =
   "inline-flex h-12 items-center justify-center gap-2 rounded-md px-5 text-body font-semibold transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-60";
 
 const variants: Record<Variant, string> = {
-  primary: "bg-primary text-on-primary",
-  secondary: "border border-line-strong bg-surface-raised text-ink",
+  primary: "bg-primary text-on-primary hover:bg-primary/90 disabled:hover:bg-primary",
+  secondary:
+    "border border-line-strong bg-surface-raised text-ink hover:bg-surface-sunken disabled:hover:bg-surface-raised",
 };
 
 type Props = ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant };
