@@ -485,6 +485,83 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          actor_id: string
+          amount: number | null
+          count: number
+          created_at: string
+          household_id: string
+          id: string
+          kind: string
+          occurred_on: string | null
+          read_at: string | null
+          recipient_id: string
+          subject: string | null
+          transaction_id: string | null
+          tx_type: string | null
+        }
+        Insert: {
+          actor_id: string
+          amount?: number | null
+          count?: number
+          created_at?: string
+          household_id: string
+          id?: string
+          kind: string
+          occurred_on?: string | null
+          read_at?: string | null
+          recipient_id: string
+          subject?: string | null
+          transaction_id?: string | null
+          tx_type?: string | null
+        }
+        Update: {
+          actor_id?: string
+          amount?: number | null
+          count?: number
+          created_at?: string
+          household_id?: string
+          id?: string
+          kind?: string
+          occurred_on?: string | null
+          read_at?: string | null
+          recipient_id?: string
+          subject?: string | null
+          transaction_id?: string | null
+          tx_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_methods: {
         Row: {
           created_at: string
