@@ -485,6 +485,73 @@ export type Database = {
           },
         ]
       }
+      notes: {
+        Row: {
+          body: string
+          created_at: string
+          created_by: string
+          deleted_at: string | null
+          edited_at: string
+          household_id: string
+          id: string
+          is_pinned: boolean
+          items: Json
+          kind: string
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          body?: string
+          created_at?: string
+          created_by: string
+          deleted_at?: string | null
+          edited_at?: string
+          household_id: string
+          id?: string
+          is_pinned?: boolean
+          items?: Json
+          kind?: string
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by?: string
+          deleted_at?: string | null
+          edited_at?: string
+          household_id?: string
+          id?: string
+          is_pinned?: boolean
+          items?: Json
+          kind?: string
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           actor_id: string
@@ -494,6 +561,7 @@ export type Database = {
           household_id: string
           id: string
           kind: string
+          note_id: string | null
           occurred_on: string | null
           read_at: string | null
           recipient_id: string
@@ -509,6 +577,7 @@ export type Database = {
           household_id: string
           id?: string
           kind: string
+          note_id?: string | null
           occurred_on?: string | null
           read_at?: string | null
           recipient_id: string
@@ -524,6 +593,7 @@ export type Database = {
           household_id?: string
           id?: string
           kind?: string
+          note_id?: string | null
           occurred_on?: string | null
           read_at?: string | null
           recipient_id?: string
@@ -544,6 +614,13 @@ export type Database = {
             columns: ["household_id"]
             isOneToOne: false
             referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "notes"
             referencedColumns: ["id"]
           },
           {
@@ -834,8 +911,14 @@ export type Database = {
       }
       my_household_id: { Args: never; Returns: string }
       normalize_merchant: { Args: { p: string }; Returns: string }
+      note_items_content: { Args: { p_items: Json }; Returns: Json }
+      note_subject: { Args: { p_body: string; p_items: Json }; Returns: string }
       set_asset_value: {
         Args: { p_amount: number; p_as_of: string; p_asset_id: string }
+        Returns: undefined
+      }
+      toggle_note_item: {
+        Args: { p_done: boolean; p_item_id: string; p_note_id: string }
         Returns: undefined
       }
       uncheck_recurring: {
