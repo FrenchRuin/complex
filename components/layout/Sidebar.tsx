@@ -16,6 +16,12 @@ import { NAV_ITEMS, isActivePath } from "@/lib/nav";
 
 const DOT: Record<string, string> = { joint: "bg-joint", a: "bg-member-a", b: "bg-member-b" };
 const SYNC_LABEL = { connecting: "연결하는 중", online: "실시간 연결됨", offline: "연결 끊김" } as const;
+/** 아바타 오른쪽 아래 상태 점: 연결됨 초록, 연결 중 회색, 끊김 속 빈 동그라미 (색만으로 구분하지 않게 모양도 다르게) */
+const DOT_STATUS = {
+  online: "bg-online",
+  connecting: "bg-line-strong",
+  offline: "border-2 border-line-strong bg-surface-raised",
+} as const;
 
 type Props = {
   me: HouseholdMember;
@@ -152,10 +158,13 @@ export function Sidebar({ me, members, names, paymentMethods, recurringDue }: Pr
           설정
         </Link>
         <div className="flex items-center gap-2 px-3 pt-2">
-          <Avatar slot={me.slot} name={me.displayName} avatarUrl={me.avatarUrl} />
-          <span className="min-w-0">
-            <span className="block truncate text-body text-ink">{me.displayName}</span>
-            <span className="block text-caption text-ink-muted">{SYNC_LABEL[status]}</span>
+          <span className="relative shrink-0" title={SYNC_LABEL[status]}>
+            <Avatar slot={me.slot} name={me.displayName} avatarUrl={me.avatarUrl} />
+            <span aria-hidden className={`absolute -right-0.5 -bottom-0.5 size-3 rounded-full ring-2 ring-surface-raised ${DOT_STATUS[status]}`} />
+          </span>
+          <span className="min-w-0 truncate text-body text-ink">
+            {me.displayName}
+            <span className="sr-only"> · {SYNC_LABEL[status]}</span>
           </span>
         </div>
       </div>
