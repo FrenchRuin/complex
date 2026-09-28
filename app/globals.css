@@ -173,6 +173,12 @@
   }
 }
 
+@keyframes drawer-in {
+  from {
+    transform: translateX(-100%);
+  }
+}
+
 @keyframes panel-in {
   from {
     transform: translateX(100%);

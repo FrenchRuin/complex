@@ -1,3 +1,4 @@
+import { MobileMenuProvider } from "@/components/layout/MobileMenu";
 import { MobileTabBar } from "@/components/layout/MobileTabBar";
 import { NotificationsProvider } from "@/components/notifications/NotificationsProvider";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -32,28 +33,24 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
   const namesById = Object.fromEntries(members.map((m) => [m.id, m.displayName]));
   const meMember = { id: me.id, slot: me.slot, displayName: me.displayName, avatarUrl: me.avatarUrl };
 
+  const sidebar = { me: meMember, members, names, paymentMethods, recurringDue: recurring.dueUnpaid };
+
   return (
     <ToastProvider>
       <RealtimeProvider householdId={me.householdId}>
         <NotificationsProvider value={{ items: notifications, names: namesById }}>
-        <TransactionPanelProvider
-          data={{ categories, paymentMethods, members, names, mySlot: me.slot, rules }}
-        >
-          <div className="lg:flex lg:h-dvh">
-            <Sidebar
-              me={meMember}
-              members={members}
-              names={names}
-              paymentMethods={paymentMethods}
-              recurringDue={recurring.dueUnpaid}
-            />
-            <main className="min-w-0 flex-1 pb-[calc(96px+env(safe-area-inset-bottom,0px))] lg:overflow-y-auto lg:pb-10">
-              <OfflineBanner />
-              {children}
-            </main>
-          </div>
-          <MobileTabBar recurringDue={recurring.dueUnpaid} />
-        </TransactionPanelProvider>
+          <TransactionPanelProvider data={{ categories, paymentMethods, members, names, mySlot: me.slot, rules }}>
+            <MobileMenuProvider data={sidebar}>
+              <div className="lg:flex lg:h-dvh">
+                <Sidebar {...sidebar} />
+                <main className="min-w-0 flex-1 pb-[calc(96px+env(safe-area-inset-bottom,0px))] lg:overflow-y-auto lg:pb-10">
+                  <OfflineBanner />
+                  {children}
+                </main>
+              </div>
+              <MobileTabBar recurringDue={recurring.dueUnpaid} />
+            </MobileMenuProvider>
+          </TransactionPanelProvider>
         </NotificationsProvider>
       </RealtimeProvider>
     </ToastProvider>
