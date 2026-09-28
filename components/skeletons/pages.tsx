@@ -73,6 +73,22 @@ export function AssetsSkeleton() {
   );
 }
 
+export function NotesSkeleton() {
+  return (
+    <PageSkeleton title="메모" className="flex flex-col gap-4 px-5 py-6 lg:px-8">
+      <div className="flex gap-2">
+        <Skeleton className="h-11 flex-1 rounded-sm" />
+        <Skeleton className="h-11 w-28 rounded-md" />
+      </div>
+      <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <CardSkeleton lines={3} />
+        <CardSkeleton lines={4} />
+        <CardSkeleton lines={2} />
+      </div>
+    </PageSkeleton>
+  );
+}
+
 export function SettingsSkeleton() {
   return (
     <PageSkeleton title="설정" className="flex w-full max-w-[720px] flex-col gap-4 px-5 py-6 lg:px-8">
