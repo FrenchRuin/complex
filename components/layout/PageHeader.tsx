@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { MobileMenuButton } from "./MobileMenu";
 
 type Props = {
   title: ReactNode;
@@ -16,6 +17,8 @@ export function PageHeader({ title, titleStart, titleEnd, children }: Props) {
       <div className="flex min-h-11 flex-wrap items-center justify-between gap-3">
         {/* 폰: 제목 줄이 한 줄을 다 쓰고(오른쪽 끝 종), 필터 같은 children은 다음 줄로 */}
         <div className="flex w-full min-w-0 items-center gap-1 lg:w-auto lg:flex-1">
+          {/* 폰: 왼쪽 끝 ☰ 메뉴 (웹은 사이드바가 늘 보임) */}
+          <MobileMenuButton />
           {titleStart}
           <h1 className="text-title text-ink tabular-nums">{title}</h1>
           {titleEnd}

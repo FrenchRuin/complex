@@ -15,7 +15,7 @@ export function SettingsSubpage({ title, children }: Props) {
           <Link
             href="/settings"
             aria-label="설정으로 돌아가기"
-            className="-ml-2 inline-flex size-11 items-center justify-center rounded-sm text-ink hover:bg-surface-sunken"
+            className="inline-flex size-11 items-center justify-center rounded-sm text-ink hover:bg-surface-sunken lg:-ml-2"
           >
             <ChevronLeft size={22} strokeWidth={1.75} aria-hidden />
           </Link>
