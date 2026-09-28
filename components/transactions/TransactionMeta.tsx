@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { Checkbox } from "@/components/ui/Checkbox";
 import { formatMonthDayKST } from "@/lib/date";
 import type { HouseholdMember } from "@/lib/household";
 import type { TransactionRecord } from "./types";
@@ -41,15 +42,9 @@ export function FormFooter({ error, pending, keepOpen, onKeepOpenChange, onDelet
         {error}
       </p>
       {keepOpen === null ? null : (
-        <label className="flex items-center gap-2 text-body text-ink">
-          <input
-            type="checkbox"
-            checked={keepOpen}
-            onChange={(e) => onKeepOpenChange(e.target.checked)}
-            className="size-5 accent-[var(--primary)]"
-          />
+        <Checkbox checked={keepOpen} onChange={onKeepOpenChange}>
           계속 추가
-        </label>
+        </Checkbox>
       )}
       <div className="flex gap-2">
         {onDelete ? <DeleteButton disabled={pending} onDelete={onDelete} /> : null}

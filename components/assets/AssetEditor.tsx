@@ -5,9 +5,11 @@ import { createAsset, setDeleted, updateAssetInfo } from "@/app/(app)/assets/act
 import { AmountInput } from "@/components/transactions/AmountInput";
 import { DeleteButton } from "@/components/transactions/TransactionMeta";
 import { Button } from "@/components/ui/Button";
+import { Checkbox } from "@/components/ui/Checkbox";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { ModalDialog } from "@/components/ui/ModalDialog";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
+import { Select } from "@/components/ui/Select";
 import { TextField } from "@/components/ui/TextField";
 import { useToast } from "@/components/ui/Toast";
 import type { AssetItem } from "@/lib/assets";
@@ -77,23 +79,13 @@ export function AssetEditor({ item, names, onClose }: Props) {
             placeholder="예: 생활비 통장, 전세 보증금"
             autoFocus={!item}
           />
-          <div className="flex flex-col gap-2">
-            <label htmlFor="asset-kind" className="text-caption font-semibold text-ink-muted">
-              종류
-            </label>
-            <select
-              id="asset-kind"
-              value={kind}
-              onChange={(e) => changeKind(e.target.value as AssetKind)}
-              className="h-12 rounded-sm bg-surface-sunken px-4 text-body text-ink"
-            >
-              {ASSET_KINDS.map((k) => (
-                <option key={k} value={k}>
-                  {ASSET_KIND_LABEL[k]}
-                </option>
-              ))}
-            </select>
-          </div>
+          <Select
+            id="asset-kind"
+            label="종류"
+            value={kind}
+            onChange={(v) => changeKind(v as AssetKind)}
+            options={ASSET_KINDS.map((k) => ({ value: k, label: ASSET_KIND_LABEL[k] }))}
+          />
           <SegmentedControl
             legend="소유"
             options={OWNERS.map((o) => ({ value: o, label: ownerLabel(o, names) }))}
@@ -107,15 +99,9 @@ export function AssetEditor({ item, names, onClose }: Props) {
               <DatePicker label="기준일" value={asOf} onChange={setAsOf} />
             </>
           )}
-          <label className="flex items-center gap-2 text-body text-ink">
-            <input
-              type="checkbox"
-              checked={isLiability}
-              onChange={(e) => setIsLiability(e.target.checked)}
-              className="size-5 accent-[var(--primary)]"
-            />
+          <Checkbox checked={isLiability} onChange={setIsLiability}>
             부채예요 (대출처럼 갚아야 하는 돈)
-          </label>
+          </Checkbox>
           <TextField label="메모 (선택)" value={memo} onChange={(e) => setMemo(e.target.value)} maxLength={200} />
           <p role="alert" className="min-h-[18px] text-caption text-danger">
             {error}

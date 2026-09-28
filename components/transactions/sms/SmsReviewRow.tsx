@@ -1,6 +1,8 @@
 "use client";
 
+import { Checkbox } from "@/components/ui/Checkbox";
 import { DatePicker } from "@/components/ui/DatePicker";
+import { Select } from "@/components/ui/Select";
 import { SCOPE_LABEL, SCOPES, SLOTS, ownerLabel, type MemberNames, type Scope, type Slot } from "@/lib/domain";
 import type { CategoryOption, PaymentMethodOption } from "@/lib/household-data";
 import { formatNumber, parseWon } from "@/lib/money";
@@ -25,12 +27,11 @@ export function SmsReviewRow({ row, index, categories, paymentMethods, names, on
   return (
     <li className={`rounded-md border p-3 ${row.selected ? "border-primary" : "border-line"}`}>
       <div className="flex items-start gap-3">
-        <input
-          type="checkbox"
+        <Checkbox
           checked={row.selected}
-          onChange={(e) => onChange({ selected: e.target.checked })}
-          aria-label={`${index + 1}번째 문자 저장하기`}
-          className="mt-1 size-5 shrink-0 accent-[var(--primary)]"
+          onChange={(selected) => onChange({ selected })}
+          ariaLabel={`${index + 1}번째 문자 저장하기`}
+          className="mt-0.5 shrink-0"
         />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -57,52 +58,36 @@ export function SmsReviewRow({ row, index, categories, paymentMethods, names, on
           가맹점
           <input value={row.merchant} maxLength={50} onChange={(e) => onChange({ merchant: e.target.value })} className={field} />
         </label>
-        <label className={label}>
-          카테고리
-          <select value={row.categoryId ?? ""} onChange={(e) => onChange({ categoryId: e.target.value || null })} className={field}>
-            <option value="">골라 주세요</option>
-            {usable.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className={label}>
-          결제수단
-          <select
-            value={row.paymentMethodId ?? ""}
-            onChange={(e) => onChange({ paymentMethodId: e.target.value || null })}
-            className={field}
-          >
-            <option value="">선택 안 함</option>
-            {paymentMethods.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className={label}>
-          구분
-          <select value={row.scope} onChange={(e) => onChange({ scope: e.target.value as Scope })} className={field}>
-            {SCOPES.map((s) => (
-              <option key={s} value={s}>
-                {SCOPE_LABEL[s]}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className={label}>
-          {row.scope === "joint" ? "누가 결제" : "누구의 지출"}
-          <select value={row.memberSlot} onChange={(e) => onChange({ memberSlot: e.target.value as Slot })} className={field}>
-            {SLOTS.map((s) => (
-              <option key={s} value={s}>
-                {ownerLabel(s, names)}
-              </option>
-            ))}
-          </select>
-        </label>
+        <Select
+          compact
+          label="카테고리"
+          value={row.categoryId ?? ""}
+          onChange={(v) => onChange({ categoryId: v || null })}
+          placeholder="골라 주세요"
+          options={usable.map((c) => ({ value: c.id, label: c.name }))}
+        />
+        <Select
+          compact
+          label="결제수단"
+          value={row.paymentMethodId ?? ""}
+          onChange={(v) => onChange({ paymentMethodId: v || null })}
+          emptyLabel="선택 안 함"
+          options={paymentMethods.map((m) => ({ value: m.id, label: m.name }))}
+        />
+        <Select
+          compact
+          label="구분"
+          value={row.scope}
+          onChange={(v) => onChange({ scope: v as Scope })}
+          options={SCOPES.map((s) => ({ value: s, label: SCOPE_LABEL[s] }))}
+        />
+        <Select
+          compact
+          label={row.scope === "joint" ? "누가 결제" : "누구의 지출"}
+          value={row.memberSlot}
+          onChange={(v) => onChange({ memberSlot: v as Slot })}
+          options={SLOTS.map((s) => ({ value: s, label: ownerLabel(s, names) }))}
+        />
       </div>
     </li>
   );

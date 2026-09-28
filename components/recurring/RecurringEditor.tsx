@@ -6,7 +6,9 @@ import { AmountInput } from "@/components/transactions/AmountInput";
 import { AssignmentFields } from "@/components/transactions/AssignmentFields";
 import { PaymentMethodSelect } from "@/components/transactions/PaymentMethodSelect";
 import { Button } from "@/components/ui/Button";
+import { Checkbox } from "@/components/ui/Checkbox";
 import { ModalDialog } from "@/components/ui/ModalDialog";
+import { Select } from "@/components/ui/Select";
 import { TextField } from "@/components/ui/TextField";
 import { useToast } from "@/components/ui/Toast";
 import { defaultAssignment } from "@/lib/calc/assignment";
@@ -91,48 +93,26 @@ export function RecurringEditor({ open, item, data, onClose }: Props) {
           value={amount}
           onChange={setAmount}
         />
-        <label className="flex items-center gap-2 text-body text-ink">
-          <input
-            type="checkbox"
-            checked={isVariable}
-            onChange={(e) => setIsVariable(e.target.checked)}
-            className="size-5 accent-[var(--primary)]"
-          />
+        <Checkbox checked={isVariable} onChange={setIsVariable}>
           매달 금액이 달라요
-        </label>
-        <label className="flex items-center gap-2 text-body text-ink">
-          <input
-            type="checkbox"
-            checked={hasVariableDate}
-            onChange={(e) => setHasVariableDate(e.target.checked)}
-            className="size-5 accent-[var(--primary)]"
-          />
+        </Checkbox>
+        <Checkbox checked={hasVariableDate} onChange={setHasVariableDate}>
           매달 결제일도 달라요
-        </label>
+        </Checkbox>
         <TextField
           label="매월 결제일 (1~31, 없는 날은 말일)"
           inputMode="numeric"
           value={day}
           onChange={(e) => setDay(e.target.value.replace(/[^0-9]/g, "").slice(0, 2))}
         />
-        <div className="flex flex-col gap-2">
-          <label htmlFor="recurring-category" className="text-caption font-semibold text-ink-muted">
-            카테고리
-          </label>
-          <select
-            id="recurring-category"
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-            className="h-12 rounded-sm bg-surface-sunken px-4 text-body text-ink"
-          >
-            <option value="">골라 주세요</option>
-            {expenseCategories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          id="recurring-category"
+          label="카테고리"
+          value={categoryId}
+          onChange={setCategoryId}
+          placeholder="골라 주세요"
+          options={expenseCategories.map((c) => ({ value: c.id, label: c.name }))}
+        />
         <PaymentMethodSelect
           id="recurring-payment-method"
           methods={data.paymentMethods}
