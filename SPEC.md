@@ -400,7 +400,27 @@
 - 모든 가구 소속 테이블: `household_id = my_household_id()`인 행만 select/insert/update/delete.
 - members: 같은 가구 구성원만 조회, 자기 행의 display_name만 수정.
 - invites: 같은 가구만 생성·조회. 초대 수락은 서버 함수(RPC, security definer)로 처리: 토큰 유효성·만료·인원 확인 후 members에 추가.
+- notifications: 받는 사람(`recipient_id`)만 조회하고, 바꿀 수 있는 칸은 `read_at`뿐. 만들기·지우기는 사용자에게 막혀 있다 (2026-09-28).
 - 허용 이메일 확인은 서버(로그인 서버 액션과 미들웨어)에서 한다.
+
+### 5.5 개선으로 추가한 테이블
+
+**notifications** (F-17, 2026-09-28 추가)
+| 컬럼 | 타입 | 설명 |
+| --- | --- | --- |
+| household_id | uuid fk | |
+| recipient_id | uuid fk → members | 받는 사람 |
+| actor_id | uuid fk → members | 한 사람 |
+| kind | text | `'created'` / `'updated'` / `'deleted'` / `'restored'` / `'recurring_paid'` / `'sms_batch'` |
+| transaction_id | uuid fk null | 문자 묶음(`sms_batch`)은 null |
+| occurred_on | date null | 알림을 만든 때의 거래 날짜 (문자 묶음은 가장 이른 날짜) |
+| subject | text null | 가맹점, 없으면 카테고리 이름 |
+| amount | bigint null | 금액 (문자 묶음은 지출 합계) |
+| tx_type | text null | `'expense'` / `'income'` |
+| count | int | 문자 묶음의 건수, 그 밖에는 1 |
+| read_at | timestamptz null | 읽은 시각 |
+
+인덱스: `(recipient_id, created_at desc)`. 행은 사용자가 직접 만들 수 없고 transactions의 트리거(`notify_transactions_inserted`, `notify_transaction_updated`)만 만든다.
 
 ---
 
