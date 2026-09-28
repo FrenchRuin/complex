@@ -5,6 +5,7 @@ import { saveGoal, setDeleted } from "@/app/(app)/assets/actions";
 import { AmountInput } from "@/components/transactions/AmountInput";
 import { DeleteButton } from "@/components/transactions/TransactionMeta";
 import { Button } from "@/components/ui/Button";
+import { Checkbox } from "@/components/ui/Checkbox";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { ModalDialog } from "@/components/ui/ModalDialog";
 import { TextField } from "@/components/ui/TextField";
@@ -53,15 +54,9 @@ export function GoalEditor({ goal, onClose }: Props) {
       <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
         <TextField label="목표 이름" value={name} onChange={(e) => setName(e.target.value)} maxLength={30} placeholder="예: 여름 여행, 비상금" autoFocus />
         <AmountInput id="goal-target" label="목표액" value={target} onChange={setTarget} />
-        <label className="flex items-center gap-2 text-body text-ink">
-          <input
-            type="checkbox"
-            checked={hasDue}
-            onChange={(e) => setHasDue(e.target.checked)}
-            className="size-5 accent-[var(--primary)]"
-          />
+        <Checkbox checked={hasDue} onChange={setHasDue}>
           기한 정하기
-        </label>
+        </Checkbox>
         {hasDue ? <DatePicker label="기한" value={dueDate} onChange={setDueDate} /> : null}
         <p role="alert" className="min-h-[18px] text-caption text-danger">
           {error}

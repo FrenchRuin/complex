@@ -1,5 +1,6 @@
 "use client";
 
+import { Select } from "@/components/ui/Select";
 import { ownerLabel, type MemberNames } from "@/lib/domain";
 import type { PaymentMethodOption } from "@/lib/household-data";
 
@@ -14,23 +15,13 @@ type Props = {
 /** 결제수단 고르기 (선택). 고르면 구분·사람 기본값이 바뀐다. */
 export function PaymentMethodSelect({ methods, names, value, onChange, id = "tx-payment-method" }: Props) {
   return (
-    <div className="flex flex-col gap-2">
-      <label htmlFor={id} className="text-caption font-semibold text-ink-muted">
-        결제수단 (선택)
-      </label>
-      <select
-        id={id}
-        value={value ?? ""}
-        onChange={(e) => onChange(e.target.value === "" ? null : e.target.value)}
-        className="h-12 rounded-sm bg-surface-sunken px-4 text-body text-ink"
-      >
-        <option value="">선택 안 함</option>
-        {methods.map((m) => (
-          <option key={m.id} value={m.id}>
-            {m.name} · {ownerLabel(m.owner, names)}
-          </option>
-        ))}
-      </select>
-    </div>
+    <Select
+      id={id}
+      label="결제수단 (선택)"
+      value={value ?? ""}
+      onChange={(v) => onChange(v === "" ? null : v)}
+      emptyLabel="선택 안 함"
+      options={methods.map((m) => ({ value: m.id, label: `${m.name} · ${ownerLabel(m.owner, names)}` }))}
+    />
   );
 }
