@@ -71,9 +71,11 @@ export function UsageSection({ usage, supabaseProjectRef }: Props) {
         <ExternalButton href="https://vercel.com/d?to=%2F%5Bteam%5D%2F~%2Fusage&title=Usage">
           Vercel 사용량 보기
         </ExternalButton>
+        <ExternalButton href="https://claude.ai/settings/usage">Claude 사용량 보기</ExternalButton>
       </div>
       <p className="mt-2 text-caption text-ink-muted">
-        Vercel 사용량(트래픽·함수 실행 시간)은 보안상 앱 안에서 가져오지 않고, Vercel 화면에서 확인해요.
+        Vercel 사용량(트래픽·함수 실행 시간)은 보안상 앱 안에서 가져오지 않고, Vercel 화면에서 확인해요. Claude 구독
+        사용량은 가져올 수 있는 방법이 없어 claude.ai 화면에서 확인해요.
       </p>
     </SettingsSection>
   );
@@ -85,7 +87,7 @@ function ExternalButton({ href, children }: { href: string; children: string }) 
       href={href}
       target="_blank"
       rel="noreferrer"
-      className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-md border border-line-strong px-4 text-body font-semibold text-ink hover:bg-surface-sunken"
+      className="inline-flex h-11 items-center sm:flex-1 justify-center gap-2 rounded-md border border-line-strong px-4 text-body font-semibold text-ink hover:bg-surface-sunken"
     >
       {children}
       <ExternalLink size={16} strokeWidth={1.75} aria-hidden />
