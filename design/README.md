@@ -49,6 +49,8 @@
 - **사람 칩**: `label` 글자, 배경 `joint-soft`/`member-a-soft`/`member-b-soft`, 글자는 같은 계열 진한 색. 예: `공동`, `지훈`, `서연`.
 - **분할 막대**: 이번 달 지출을 공동/A/B 비율로 나눈 가로 막대, 높이 8px, `radius-full`. 막대 아래에 이름과 금액을 글자로 함께 적습니다.
 - **예산 진행바**: 트랙 `surface-sunken`, 채움 `primary`; 100%를 넘으면 채움 `danger`와 `초과 32,000원` 배지(`danger-soft` 배경).
+- **드롭다운**(`components/ui/Select`): 칸은 입력창과 같은 `surface-sunken`, 누르면 날짜 고르기 창처럼 떠 있는 `surface-raised` 목록(`shadow-float`)이 열리고 고른 항목은 `primary` 글자 + 체크. 기본 `<select>`는 쓰지 않습니다.
+- **체크박스**(`components/ui/Checkbox`): 둥근 네모(6px), 켜면 `primary` 바탕 + 흰 체크. 기본 모양 체크박스는 쓰지 않습니다.
 - **세그먼트 컨트롤**: 지출/수입, 공동/개인 전환. 트랙 `surface-sunken`, 선택 칸 `surface-raised` + `ink`.
 - **캘린더 칸**: 날짜 숫자 위, 그날 지출 합계를 `caption`으로 아래. 선택된 날은 `primary-soft` 배경.
 - **요약 카드**: `heading` 제목, 큰 숫자 하나, 그 아래 보조 줄 두세 개(`caption`).
