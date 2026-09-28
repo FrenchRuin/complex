@@ -1,4 +1,5 @@
 import { MobileTabBar } from "@/components/layout/MobileTabBar";
+import { NotificationsProvider } from "@/components/notifications/NotificationsProvider";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { OfflineBanner } from "@/components/realtime/OfflineBanner";
 import { RealtimeProvider } from "@/components/realtime/RealtimeProvider";
@@ -10,6 +11,7 @@ import {
   getVisibleCategories,
   getVisiblePaymentMethods,
 } from "@/lib/household-data";
+import { getMyNotifications } from "@/lib/notifications";
 import { getRecurringOverview } from "@/lib/recurring";
 
 /**
@@ -18,19 +20,22 @@ import { getRecurringOverview } from "@/lib/recurring";
  */
 export default async function AppLayout({ children }: LayoutProps<"/">) {
   const me = await requireMember();
-  const [members, categories, paymentMethods, recurring, rules] = await Promise.all([
+  const [members, categories, paymentMethods, recurring, rules, notifications] = await Promise.all([
     getHouseholdMembers(),
     getVisibleCategories(),
     getVisiblePaymentMethods(),
     getRecurringOverview(),
     getMerchantRules(),
+    getMyNotifications(),
   ]);
   const names = toMemberNames(members);
+  const namesById = Object.fromEntries(members.map((m) => [m.id, m.displayName]));
   const meMember = { id: me.id, slot: me.slot, displayName: me.displayName, avatarUrl: me.avatarUrl };
 
   return (
     <ToastProvider>
       <RealtimeProvider householdId={me.householdId}>
+        <NotificationsProvider value={{ items: notifications, names: namesById }}>
         <TransactionPanelProvider
           data={{ categories, paymentMethods, members, names, mySlot: me.slot, rules }}
         >
@@ -49,6 +54,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
           </div>
           <MobileTabBar recurringDue={recurring.dueUnpaid} />
         </TransactionPanelProvider>
+        </NotificationsProvider>
       </RealtimeProvider>
     </ToastProvider>
   );
