@@ -9,7 +9,10 @@ test("자산·부채 추가 → 순자산, 저축 목표 적립 → 진행률 (F
     await page.getByRole("button", { name: "자산·부채 추가" }).click();
     const dialog = page.getByRole("dialog", { name: "자산·부채 추가" });
     await dialog.getByLabel("이름").fill(name);
-    if (kind) await dialog.getByLabel("종류").selectOption({ label: kind });
+    if (kind) {
+      await dialog.getByRole("combobox", { name: "종류" }).click();
+      await page.getByRole("option", { name: kind, exact: true }).click();
+    }
     await dialog.getByLabel("금액", { exact: true }).fill(amount);
     await dialog.getByRole("button", { name: "저장" }).click();
     await expect(dialog).toBeHidden();
