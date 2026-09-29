@@ -83,8 +83,9 @@ export function SpendBudgetEditor({ monthLabel, monthFirst, budgets, paymentMeth
                 />
               </li>
             ) : (
-              <li key={b.id} className="flex items-center gap-2 border-b border-line py-2 last:border-b-0">
-                <span className="min-w-0 flex-1">
+              // 좁은 폰에서는 버튼들이 다음 줄 오른쪽으로 내려간다
+              <li key={b.id} className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-line py-2 last:border-b-0">
+                <span className="min-w-[8rem] flex-1">
                   <label htmlFor={`spend-${b.id}`} className="block truncate text-body text-ink">
                     {b.name}
                   </label>
@@ -103,7 +104,7 @@ export function SpendBudgetEditor({ monthLabel, monthFirst, budgets, paymentMeth
                   />
                   <span className="text-body text-ink-muted">원</span>
                 </span>
-                <span className="-mr-2 flex shrink-0 items-center">
+                <span className="-mr-2 ml-auto flex shrink-0 items-center">
                   <IconButton icon={ChevronUp} label={`${b.name} 위로`} size="sm" disabled={pending || index === 0} onClick={() => run(() => moveSpendBudget(b.id, "up"))} />
                   <IconButton
                     icon={ChevronDown}
