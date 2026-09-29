@@ -716,6 +716,7 @@ export type Database = {
           kind: string
           note_id: string | null
           occurred_on: string | null
+          pushed_at: string | null
           read_at: string | null
           recipient_id: string
           subject: string | null
@@ -733,6 +734,7 @@ export type Database = {
           kind: string
           note_id?: string | null
           occurred_on?: string | null
+          pushed_at?: string | null
           read_at?: string | null
           recipient_id: string
           subject?: string | null
@@ -750,6 +752,7 @@ export type Database = {
           kind?: string
           note_id?: string | null
           occurred_on?: string | null
+          pushed_at?: string | null
           read_at?: string | null
           recipient_id?: string
           subject?: string | null
@@ -876,6 +879,57 @@ export type Database = {
             columns: ["household_id"]
             isOneToOne: false
             referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          device: string
+          endpoint: string
+          household_id: string
+          id: string
+          last_used_at: string | null
+          member_id: string
+          p256dh: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          device?: string
+          endpoint: string
+          household_id: string
+          id?: string
+          last_used_at?: string | null
+          member_id: string
+          p256dh: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          device?: string
+          endpoint?: string
+          household_id?: string
+          id?: string
+          last_used_at?: string | null
+          member_id?: string
+          p256dh?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_subscriptions_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "push_subscriptions_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
             referencedColumns: ["id"]
           },
         ]
