@@ -30,6 +30,10 @@
   --expense: #cc2f2f;
   --holiday: #c2362b;
   --scrim: rgb(11 18 32 / 0.4);
+  /* 감자밭 로고 (꾸밈 전용, 글자·상태 표시에 쓰지 않는다) */
+  --potato: #8a5a2b;
+  --potato-soft: #ecd2a6;
+  --sprout: #2f8a4a;
 
   --shadow-float-value: 0 2px 6px #151b2314, 0 10px 24px -4px #151b2324;
   --shadow-sheet-value: 0 -8px 32px #151b2329;
@@ -64,6 +68,9 @@
   --expense: #ff7a7a;
   --holiday: #ff8a7e;
   --scrim: rgb(0 0 0 / 0.6);
+  --potato: #e6c08a;
+  --potato-soft: #5b3f24;
+  --sprout: #6cc47a;
 
   --shadow-float-value: 0 10px 24px -4px #000000cc;
   --shadow-sheet-value: 0 -8px 32px #000000e6;
@@ -95,6 +102,9 @@
     --expense: #ff7a7a;
     --holiday: #ff8a7e;
     --scrim: rgb(0 0 0 / 0.6);
+    --potato: #e6c08a;
+    --potato-soft: #5b3f24;
+    --sprout: #6cc47a;
 
     --shadow-float-value: 0 10px 24px -4px #000000cc;
     --shadow-sheet-value: 0 -8px 32px #000000e6;
@@ -128,6 +138,9 @@
   --color-expense: var(--expense);
   --color-holiday: var(--holiday);
   --color-scrim: var(--scrim);
+  --color-potato: var(--potato);
+  --color-potato-soft: var(--potato-soft);
+  --color-sprout: var(--sprout);
 
   --font-sans: "Pretendard Variable", "Pretendard", "IBM Plex Sans KR", -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
 
