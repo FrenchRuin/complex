@@ -22,6 +22,7 @@ const ev = (over: Partial<CalendarEvent>): CalendarEvent => ({
   endTime: null,
   repeat: "none",
   repeatUntil: null,
+  skipDates: [],
   createdBy: "m",
   updatedBy: "m",
   updatedAt: "2026-09-01T00:00:00Z",
@@ -63,6 +64,14 @@ describe("occurrencesBetween", () => {
   it("반복 끝 날짜 뒤로는 없음, 시작 전도 없음", () => {
     const e = ev({ startDate: "2026-09-15", endDate: "2026-09-15", repeat: "weekly", repeatUntil: "2026-09-22" });
     expect(starts([e])).toEqual(["2026-09-15", "2026-09-22"]);
+  });
+
+  it("건너뛴 회차(이 일정만 지움·떼어 냄)는 빠지고, 여러 날 일정도 그 회차 전체가 빠진다", () => {
+    const weekly = ev({ startDate: "2026-09-01", endDate: "2026-09-01", repeat: "weekly", skipDates: ["2026-09-15"] });
+    expect(starts([weekly])).toEqual(["2026-09-01", "2026-09-08", "2026-09-22", "2026-09-29"]);
+    const trip = ev({ startDate: "2026-08-30", endDate: "2026-09-01", repeat: "monthly", skipDates: ["2026-08-30"] });
+    const byDay = occurrencesByDay(occurrencesBetween([trip], SEPT), SEPT);
+    expect([...byDay.keys()]).toEqual(["2026-09-30"]);
   });
 
   it("같은 날은 하루 종일 먼저, 그다음 시각 순", () => {

@@ -30,6 +30,8 @@ const RPC_ERROR_MESSAGES: Record<string, string> = {
   invalid_goal: "저축 목표를 찾을 수 없어요. 새로고침해 주세요",
   invalid_asset: "자산 항목을 찾을 수 없어요. 새로고침해 주세요",
   invalid_note: "메모를 찾을 수 없어요. 새로고침해 주세요",
+  event_not_found: "일정을 찾을 수 없어요. 새로고침해 주세요",
+  occurrence_not_found: "이 날짜 일정을 찾을 수 없어요. 새로고침해 주세요",
   last_asset_value: "금액 기록은 하나 이상 있어야 해요. 항목을 지우려면 항목 삭제를 눌러 주세요",
 };
 

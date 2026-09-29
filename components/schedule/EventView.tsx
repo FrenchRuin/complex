@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { DeleteButton } from "@/components/transactions/TransactionMeta";
 import { LinkifiedText } from "@/components/ui/LinkifiedText";
 import { PersonChip } from "@/components/ui/PersonChip";
@@ -13,11 +14,14 @@ type Props = {
   names: MemberNames;
   members: readonly HouseholdMember[];
   pending: boolean;
+  /** 반복 일정은 한 번 누르면 "이 일정만 / 반복 전체"를 묻는다 (footer로 들어옴) */
   onDelete: () => void;
+  /** 있으면 삭제 버튼 대신 아래에 보인다 (반복 일정 범위 고르기) */
+  footer?: ReactNode;
 };
 
 /** 일정 보기 (F-19): 날짜·시각·반복·누구·메모(링크). 고치려면 창 머리의 "수정" */
-export function EventView({ occurrence, names, members, pending, onDelete }: Props) {
+export function EventView({ occurrence, names, members, pending, onDelete, footer }: Props) {
   const { event } = occurrence;
   const editor = members.find((m) => m.id === event.updatedBy);
   const repeat = repeatLabel(event);
@@ -52,13 +56,23 @@ export function EventView({ occurrence, names, members, pending, onDelete }: Pro
           {editor ? <PersonChip owner={editor.slot} label={editor.displayName} /> : null}
           <span>{notificationTimeLabel(event.updatedAt)} 마지막 수정</span>
         </p>
-        {event.repeat !== "none" ? (
-          <p className="text-caption text-ink-muted">반복 일정은 고치거나 삭제하면 모든 회차에 적용돼요.</p>
-        ) : null}
       </div>
 
       <div className="flex border-t border-line px-5 pt-3 pb-[calc(20px+env(safe-area-inset-bottom,0px))]">
-        <DeleteButton disabled={pending} onDelete={onDelete} />
+        {footer ? (
+          <div className="w-full">{footer}</div>
+        ) : event.repeat === "none" ? (
+          <DeleteButton disabled={pending} onDelete={onDelete} />
+        ) : (
+          <button
+            type="button"
+            disabled={pending}
+            onClick={onDelete}
+            className="inline-flex h-12 items-center justify-center rounded-md bg-danger-soft px-4 text-body font-semibold text-danger hover:bg-danger/20 disabled:opacity-60"
+          >
+            삭제
+          </button>
+        )}
       </div>
     </>
   );

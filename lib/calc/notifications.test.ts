@@ -43,6 +43,19 @@ describe("일정 알림 (F-19)", () => {
     );
   });
 
+  it("반복 일정의 그날만 지우기·되돌리기는 날짜와 함께", () => {
+    const one = { subject: "운동", amount: null, count: 1, occurredOn: "2026-09-30" };
+    expect(notificationSentence({ ...one, kind: "event_occurrence_deleted" }, "지훈")).toBe(
+      "지훈님이 9월 30일 일정 ‘운동’을 삭제했어요",
+    );
+    expect(notificationSentence({ ...one, kind: "event_occurrence_restored" }, "지훈")).toBe(
+      "지훈님이 9월 30일 일정 ‘운동’을 되돌렸어요",
+    );
+    expect(notificationHref({ kind: "event_occurrence_deleted", transactionId: null, occurredOn: "2026-09-30", eventId: "e1" })).toBe(
+      "/schedule?month=2026-09",
+    );
+  });
+
   it("누르면 그 달 일정 화면에서 그 일정, 삭제면 그 달만", () => {
     expect(notificationHref({ kind: "event_updated", transactionId: null, occurredOn: "2026-10-03", eventId: "e1" })).toBe(
       "/schedule?month=2026-10&event=e1",

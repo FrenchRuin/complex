@@ -13,7 +13,7 @@ export const getEvents = cache(async (): Promise<CalendarEvent[]> => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("events")
-    .select("id, title, memo, owner, start_date, end_date, all_day, start_time, end_time, repeat, repeat_until, created_by, updated_by, updated_at")
+    .select("id, title, memo, owner, start_date, end_date, all_day, start_time, end_time, repeat, repeat_until, skip_dates, created_by, updated_by, updated_at")
     .is("deleted_at", null)
     .order("start_date")
     .limit(1000);
@@ -32,6 +32,7 @@ export const getEvents = cache(async (): Promise<CalendarEvent[]> => {
     endTime: hhmm(e.end_time),
     repeat: (REPEATS as readonly string[]).includes(e.repeat) ? (e.repeat as EventRepeat) : "none",
     repeatUntil: e.repeat_until,
+    skipDates: e.skip_dates,
     createdBy: e.created_by,
     updatedBy: e.updated_by,
     updatedAt: e.updated_at,

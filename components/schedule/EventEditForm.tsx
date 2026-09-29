@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { saveEvent } from "@/app/(app)/schedule/actions";
+import { saveEvent, type OccurrenceRef } from "@/app/(app)/schedule/actions";
 import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { DatePicker } from "@/components/ui/DatePicker";
@@ -21,6 +21,8 @@ type Props = {
   names: MemberNames;
   onSaved: () => void;
   onCancel?: () => void;
+  /** "이 일정만 수정": 이 회차를 반복에서 떼어 내 저장한다. event는 그 회차 날짜로 채워서 준다 */
+  detachFrom?: OccurrenceRef;
 };
 
 const REPEAT_OPTIONS = [
@@ -32,7 +34,7 @@ const REPEAT_OPTIONS = [
 const TIMES = TIME_OPTIONS.map((t) => ({ value: t, label: t }));
 
 /** 일정 편집 (F-19). 시각은 30분 단위 드롭다운, 여러 날·반복 끝은 켤 때만 보인다 */
-export function EventEditForm({ event, defaultDate, names, onSaved, onCancel }: Props) {
+export function EventEditForm({ event, defaultDate, names, onSaved, onCancel, detachFrom }: Props) {
   const toast = useToast();
   const [pending, startTransition] = useTransition();
   const [title, setTitle] = useState(event?.title ?? "");
@@ -57,19 +59,22 @@ export function EventEditForm({ event, defaultDate, names, onSaved, onCancel }: 
   function save() {
     setError(null);
     startTransition(async () => {
-      const result = await saveEvent({
-        id: event?.id,
-        title,
-        memo,
-        owner,
-        startDate,
-        endDate: multiDay ? endDate : startDate,
-        allDay,
-        startTime: allDay ? null : startTime,
-        endTime: allDay || !endTime ? null : endTime,
-        repeat,
-        repeatUntil: repeat !== "none" && hasUntil ? repeatUntil : null,
-      });
+      const result = await saveEvent(
+        {
+          id: detachFrom ? undefined : event?.id,
+          title,
+          memo,
+          owner,
+          startDate,
+          endDate: multiDay ? endDate : startDate,
+          allDay,
+          startTime: allDay ? null : startTime,
+          endTime: allDay || !endTime ? null : endTime,
+          repeat,
+          repeatUntil: repeat !== "none" && hasUntil ? repeatUntil : null,
+        },
+        detachFrom,
+      );
       if (result.error) return setError(result.error);
       toast(event ? "일정을 고쳤어요" : "일정을 추가했어요");
       onSaved();
@@ -103,8 +108,12 @@ export function EventEditForm({ event, defaultDate, names, onSaved, onCancel }: 
           </div>
         )}
 
-        <Select label="반복" value={repeat} onChange={(v) => setRepeat(v as EventRepeat)} options={REPEAT_OPTIONS} />
-        {repeat !== "none" ? (
+        {detachFrom ? (
+          <p className="text-caption text-ink-muted">이 날짜 일정만 바뀌어요. 나머지 반복 일정은 그대로예요.</p>
+        ) : (
+          <Select label="반복" value={repeat} onChange={(v) => setRepeat(v as EventRepeat)} options={REPEAT_OPTIONS} />
+        )}
+        {repeat !== "none" && !detachFrom ? (
           <>
             <Checkbox checked={hasUntil} onChange={setHasUntil}>
               반복 끝나는 날 정하기
