@@ -75,7 +75,7 @@ export default async function TransactionsPage({ searchParams }: PageProps<"/tra
         {searchAll ? (
           <SearchResults filters={filters} currentMonth={currentMonth} rows={rows} labels={labels} names={names} />
         ) : (
-          <MonthView filters={filters} currentMonth={currentMonth} rows={rows} labels={labels} names={names} />
+          <MonthView filters={filters} currentMonth={currentMonth} rows={rows} labels={labels} names={names} range={range} />
         )}
       </div>
       <OpenFromQuery rows={rows} />
