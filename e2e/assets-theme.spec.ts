@@ -22,6 +22,12 @@ test("자산·부채 추가 → 순자산, 저축 목표 적립 → 진행률 (F
   await expect(page.getByText("자산 5,000,000원 − 부채 2,000,000원")).toBeVisible();
   await expect(page.getByText("3,000,000원").first()).toBeVisible();
 
+  // 목록은 종류별로 묶여 접혀 있다: 묶음 머리에 개수·합계, 누르면 펼쳐진다
+  const depositGroup = page.getByRole("button", { name: /^예금 1개/ });
+  await expect(depositGroup).toHaveAttribute("aria-expanded", "false");
+  await expect(page.getByRole("button", { name: /^대출 1개/ })).toContainText("−2,000,000원");
+  await depositGroup.click();
+
   // 지난 날짜 금액 기록 → 지금 금액은 그대로, 추이 표에 지난달이 생긴다 (F-41)
   await page.getByRole("button", { name: /E2E 통장/ }).click();
   const edit = page.getByRole("dialog", { name: "자산·부채 수정" });
@@ -50,11 +56,10 @@ test("자산·부채 추가 → 순자산, 저축 목표 적립 → 진행률 (F
   await expect(contribute).toBeHidden();
   await expect(page.getByRole("progressbar", { name: "E2E 여행 진행률" })).toHaveAttribute("aria-valuenow", "25");
 
-  // 홈 카드에도 순자산과 목표가 보인다
+  // 홈은 돈 중심이라 자산 카드가 없다 (2026-09-29). 자산은 메뉴로
   await page.goto("/");
-  const card = page.getByRole("main").getByRole("link", { name: /자산·목표/ });
-  await expect(card).toContainText("3,000,000원");
-  await expect(card).toContainText("E2E 여행");
+  await expect(page.getByRole("heading", { name: /월 지출/ })).toBeVisible();
+  await expect(page.getByRole("main").getByRole("link", { name: /자산·목표/ })).toHaveCount(0);
 });
 
 test("화면 모드: 다크를 고르면 바로 바뀌고 새로고침해도 유지, 시스템으로 되돌리기 (F-53)", async ({ page }) => {
