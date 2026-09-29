@@ -76,18 +76,19 @@ docs/progress.md
 | `surface` | #F4F6F8 | #0F1318 | 페이지 바탕 |
 | `surface-raised` | #FFFFFF | #181D24 | 카드, 사이드바, 패널 |
 | `surface-sunken` | #E9EDF1 | #0A0D11 | 입력창, 세그먼트 트랙, 빈 진행바 |
-| `line` | #DCE2E8 | #262D36 | 구분선 |
-| `line-strong` | #8A95A1 | #6B7682 | 컨트롤 테두리 |
+| `line` | #DCE2E8 | #2C343E | 구분선 |
+| `line-strong` | #7B8794 | #6B7682 | 컨트롤 테두리 |
 | `ink` | #151B23 | #EEF1F4 | 본문, 지출 금액 |
 | `ink-muted` | #56616E | #A3ADB8 | 날짜, 보조 문구 |
 | `primary` | #1B5FAF | #78AEF2 | 유일한 행동 색, 수입 금액 |
-| `primary-soft` | #E6EEF8 | #172636 | 선택 상태 배경 |
+| `primary-soft` | #E6EEF8 | #203854 | 선택 상태 배경 |
 | `on-primary` | #FFFFFF | #0B1220 | primary 위 글자 |
 | `joint` / `joint-soft` | #3C4E66 / #E8ECF1 | #A9B8CC / #1E2733 | 공동 |
 | `member-a` / `member-a-soft` | #0A7061 / #E0F2EE | #4FC7B2 / #0F2A26 | 사람 A |
 | `member-b` / `member-b-soft` | #AD500A / #FBEBDD | #F2A45E / #33200F | 사람 B |
 | `danger` / `danger-soft` | #C2362B / #FBE6E4 | #FF8A7E / #3A1714 | 예산 초과, 삭제 |
 | `holiday` | #C2362B | #FF8A7E | 공휴일 날짜·이름 (경고용 아님, 이름 글자와 함께) |
+| `scrim` | 남색 40% | 검정 60% | 창·패널·메뉴 뒤 덮개 (두 모드 모두 어둡게, `ink/30` 쓰지 않기) |
 
 - 글자: `amount-hero` 32/40 700, `title` 22/30 700, `heading` 17/24 600, `amount` 17/24 600, `body` 15/22 400, `caption` 13/18 400, `label` 12/16 600.
 - 간격 4px 단위 (`4 8 12 16 20 24 32`), 모서리 `8 / 14 / 22 / 9999`.
