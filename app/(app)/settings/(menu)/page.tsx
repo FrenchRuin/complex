@@ -8,17 +8,13 @@ import {
   Tags,
   User,
   Users,
-  Wallet,
   type LucideIcon,
 } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { getMonthBudgets } from "@/lib/budget";
 import { FREE_DB_LIMIT_BYTES, usagePercent } from "@/lib/calc/usage";
-import { currentMonthKST } from "@/lib/date";
 import { getHouseholdMembers, requireMember } from "@/lib/household";
-import { formatWon } from "@/lib/money";
 import { getAllCategories, getAllPaymentMethods, getUsage } from "@/lib/settings-data";
 import { logout } from "../actions";
 
@@ -29,17 +25,15 @@ type MenuItem = { href: string; label: string; icon: LucideIcon; summary: string
 /** 설정 첫 화면: 메뉴 목록 + 각 메뉴의 현재 상태 요약 */
 export default async function SettingsPage() {
   const me = await requireMember();
-  const [members, categories, methods, budgets, usage] = await Promise.all([
+  const [members, categories, methods, usage] = await Promise.all([
     getHouseholdMembers(),
     getAllCategories(),
     getAllPaymentMethods(),
-    getMonthBudgets(currentMonthKST()),
     getUsage(),
   ]);
 
   const visible = categories.filter((c) => !c.is_hidden);
   const hidden = categories.length - visible.length;
-  const budgetTotal = budgets.reduce((sum, b) => sum + b.amount, 0);
 
   const items: MenuItem[] = [
     { href: "/settings/profile", label: "프로필", icon: User, summary: me.displayName },
@@ -62,12 +56,6 @@ export default async function SettingsPage() {
       label: "계좌·카드",
       icon: CreditCard,
       summary: `${methods.filter((m) => !m.is_hidden).length}개`,
-    },
-    {
-      href: "/settings/budget",
-      label: "예산",
-      icon: Wallet,
-      summary: budgets.length ? `이번 달 ${budgets.length}개 · ${formatWon(budgetTotal)}` : "아직 없어요",
     },
     { href: "/settings/theme", label: "화면 모드", icon: SunMoon, summary: "시스템·라이트·다크" },
     { href: "/settings/app", label: "앱으로 설치", icon: Smartphone, summary: "홈 화면에 추가" },

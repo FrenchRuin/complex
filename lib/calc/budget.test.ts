@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  allowanceRows,
+  allowanceText,
   barWidth,
   budgetSummary,
   categoryBudgetRows,
@@ -89,5 +91,22 @@ describe("overText / barWidth", () => {
     expect(overText("식비", 32000)).toBe("식비 예산을 32,000원 넘었어요");
     expect(barWidth(130)).toBe(100);
     expect(barWidth(-5)).toBe(0);
+  });
+});
+
+describe("allowanceRows (용돈)", () => {
+  it("한도가 있는 사람만, 개인 지출과 비교한다", () => {
+    const rows = allowanceRows([{ slot: "b", amount: 300000 }, { slot: "a", amount: 200000 }], { a: 230000, b: 120000 });
+    expect(rows).toEqual([
+      { slot: "a", limit: 200000, spent: 230000, percent: 115, remaining: -30000, over: true, overBy: 30000 },
+      { slot: "b", limit: 300000, spent: 120000, percent: 40, remaining: 180000, over: false, overBy: 0 },
+    ]);
+    expect(allowanceRows([{ slot: "a", amount: 100000 }], { a: 0, b: 50000 }).map((r) => r.slot)).toEqual(["a"]);
+  });
+
+  it("문구: 남은 금액, 넘으면 이름과 초과 금액", () => {
+    const [over, under] = allowanceRows([{ slot: "a", amount: 200000 }, { slot: "b", amount: 300000 }], { a: 230000, b: 120000 });
+    expect(allowanceText(over, "지훈")).toBe("지훈님 용돈을 30,000원 넘었어요");
+    expect(allowanceText(under, "서연")).toBe("180,000원 남았어요");
   });
 });

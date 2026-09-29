@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { saveBudgets } from "@/app/(app)/settings/budget-actions";
+import { saveBudgets } from "@/app/(app)/budget/actions";
 import { Button } from "@/components/ui/Button";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { useToast } from "@/components/ui/Toast";
 import type { BudgetItem } from "@/lib/calc/budget";
 import type { CategoryOption } from "@/lib/household-data";
 import { formatNumber, formatWon, parseWon } from "@/lib/money";
-import { SettingsSection } from "./SettingsSection";
+import { SettingsSection } from "@/components/settings/SettingsSection";
 
 type Props = {
   monthLabel: string;
@@ -43,7 +43,7 @@ export function BudgetEditor({ monthLabel, monthFirst, categories, budgets }: Pr
   return (
     <SettingsSection
       id="budget"
-      title={`${monthLabel} 예산`}
+      title={`${monthLabel} 카테고리 예산`}
       description="카테고리별 한 달 예산이에요. 빈칸은 예산 없음이고, 다음 달에는 이번 달 예산이 자동으로 복사돼요."
     >
       <ul>

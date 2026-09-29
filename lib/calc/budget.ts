@@ -2,6 +2,7 @@
  * 예산 계산 (F-21, F-22).
  */
 import { monthRange, type DateString, type MonthString } from "@/lib/date";
+import { SLOTS, type Slot } from "@/lib/domain";
 import { formatWon } from "@/lib/money";
 
 export type BudgetItem = { categoryId: string; amount: number };
@@ -88,4 +89,44 @@ export function overText(categoryName: string, overBy: number): string {
 /** 진행바 채움 폭 (0~100) */
 export function barWidth(percent: number): number {
   return Math.min(100, Math.max(0, percent));
+}
+
+/** 용돈: 사람별 한 달 개인 지출 한도 */
+export type AllowanceItem = { slot: Slot; amount: number };
+
+export type AllowanceRow = {
+  slot: Slot;
+  limit: number;
+  /** 그 사람의 개인 지출 합계 (공동 지출 제외) */
+  spent: number;
+  percent: number;
+  /** 남은 금액 (넘었으면 음수) */
+  remaining: number;
+  over: boolean;
+  overBy: number;
+};
+
+/** 한도가 있는 사람만, A → B 순. personalSpent는 splitByOwner의 a·b (개인 지출 합계) */
+export function allowanceRows(allowances: readonly AllowanceItem[], personalSpent: Record<Slot, number>): AllowanceRow[] {
+  return SLOTS.flatMap((slot) => {
+    const item = allowances.find((a) => a.slot === slot);
+    if (!item) return [];
+    const spent = personalSpent[slot];
+    return [
+      {
+        slot,
+        limit: item.amount,
+        spent,
+        percent: Math.round((spent / item.amount) * 100),
+        remaining: item.amount - spent,
+        over: spent > item.amount,
+        overBy: Math.max(0, spent - item.amount),
+      },
+    ];
+  });
+}
+
+/** "70,000원 남았어요" / "지훈님 용돈을 30,000원 넘었어요" */
+export function allowanceText(row: AllowanceRow, name: string): string {
+  return row.over ? `${name}님 용돈을 ${formatWon(row.overBy)} 넘었어요` : `${formatWon(row.remaining)} 남았어요`;
 }

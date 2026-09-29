@@ -1,4 +1,15 @@
-import { CalendarDays, ChartColumn, House, NotebookPen, PiggyBank, ReceiptText, Repeat, Settings, type LucideIcon } from "lucide-react";
+import {
+  CalendarDays,
+  ChartColumn,
+  House,
+  NotebookPen,
+  PiggyBank,
+  ReceiptText,
+  Repeat,
+  Settings,
+  Wallet,
+  type LucideIcon,
+} from "lucide-react";
 
 export type NavItem = {
   href: string;
@@ -15,6 +26,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/transactions", label: "내역", icon: ReceiptText, inTabBar: true, inSidebar: true },
   { href: "/stats", label: "통계", icon: ChartColumn, inTabBar: true, inSidebar: true },
   { href: "/recurring", label: "정기지출", icon: Repeat, inTabBar: true, inSidebar: true },
+  { href: "/budget", label: "예산", icon: Wallet, inTabBar: false, inSidebar: true },
   { href: "/schedule", label: "일정", icon: CalendarDays, inTabBar: false, inSidebar: true },
   { href: "/notes", label: "메모", icon: NotebookPen, inTabBar: false, inSidebar: true },
   { href: "/assets", label: "자산·목표", icon: PiggyBank, inTabBar: false, inSidebar: true },
