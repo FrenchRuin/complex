@@ -2,6 +2,7 @@
 
 import { WEEKDAY_LABELS, calendarWeeks } from "@/lib/calc/calendar";
 import type { Occurrence, RecurringDue } from "@/lib/calc/events";
+import type { HolidayMap } from "@/lib/calc/holidays";
 import { formatDayHeader, type DateString, type MonthString } from "@/lib/date";
 import type { Owner } from "@/lib/domain";
 
@@ -11,6 +12,7 @@ type Props = {
   selected: DateString | null;
   byDay: Map<DateString, Occurrence[]>;
   dues: Map<DateString, RecurringDue[]>;
+  holidays: HolidayMap;
   onSelect: (date: DateString) => void;
 };
 
@@ -21,9 +23,10 @@ const MAX_TITLES = 3;
 
 /**
  * 일정 월 달력 (F-19). 웹은 칸마다 일정 제목(최대 3개 + 외 N), 폰은 점.
- * 정기지출 결제일은 회색 글자/점으로 함께 (읽기만). 날짜를 누르면 옆(폰은 아래)에 그날 목록.
+ * 정기지출 결제일은 회색 글자/점으로 함께 (읽기만). 공휴일은 날짜 숫자를 holiday 색으로, 웹은 이름도 (F-55).
+ * 날짜를 누르면 옆(폰은 아래)에 그날 목록.
  */
-export function ScheduleCalendar({ month, today, selected, byDay, dues, onSelect }: Props) {
+export function ScheduleCalendar({ month, today, selected, byDay, dues, holidays, onSelect }: Props) {
   return (
     <section aria-label="일정 달력" className="rounded-md bg-surface-raised p-3 lg:p-4">
       <div className="grid grid-cols-7 pb-1 text-center text-label text-ink-muted" aria-hidden>
@@ -39,8 +42,10 @@ export function ScheduleCalendar({ month, today, selected, byDay, dues, onSelect
             const list = byDay.get(date) ?? [];
             const dayDues = dues.get(date) ?? [];
             const isSelected = selected === date;
+            const holiday = holidays[date]?.join(", ") ?? null;
             const label = [
               formatDayHeader(date),
+              holiday,
               list.length ? `일정 ${list.length}개` : null,
               dayDues.length ? `정기지출 ${dayDues.length}건` : null,
               isSelected ? "선택됨" : null,
@@ -61,11 +66,16 @@ export function ScheduleCalendar({ month, today, selected, byDay, dues, onSelect
               >
                 <span
                   className={`self-center text-caption tabular-nums lg:self-start lg:px-1 ${
-                    date === today ? "font-bold text-primary" : "text-ink"
+                    date === today ? "font-bold text-primary" : holiday ? "text-holiday" : "text-ink"
                   }`}
                 >
                   {Number(date.slice(8))}
                 </span>
+                {holiday ? (
+                  <span className="hidden truncate px-1 text-[11px] leading-4 text-holiday lg:block" aria-hidden>
+                    {holiday}
+                  </span>
+                ) : null}
 
                 {/* 폰: 점 */}
                 <span className="flex flex-wrap justify-center gap-0.5 lg:hidden" aria-hidden>

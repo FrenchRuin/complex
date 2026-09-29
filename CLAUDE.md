@@ -87,6 +87,7 @@ docs/progress.md
 | `member-a` / `member-a-soft` | #0A7061 / #E0F2EE | #4FC7B2 / #0F2A26 | 사람 A |
 | `member-b` / `member-b-soft` | #AD500A / #FBEBDD | #F2A45E / #33200F | 사람 B |
 | `danger` / `danger-soft` | #C2362B / #FBE6E4 | #FF8A7E / #3A1714 | 예산 초과, 삭제 |
+| `holiday` | #C2362B | #FF8A7E | 공휴일 날짜·이름 (경고용 아님, 이름 글자와 함께) |
 
 - 글자: `amount-hero` 32/40 700, `title` 22/30 700, `heading` 17/24 600, `amount` 17/24 600, `body` 15/22 400, `caption` 13/18 400, `label` 12/16 600.
 - 간격 4px 단위 (`4 8 12 16 20 24 32`), 모서리 `8 / 14 / 22 / 9999`.

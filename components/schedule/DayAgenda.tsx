@@ -12,13 +12,15 @@ type Props = {
   date: DateString;
   occurrences: readonly Occurrence[];
   dues: readonly RecurringDue[];
+  /** 그날 공휴일 이름 (F-55) */
+  holidayNames: readonly string[];
   names: MemberNames;
   onOpen: (occurrence: Occurrence) => void;
   onAdd: (date: DateString) => void;
 };
 
-/** 고른 날의 일정 목록 + 그날 정기지출 결제일 (F-19) */
-export function DayAgenda({ date, occurrences, dues, names, onOpen, onAdd }: Props) {
+/** 고른 날의 일정 목록 + 그날 정기지출 결제일 (F-19) + 공휴일 이름 (F-55) */
+export function DayAgenda({ date, occurrences, dues, holidayNames, names, onOpen, onAdd }: Props) {
   return (
     <section aria-labelledby="day-agenda" className="rounded-md bg-surface-raised p-5">
       <div className="flex items-center justify-between gap-2">
@@ -33,6 +35,9 @@ export function DayAgenda({ date, occurrences, dues, names, onOpen, onAdd }: Pro
           <Plus size={18} strokeWidth={1.75} aria-hidden />이 날 일정 추가
         </button>
       </div>
+      {holidayNames.length ? (
+        <p className="mt-1 text-caption font-semibold text-holiday">공휴일 · {holidayNames.join(", ")}</p>
+      ) : null}
 
       {occurrences.length === 0 && dues.length === 0 ? (
         <p className="mt-2 text-body text-ink-muted">일정이 없어요.</p>
