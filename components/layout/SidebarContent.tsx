@@ -164,26 +164,25 @@ export function SidebarContent({ me, members, names, paymentMethods, recurringDu
         </ul>
       </section>
 
-      <div className="border-t border-line p-3 pb-[calc(12px+env(safe-area-inset-bottom,0px))]">
+      {/* 아래: 내 프로필 + 오른쪽 톱니바퀴(설정) */}
+      <div className="flex items-center gap-2 border-t border-line pt-2 pr-3 pl-6 pb-[calc(8px+env(safe-area-inset-bottom,0px))]">
+        <span className="relative shrink-0" title={SYNC_LABEL[status]}>
+          <Avatar slot={me.slot} name={me.displayName} avatarUrl={me.avatarUrl} />
+          <span aria-hidden className={`absolute -right-0.5 -bottom-0.5 size-3 rounded-full ring-2 ring-surface-raised ${DOT_STATUS[status]}`} />
+        </span>
+        <span className="min-w-0 flex-1 truncate text-body text-ink">
+          {me.displayName}
+          <span className="sr-only"> · {SYNC_LABEL[status]}</span>
+        </span>
         <Link
           href="/settings"
           onClick={onNavigate}
+          aria-label="설정"
           aria-current={isActivePath(pathname, "/settings") ? "page" : undefined}
-          className="flex h-10 items-center gap-3 rounded-sm px-3 text-body text-ink hover:bg-surface-sunken aria-[current=page]:bg-primary-soft aria-[current=page]:text-primary"
+          className="inline-flex size-11 shrink-0 items-center justify-center rounded-sm text-ink-muted hover:bg-surface-sunken hover:text-ink aria-[current=page]:bg-primary-soft aria-[current=page]:text-primary"
         >
-          <Settings size={20} strokeWidth={1.75} aria-hidden />
-          설정
+          <Settings size={22} strokeWidth={1.75} aria-hidden />
         </Link>
-        <div className="flex items-center gap-2 px-3 pt-2">
-          <span className="relative shrink-0" title={SYNC_LABEL[status]}>
-            <Avatar slot={me.slot} name={me.displayName} avatarUrl={me.avatarUrl} />
-            <span aria-hidden className={`absolute -right-0.5 -bottom-0.5 size-3 rounded-full ring-2 ring-surface-raised ${DOT_STATUS[status]}`} />
-          </span>
-          <span className="min-w-0 truncate text-body text-ink">
-            {me.displayName}
-            <span className="sr-only"> · {SYNC_LABEL[status]}</span>
-          </span>
-        </div>
       </div>
     </>
   );

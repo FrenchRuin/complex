@@ -13,7 +13,6 @@ test("설정: 메뉴 목록에서 각 화면으로 가고 돌아온다", async (
     ["가구·초대", "가구"],
     ["카테고리", "카테고리"],
     ["계좌·카드", "계좌·카드"],
-    ["예산", /예산$/],
     ["서비스 사용량", "서비스 사용량"],
   ] as const) {
     await menu.getByRole("link", { name: new RegExp(`^${label}`) }).click();
@@ -21,6 +20,12 @@ test("설정: 메뉴 목록에서 각 화면으로 가고 돌아온다", async (
     await page.getByRole("link", { name: "설정으로 돌아가기" }).click();
     await expect(menu).toBeVisible();
   }
+
+  // 예산은 설정이 아니라 사이드바 메뉴로 옮겼다 (2026-09-29). 설정은 사이드바 아래 톱니바퀴로
+  await expect(menu.getByRole("link", { name: /^예산/ })).toHaveCount(0);
+  await page.goto("/");
+  await page.getByRole("complementary").getByRole("link", { name: "설정" }).click();
+  await expect(page).toHaveURL(/\/settings$/);
 
   await expect(page.getByRole("button", { name: "로그아웃" })).toBeVisible();
 });
