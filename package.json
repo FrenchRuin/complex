@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@date-fns/tz": "1.5.0",
+    "@hyunbinseo/holidays-kr": "5.2027.2",
     "@radix-ui/react-dialog": "1.1.23",
     "@radix-ui/react-popover": "1.1.23",
     "@radix-ui/react-select": "2.3.7",

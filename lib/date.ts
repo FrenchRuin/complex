@@ -67,6 +67,12 @@ export function formatFullDate(date: DateString): string {
   return `${year}년 ${month}월 ${day}일 (${WEEKDAYS[weekday].slice(0, 1)})`;
 }
 
+/** 요일 번호: 0 일요일 ~ 6 토요일 (날짜만 다루므로 시간대와 무관) */
+export function weekdayOf(date: DateString): number {
+  const { year, month, day } = parseDate(date);
+  return new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+}
+
 /** 날짜를 n일 앞뒤로 */
 export function addDays(date: DateString, days: number): DateString {
   const { year, month, day } = parseDate(date);
