@@ -9,6 +9,7 @@ export type NotificationKind =
   | "deleted"
   | "restored"
   | "recurring_paid"
+  | "recurring_unchecked"
   | "sms_batch"
   | "note_created"
   | "note_updated"
@@ -40,6 +41,7 @@ const KINDS: readonly NotificationKind[] = [
   "deleted",
   "restored",
   "recurring_paid",
+  "recurring_unchecked",
   "sms_batch",
   "note_created",
   "note_updated",
@@ -87,6 +89,7 @@ const ACTION_TEXT: Record<"created" | "updated" | "deleted" | "restored", string
 /**
  * "서연님이 다이소 12,000원을 추가했어요"
  * "서연님이 월세 700,000원 납부를 체크했어요"
+ * "서연님이 월세 700,000원 납부 체크를 풀었어요"
  * "서연님이 문자로 5건을 추가했어요"
  */
 export function notificationSentence(item: Pick<NotificationItem, "kind" | "subject" | "amount" | "count">, actorName: string): string {
@@ -104,6 +107,7 @@ export function notificationSentence(item: Pick<NotificationItem, "kind" | "subj
   // 문자 묶음이 아니면 DB가 금액을 항상 채운다. 그래서 "…원을"로 끝나 조사가 늘 "을"
   const what = `${item.subject ?? "내역"} ${formatWon(item.amount ?? 0)}`;
   if (item.kind === "recurring_paid") return `${who} ${what} 납부를 체크했어요`;
+  if (item.kind === "recurring_unchecked") return `${who} ${what} 납부 체크를 풀었어요`;
   return `${who} ${what}을 ${ACTION_TEXT[item.kind as keyof typeof ACTION_TEXT]}`;
 }
 
@@ -135,7 +139,10 @@ export function notificationHref(
   const params = new URLSearchParams({ month: monthOf(item.occurredOn) });
   if (item.kind === "sms_batch") return `/transactions?${params}`;
   params.set("day", item.occurredOn);
-  if (item.transactionId && item.kind !== "deleted") params.set("tx", item.transactionId);
+  // 지운 내역(체크를 푼 정기지출 포함)은 날짜만
+  if (item.transactionId && item.kind !== "deleted" && item.kind !== "recurring_unchecked") {
+    params.set("tx", item.transactionId);
+  }
   return `/transactions?${params}`;
 }
 

@@ -21,7 +21,7 @@ function loadEnv() {
   return { url, key, service };
 }
 
-function adminClient(): SupabaseClient {
+export function adminClient(): SupabaseClient {
   const { url, service } = loadEnv();
   return createClient(url, service, { auth: { persistSession: false } });
 }

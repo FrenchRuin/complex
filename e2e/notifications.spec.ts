@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { E2E_NAMES, readCreds, userClient } from "./support/accounts";
+import { adminClient, E2E_NAMES, readCreds, userClient } from "./support/accounts";
 import { login } from "./support/login";
 
 test("한 사람이 내역을 추가하면 다른 사람에게 알림이 오고, 누르면 그 내역이 열린다 (F-17)", async ({ browser }) => {
@@ -82,6 +82,19 @@ test("알림 규칙: 문자 여러 건은 하나로, 같은 내역 수정은 하
   await a.from("transactions").update({ deleted_at: new Date().toISOString() }).eq("id", tx!.id);
   // 정기지출 납부 체크로 생긴 내역 (source = recurring)
   await a.from("transactions").insert(row("E2E 월세", 700000, "recurring"));
+  // 진짜 정기지출을 체크했다가 풀면 "삭제" 대신 "납부 체크를 풀었어요"
+  const { data: item, error: itemError } = await a
+    .from("recurring_items")
+    .insert({
+      name: "E2E 관리비", amount: 150000, day_of_month: 25, category_id: categoryId,
+      scope: "joint", member_slot: "a", start_month: "2026-09-01",
+      household_id: "00000000-0000-0000-0000-000000000000",
+    })
+    .select("id")
+    .single();
+  expect(itemError).toBeNull();
+  expect((await a.rpc("check_recurring", { p_item_id: item!.id, p_month: "2026-09-01" })).error).toBeNull();
+  expect((await a.rpc("uncheck_recurring", { p_item_id: item!.id, p_month: "2026-09-01" })).error).toBeNull();
 
   const { data: forB } = await b
     .from("notifications")
@@ -94,7 +107,11 @@ test("알림 규칙: 문자 여러 건은 하나로, 같은 내역 수정은 하
   const mine = (forB ?? []).filter((n) => n.transaction_id === tx!.id);
   expect(mine.map((n) => n.kind)).toEqual(["created", "updated", "deleted"]);
   expect(mine.find((n) => n.kind === "updated")).toMatchObject({ amount: 7000, subject: "E2E 규칙" });
-  expect(forB!.filter((n) => n.kind === "recurring_paid")).toEqual([expect.objectContaining({ subject: "E2E 월세", amount: 700000 })]);
+  expect(forB!.filter((n) => n.kind === "recurring_paid").map((n) => n.subject)).toEqual(["E2E 월세", "E2E 관리비"]);
+  expect(forB!.filter((n) => n.kind === "deleted")).toHaveLength(1);
+  expect(forB!.filter((n) => n.kind === "recurring_unchecked")).toEqual([
+    expect.objectContaining({ subject: "E2E 관리비", amount: 150000 }),
+  ]);
 
   // A 자신에게는 알림이 없다
   const { data: forA } = await a.from("notifications").select("id").gte("created_at", since);
@@ -105,4 +122,33 @@ test("알림 규칙: 문자 여러 건은 하나로, 같은 내역 수정은 하
   expect(forged.error).not.toBeNull();
   const tamper = await b.from("notifications").update({ subject: "바꿈" } as never).gte("created_at", since);
   expect(tamper.error).not.toBeNull();
+});
+
+test("90일 지난 알림은 새 알림이 생길 때 지워진다 (F-17)", async () => {
+  const creds = readCreds();
+  const a = await userClient(creds.a.email, creds.a.password);
+  const admin = adminClient();
+  const { data: members } = await admin.from("members").select("id, household_id, display_name").in("display_name", [E2E_NAMES.a, E2E_NAMES.b]);
+  const memberA = members!.find((m) => m.display_name === E2E_NAMES.a)!;
+  const memberB = members!.find((m) => m.display_name === E2E_NAMES.b)!;
+  const daysAgo = (days: number) => new Date(Date.now() - days * 86_400_000).toISOString();
+  const old = (subject: string, days: number) => ({
+    household_id: memberB.household_id, recipient_id: memberB.id, actor_id: memberA.id,
+    kind: "created", subject, amount: 1000, created_at: daysAgo(days),
+  });
+  const seeded = await admin.from("notifications").insert([old("E2E 91일 전", 91), old("E2E 80일 전", 80)]);
+  expect(seeded.error).toBeNull();
+
+  const { data: category } = await a.from("categories").select("id").eq("type", "expense").eq("name", "식비").single();
+  const added = await a.from("transactions").insert({
+    type: "expense", amount: 1000, occurred_on: "2026-09-10", category_id: category!.id, merchant: "E2E 정리",
+    scope: "joint", member_slot: "a", source: "manual",
+    household_id: "00000000-0000-0000-0000-000000000000",
+    created_by: "00000000-0000-0000-0000-000000000000",
+    updated_by: "00000000-0000-0000-0000-000000000000",
+  });
+  expect(added.error).toBeNull();
+
+  const { data: left } = await admin.from("notifications").select("subject").eq("recipient_id", memberB.id).like("subject", "E2E %일 전");
+  expect(left!.map((n) => n.subject)).toEqual(["E2E 80일 전"]);
 });

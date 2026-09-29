@@ -15,6 +15,9 @@ describe("notificationSentence", () => {
     expect(notificationSentence({ subject: "월세", amount: 700000, count: 1, kind: "recurring_paid" }, "지훈")).toBe(
       "지훈님이 월세 700,000원 납부를 체크했어요",
     );
+    expect(notificationSentence({ subject: "월세", amount: 700000, count: 1, kind: "recurring_unchecked" }, "지훈")).toBe(
+      "지훈님이 월세 700,000원 납부 체크를 풀었어요",
+    );
   });
 
   it("문자 여러 건은 건수로", () => {
@@ -84,6 +87,9 @@ describe("notificationHref", () => {
 
   it("삭제된 내역은 날짜만", () => {
     expect(notificationHref({ kind: "deleted", transactionId: "t1", occurredOn: "2026-08-31" })).toBe(
+      "/transactions?month=2026-08&day=2026-08-31",
+    );
+    expect(notificationHref({ kind: "recurring_unchecked", transactionId: "t1", occurredOn: "2026-08-31" })).toBe(
       "/transactions?month=2026-08&day=2026-08-31",
     );
   });
