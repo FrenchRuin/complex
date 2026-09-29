@@ -1,6 +1,5 @@
 import { BudgetBar } from "@/components/dashboard/BudgetBar";
-import { allowanceText, overText, type AllowanceRow, type BudgetSummary, type CategoryBudgetRow } from "@/lib/calc/budget";
-import { ownerLabel, type MemberNames } from "@/lib/domain";
+import { overText, spendBudgetText, type BudgetSummary, type CategoryBudgetRow, type SpendBudgetRow } from "@/lib/calc/budget";
 import { formatWon } from "@/lib/money";
 
 /** 변동지출 예산 합계: 쓴 돈 / 예산, 진행바, 남은 예산·하루 예산 (F-21) */
@@ -61,27 +60,22 @@ export function CategoryBudgetList({ rows, categoryNames }: CategoryProps) {
   );
 }
 
-/** 용돈: 사람마다 개인 지출 / 한도, 막대, 남은 금액 (사람 이름을 글자로 함께) */
-export function AllowanceList({ rows, names }: { rows: readonly AllowanceRow[]; names: MemberNames }) {
+/** 통장·카드 예산: 예산마다 그 계좌·카드로 쓴 돈 / 한 달 금액, 막대, 남은 금액 (F-21) */
+export function SpendBudgetList({ rows }: { rows: readonly SpendBudgetRow[] }) {
   return (
     <ul className="flex flex-col gap-3">
-      {rows.map((r) => {
-        const name = ownerLabel(r.slot, names);
-        return (
-          <li key={r.slot}>
-            <div className="mb-1 flex justify-between text-body tabular-nums">
-              <span className="text-ink">{name} 용돈</span>
-              <span className="text-caption text-ink-muted">
-                {formatWon(r.spent)} / {formatWon(r.limit)}
-              </span>
-            </div>
-            <BudgetBar percent={r.percent} overBy={r.overBy} label={`${name} 용돈`} />
-            <p className={`mt-1 text-caption tabular-nums ${r.over ? "text-danger" : "text-ink-muted"}`}>
-              {allowanceText(r, name)}
-            </p>
-          </li>
-        );
-      })}
+      {rows.map((r) => (
+        <li key={r.id}>
+          <div className="mb-1 flex justify-between gap-2 text-body tabular-nums">
+            <span className="min-w-0 truncate text-ink">{r.name}</span>
+            <span className="shrink-0 text-caption text-ink-muted">
+              {formatWon(r.spent)} / {formatWon(r.limit)}
+            </span>
+          </div>
+          <BudgetBar percent={r.percent} overBy={r.overBy} label={r.name} />
+          <p className={`mt-1 text-caption tabular-nums ${r.over ? "text-danger" : "text-ink-muted"}`}>{spendBudgetText(r)}</p>
+        </li>
+      ))}
     </ul>
   );
 }

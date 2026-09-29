@@ -48,9 +48,7 @@ export const paymentMethodInputSchema = z.object({
   kind: z.enum(PAYMENT_KINDS, "종류를 골라 주세요"),
   owner: z.enum(OWNERS, "소유를 골라 주세요"),
   smsAliases: smsAliasesSchema,
-  /** 용돈 통장·카드 (F-21). 공동 소유면 항상 false */
-  isAllowance: z.boolean(),
-}).transform((v) => ({ ...v, isAllowance: v.owner !== "joint" && v.isAllowance }));
+});
 
 export const moveDirectionSchema = z.enum(["up", "down"]);
 

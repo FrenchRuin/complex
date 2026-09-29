@@ -14,44 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      allowances: {
-        Row: {
-          amount: number
-          created_at: string
-          household_id: string
-          id: string
-          member_slot: string
-          month: string
-          updated_at: string
-        }
-        Insert: {
-          amount: number
-          created_at?: string
-          household_id: string
-          id?: string
-          member_slot: string
-          month: string
-          updated_at?: string
-        }
-        Update: {
-          amount?: number
-          created_at?: string
-          household_id?: string
-          id?: string
-          member_slot?: string
-          month?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "allowances_household_id_fkey"
-            columns: ["household_id"]
-            isOneToOne: false
-            referencedRelation: "households"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       asset_values: {
         Row: {
           amount: number
@@ -844,7 +806,6 @@ export type Database = {
           created_at: string
           household_id: string
           id: string
-          is_allowance: boolean
           is_hidden: boolean
           kind: string
           name: string
@@ -856,7 +817,6 @@ export type Database = {
           created_at?: string
           household_id: string
           id?: string
-          is_allowance?: boolean
           is_hidden?: boolean
           kind: string
           name: string
@@ -868,7 +828,6 @@ export type Database = {
           created_at?: string
           household_id?: string
           id?: string
-          is_allowance?: boolean
           is_hidden?: boolean
           kind?: string
           name?: string
@@ -993,6 +952,129 @@ export type Database = {
             columns: ["payment_method_id"]
             isOneToOne: false
             referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spend_budget_amounts: {
+        Row: {
+          amount: number
+          budget_id: string
+          household_id: string
+          id: string
+          month: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          budget_id: string
+          household_id: string
+          id?: string
+          month: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          budget_id?: string
+          household_id?: string
+          id?: string
+          month?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spend_budget_amounts_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "spend_budgets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spend_budget_amounts_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spend_budget_methods: {
+        Row: {
+          budget_id: string
+          household_id: string
+          id: string
+          payment_method_id: string
+        }
+        Insert: {
+          budget_id: string
+          household_id: string
+          id?: string
+          payment_method_id: string
+        }
+        Update: {
+          budget_id?: string
+          household_id?: string
+          id?: string
+          payment_method_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spend_budget_methods_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "spend_budgets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spend_budget_methods_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spend_budget_methods_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: true
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spend_budgets: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          household_id: string
+          id: string
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          household_id: string
+          id?: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          household_id?: string
+          id?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spend_budgets_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
             referencedColumns: ["id"]
           },
         ]

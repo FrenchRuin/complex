@@ -21,10 +21,15 @@ const KIND_ICONS: Record<PaymentKind, LucideIcon> = {
   other: CircleEllipsis,
 };
 
-type Props = { methods: PaymentMethodItem[]; names: MemberNames };
+type Props = {
+  methods: PaymentMethodItem[];
+  names: MemberNames;
+  /** 결제수단 id → 들어 있는 통장·카드 예산 이름 (F-21) */
+  budgetNames: Readonly<Record<string, string>>;
+};
 
 /** 계좌·카드 관리 (F-51) */
-export function PaymentMethodSection({ methods, names }: Props) {
+export function PaymentMethodSection({ methods, names, budgetNames }: Props) {
   const [editing, setEditing] = useState<string | "new" | null>(null);
   const { pending, error, run } = useActionRunner();
   const list = [...methods].sort((a, b) => a.sort_order - b.sort_order);
@@ -46,7 +51,7 @@ export function PaymentMethodSection({ methods, names }: Props) {
           const Icon = KIND_ICONS[method.kind];
           const details = [
             PAYMENT_KIND_LABEL[method.kind],
-            method.is_allowance ? "용돈" : null,
+            budgetNames[method.id] ?? null,
             method.sms_aliases.length > 0 ? `별칭 ${method.sms_aliases.join(", ")}` : null,
             method.is_hidden ? "숨김" : null,
           ]

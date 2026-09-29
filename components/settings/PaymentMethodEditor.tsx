@@ -3,7 +3,6 @@
 import { useActionState, useState } from "react";
 import { savePaymentMethod } from "@/app/(app)/settings/payment-method-actions";
 import { Button } from "@/components/ui/Button";
-import { Checkbox } from "@/components/ui/Checkbox";
 import { FormMessage } from "@/components/ui/FormMessage";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { TextField } from "@/components/ui/TextField";
@@ -24,7 +23,6 @@ export type PaymentMethodItem = {
   kind: PaymentKind;
   owner: Owner;
   sms_aliases: string[];
-  is_allowance: boolean;
   sort_order: number;
   is_hidden: boolean;
 };
@@ -38,11 +36,10 @@ type Props = {
 
 const KIND_OPTIONS = PAYMENT_KINDS.map((value) => ({ value, label: PAYMENT_KIND_LABEL[value] }));
 
-/** 결제수단 추가·수정 폼: 이름, 종류, 소유, 용돈 통장·카드 여부, 문자 인식용 별칭 */
+/** 결제수단 추가·수정 폼: 이름, 종류, 소유, 문자 인식용 별칭. 예산은 예산 화면의 통장·카드 예산에서 */
 export function PaymentMethodEditor({ names, method, onDone }: Props) {
   const [kind, setKind] = useState<PaymentKind>(method?.kind ?? "card");
   const [owner, setOwner] = useState<Owner>(method?.owner ?? "joint");
-  const [isAllowance, setIsAllowance] = useState(method?.is_allowance ?? false);
   const ownerOptions = OWNERS.map((value) => ({ value, label: ownerLabel(value, names) }));
 
   const [state, formAction, pending] = useActionState(
@@ -82,18 +79,6 @@ export function PaymentMethodEditor({ names, method, onDone }: Props) {
         onChange={setOwner}
         showLegend
       />
-      {/* 용돈은 한 사람 것만: 공동 소유면 숨기고 저장할 때도 꺼진다 */}
-      {owner === "joint" ? null : (
-        <div className="flex flex-col gap-1">
-          <Checkbox checked={isAllowance} onChange={setIsAllowance}>
-            용돈 통장·카드예요
-          </Checkbox>
-          <p className="pl-7 text-caption text-ink-muted">
-            켜면 이 결제수단으로 쓴 지출이 {ownerLabel(owner, names)}님 용돈에서 빠져요.
-          </p>
-          {isAllowance ? <input type="hidden" name="isAllowance" value="on" /> : null}
-        </div>
-      )}
       <TextField
         label="문자 인식용 별칭 (선택, 쉼표로 구분)"
         name="smsAliases"

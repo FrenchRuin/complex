@@ -2,7 +2,6 @@
  * 예산 계산 (F-21, F-22).
  */
 import { daysBetween, type DateRange, type DateString } from "@/lib/date";
-import { SLOTS, type Slot } from "@/lib/domain";
 import { formatWon } from "@/lib/money";
 
 export type BudgetItem = { categoryId: string; amount: number };
@@ -91,13 +90,22 @@ export function barWidth(percent: number): number {
   return Math.min(100, Math.max(0, percent));
 }
 
-/** 용돈: 사람별 한 달 한도 (용돈 통장·카드로 쓴 금액과 비교) */
-export type AllowanceItem = { slot: Slot; amount: number };
+/**
+ * 통장·카드 예산 (F-21, 2026-09-29): 이름 + 한 달 금액 + 셀 결제수단(하나 이상, 공동·개인 모두).
+ * 그 결제수단들로 쓴 지출 합계를 금액과 비교한다. 공동으로 적은 지출도 그 카드로 냈으면 센다. 수입은 세지 않는다.
+ */
+export type SpendBudget = {
+  id: string;
+  name: string;
+  methodIds: readonly string[];
+  /** 그 달 금액 (정하지 않았으면 null) */
+  amount: number | null;
+};
 
-export type AllowanceRow = {
-  slot: Slot;
+export type SpendBudgetRow = {
+  id: string;
+  name: string;
   limit: number;
-  /** 그 사람의 용돈 통장·카드로 쓴 지출 합계 */
   spent: number;
   percent: number;
   /** 남은 금액 (넘었으면 음수) */
@@ -106,43 +114,33 @@ export type AllowanceRow = {
   overBy: number;
 };
 
-/**
- * 사람별 용돈 사용: 그 사람의 용돈 통장·카드(결제수단 id → 소유자)로 쓴 지출 합계.
- * 공동으로 적은 지출도 용돈 카드로 냈으면 포함한다 (실제로 용돈에서 돈이 나갔으니). 수입은 세지 않는다.
- */
-export function allowanceSpent(
+/** 그 달 금액이 있는 예산만, 순서 그대로 */
+export function spendBudgetRows(
+  budgets: readonly SpendBudget[],
   rows: readonly { type: string; amount: number; paymentMethodId: string | null }[],
-  allowanceMethods: Readonly<Record<string, Slot>>,
-): Record<Slot, number> {
-  const spent: Record<Slot, number> = { a: 0, b: 0 };
-  for (const row of rows) {
-    const slot = row.paymentMethodId ? allowanceMethods[row.paymentMethodId] : undefined;
-    if (row.type === "expense" && slot) spent[slot] += row.amount;
-  }
-  return spent;
-}
-
-/** 한도가 있는 사람만, A → B 순. spentBySlot은 allowanceSpent 결과 */
-export function allowanceRows(allowances: readonly AllowanceItem[], spentBySlot: Record<Slot, number>): AllowanceRow[] {
-  return SLOTS.flatMap((slot) => {
-    const item = allowances.find((a) => a.slot === slot);
-    if (!item) return [];
-    const spent = spentBySlot[slot];
+): SpendBudgetRow[] {
+  return budgets.flatMap((b) => {
+    if (b.amount === null) return [];
+    const methods = new Set(b.methodIds);
+    const spent = rows
+      .filter((r) => r.type === "expense" && r.paymentMethodId !== null && methods.has(r.paymentMethodId))
+      .reduce((sum, r) => sum + r.amount, 0);
     return [
       {
-        slot,
-        limit: item.amount,
+        id: b.id,
+        name: b.name,
+        limit: b.amount,
         spent,
-        percent: Math.round((spent / item.amount) * 100),
-        remaining: item.amount - spent,
-        over: spent > item.amount,
-        overBy: Math.max(0, spent - item.amount),
+        percent: Math.round((spent / b.amount) * 100),
+        remaining: b.amount - spent,
+        over: spent > b.amount,
+        overBy: Math.max(0, spent - b.amount),
       },
     ];
   });
 }
 
-/** "70,000원 남았어요" / "지훈님 용돈을 30,000원 넘었어요" */
-export function allowanceText(row: AllowanceRow, name: string): string {
-  return row.over ? `${name}님 용돈을 ${formatWon(row.overBy)} 넘었어요` : `${formatWon(row.remaining)} 남았어요`;
+/** "70,000원 남았어요" / "생활비 예산을 30,000원 넘었어요" */
+export function spendBudgetText(row: SpendBudgetRow): string {
+  return row.over ? overText(row.name, row.overBy) : `${formatWon(row.remaining)} 남았어요`;
 }
