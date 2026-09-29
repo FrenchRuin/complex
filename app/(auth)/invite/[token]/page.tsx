@@ -6,7 +6,7 @@ import { CenteredCard } from "@/components/layout/CenteredCard";
 import { createClient } from "@/lib/supabase/server";
 import { acceptInvite } from "./actions";
 
-export const metadata: Metadata = { title: "초대 · 우리 둘 가계부" };
+export const metadata: Metadata = { title: "초대 · 감자밭" };
 
 const STATUS_MESSAGES: Record<string, { title: string; description: string }> = {
   not_found: {

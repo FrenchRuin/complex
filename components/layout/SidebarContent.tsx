@@ -69,7 +69,7 @@ export function SidebarContent({ me, members, names, paymentMethods, recurringDu
             <Avatar key={m.id} slot={m.slot} name={m.displayName} avatarUrl={m.avatarUrl} />
           ))}
         </span>
-        <span className="min-w-0 flex-1 truncate text-heading text-ink">우리 둘 가계부</span>
+        <span className="min-w-0 flex-1 truncate text-heading text-ink">감자밭</span>
         {headerAction}
       </div>
 

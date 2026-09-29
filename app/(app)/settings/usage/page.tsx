@@ -4,7 +4,7 @@ import { UsageSection } from "@/components/settings/UsageSection";
 import { requireMember } from "@/lib/household";
 import { getUsage, supabaseProjectRef } from "@/lib/settings-data";
 
-export const metadata: Metadata = { title: "서비스 사용량 · 설정 · 우리 둘 가계부" };
+export const metadata: Metadata = { title: "서비스 사용량 · 설정 · 감자밭" };
 
 export default async function UsageSettingsPage() {
   await requireMember();

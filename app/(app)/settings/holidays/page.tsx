@@ -11,7 +11,7 @@ import { formatFullDate, todayKST } from "@/lib/date";
 import { requireMember } from "@/lib/household";
 import { autoSyncHolidays, getCustomHolidays, getHolidaySync, getPresetHolidays, hasPresetYear } from "@/lib/holidays";
 
-export const metadata: Metadata = { title: "공휴일 · 설정 · 우리 둘 가계부" };
+export const metadata: Metadata = { title: "공휴일 · 설정 · 감자밭" };
 
 const YEAR_LINK =
   "inline-flex size-11 items-center justify-center rounded-sm text-ink hover:bg-surface-sunken";

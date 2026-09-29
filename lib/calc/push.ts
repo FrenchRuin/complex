@@ -21,7 +21,7 @@ export function pushPayload(
   actorName: string,
 ): PushPayload {
   return {
-    title: "우리 둘 가계부",
+    title: "감자밭",
     body: notificationSentence(item, actorName),
     url: notificationHref(item),
     // 같은 내역·메모·일정 알림은 폰에서 하나로 겹친다

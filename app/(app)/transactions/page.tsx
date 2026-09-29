@@ -15,7 +15,7 @@ import { getVisibleCategories, getVisiblePaymentMethods } from "@/lib/household-
 import { getPeriodConfig } from "@/lib/period";
 import { getLabelMaps, getMonthTransactions, searchAllTransactions } from "@/lib/transactions";
 
-export const metadata: Metadata = { title: "내역 · 우리 둘 가계부" };
+export const metadata: Metadata = { title: "내역 · 감자밭" };
 
 /**
  * 내역 화면: 월 이동, 사람 필터, 검색·필터, 캘린더 + 날짜별 목록 (F-12, F-13).

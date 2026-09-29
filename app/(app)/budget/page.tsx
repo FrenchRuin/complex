@@ -13,7 +13,7 @@ import { getVisibleCategories, getVisiblePaymentMethods } from "@/lib/household-
 import { getCurrentPeriod } from "@/lib/period";
 import { getLabelMaps, getTransactionsInRange } from "@/lib/transactions";
 
-export const metadata: Metadata = { title: "예산 · 우리 둘 가계부" };
+export const metadata: Metadata = { title: "예산 · 감자밭" };
 
 /** 예산 화면 (F-21): 이번 달(한 달 기준 F-56의 기간) 카테고리 예산·통장·카드 예산 사용 현황 + 입력 */
 export default async function BudgetPage() {

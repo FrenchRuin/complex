@@ -4,7 +4,7 @@ import { SettingsSubpage } from "@/components/settings/SettingsSubpage";
 import { requireMember } from "@/lib/household";
 import { getAllCategories } from "@/lib/settings-data";
 
-export const metadata: Metadata = { title: "카테고리 · 설정 · 우리 둘 가계부" };
+export const metadata: Metadata = { title: "카테고리 · 설정 · 감자밭" };
 
 export default async function CategorySettingsPage() {
   await requireMember();

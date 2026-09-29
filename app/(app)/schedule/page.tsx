@@ -11,7 +11,7 @@ import { getHouseholdMembers, requireMember, toMemberNames } from "@/lib/househo
 import { getCustomHolidays, getPresetHolidays } from "@/lib/holidays";
 import { getRecurringOverview } from "@/lib/recurring";
 
-export const metadata: Metadata = { title: "일정 · 우리 둘 가계부" };
+export const metadata: Metadata = { title: "일정 · 감자밭" };
 
 const MONTH = /^\d{4}-(0[1-9]|1[0-2])$/;
 

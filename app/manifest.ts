@@ -3,9 +3,9 @@ import type { MetadataRoute } from "next";
 /** 홈 화면에 앱처럼 설치 (F-53 PWA) */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "우리 둘 가계부",
-    short_name: "우리 가계부",
-    description: "둘이 함께 쓰는 가계부",
+    name: "감자밭",
+    short_name: "감자밭",
+    description: "둘이 가꾸는 가계부",
     lang: "ko",
     start_url: "/",
     scope: "/",

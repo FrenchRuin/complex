@@ -5,7 +5,7 @@ import { getMethodBudgetNames } from "@/lib/budget";
 import { getHouseholdMembers, requireMember, toMemberNames } from "@/lib/household";
 import { getAllPaymentMethods } from "@/lib/settings-data";
 
-export const metadata: Metadata = { title: "계좌·카드 · 설정 · 우리 둘 가계부" };
+export const metadata: Metadata = { title: "계좌·카드 · 설정 · 감자밭" };
 
 export default async function PaymentMethodSettingsPage() {
   await requireMember();

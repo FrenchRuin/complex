@@ -6,7 +6,7 @@ import { SettingsSubpage } from "@/components/settings/SettingsSubpage";
 import { requireMember } from "@/lib/household";
 import { updateDisplayName } from "../actions";
 
-export const metadata: Metadata = { title: "프로필 · 설정 · 우리 둘 가계부" };
+export const metadata: Metadata = { title: "프로필 · 설정 · 감자밭" };
 
 export default async function ProfileSettingsPage() {
   const me = await requireMember();

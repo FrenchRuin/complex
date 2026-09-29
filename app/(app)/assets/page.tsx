@@ -12,7 +12,7 @@ import { getHouseholdMembers, requireMember, toMemberNames } from "@/lib/househo
 import { formatWon } from "@/lib/money";
 import { getPeriodConfig } from "@/lib/period";
 
-export const metadata: Metadata = { title: "자산·목표 · 우리 둘 가계부" };
+export const metadata: Metadata = { title: "자산·목표 · 감자밭" };
 
 /** 자산·목표 (F-40~F-42): 순자산, 자산·부채, 추이, 저축 목표 */
 export default async function AssetsPage() {
