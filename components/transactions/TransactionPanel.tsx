@@ -29,7 +29,7 @@ export function TransactionPanel({ state, data, onClose, onLearn }: Props) {
   return (
     <Dialog.Root open={open} onOpenChange={(next) => (next ? undefined : onClose())}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-40 bg-ink/30 motion-safe:animate-[fade-in_150ms_ease-out]" />
+        <Dialog.Overlay className="fixed inset-0 z-40 bg-scrim motion-safe:animate-[fade-in_150ms_ease-out]" />
         <Dialog.Content
           aria-describedby={undefined}
           className="fixed inset-x-0 bottom-0 z-50 flex max-h-[92dvh] flex-col rounded-t-lg bg-surface-raised shadow-sheet outline-none motion-safe:animate-[sheet-in_200ms_ease-out] lg:inset-y-0 lg:right-0 lg:left-auto lg:max-h-none lg:w-[440px] lg:rounded-none lg:shadow-float lg:motion-safe:animate-[panel-in_200ms_ease-out]"
@@ -60,7 +60,7 @@ export function TransactionPanel({ state, data, onClose, onLearn }: Props) {
                   aria-selected={tab === t.id}
                   onClick={() => setTab(t.id)}
                   className={`flex h-10 flex-1 items-center justify-center rounded-[6px] text-body ${
-                    tab === t.id ? "bg-surface-raised font-semibold text-ink" : "text-ink-muted hover:text-ink"
+                    tab === t.id ? "bg-surface-raised font-semibold text-ink ring-1 ring-line" : "text-ink-muted hover:text-ink"
                   }`}
                 >
                   {t.label}

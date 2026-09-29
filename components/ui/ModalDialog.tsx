@@ -17,7 +17,7 @@ export function ModalDialog({ open, onOpenChange, title, description, children }
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-40 bg-ink/30 motion-safe:animate-[fade-in_150ms_ease-out]" />
+        <Dialog.Overlay className="fixed inset-0 z-40 bg-scrim motion-safe:animate-[fade-in_150ms_ease-out]" />
         <Dialog.Content
           {...(description ? {} : { "aria-describedby": undefined })}
           className="fixed inset-x-0 bottom-0 z-50 flex max-h-[92dvh] flex-col overflow-y-auto rounded-t-lg bg-surface-raised p-5 pb-[calc(20px+env(safe-area-inset-bottom,0px))] shadow-sheet outline-none motion-safe:animate-[sheet-in_200ms_ease-out] sm:inset-x-auto sm:top-1/2 sm:bottom-auto sm:left-1/2 sm:w-[440px] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-md sm:shadow-float sm:motion-safe:animate-[fade-in_150ms_ease-out]"
