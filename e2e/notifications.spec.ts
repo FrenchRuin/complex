@@ -39,7 +39,8 @@ test("한 사람이 내역을 추가하면 다른 사람에게 알림이 오고,
   await pageB
     .getByRole("link", { name: new RegExp(`${E2E_NAMES.a}님이 E2E 알림 떡볶이 8,000원을 추가했어요`) })
     .click();
-  await expect(pageB).toHaveURL(/\/transactions\?month=\d{4}-\d{2}&day=\d{4}-\d{2}-\d{2}$/);
+  // 날짜만 넘기면 내역 화면이 그 날짜가 든 기간(한 달 기준 F-56)을 연다. 이번 달이면 month는 생략
+  await expect(pageB).toHaveURL(/\/transactions\?(month=\d{4}-\d{2}&)?day=\d{4}-\d{2}-\d{2}$/);
   await expect(pageB.getByRole("dialog", { name: "내역 수정" })).toBeVisible();
   await expect(pageB.getByLabel("가맹점·내용 (선택)")).toHaveValue("E2E 알림 떡볶이");
   // 편집 창을 닫으면 읽음 처리돼 배지가 사라져 있다
