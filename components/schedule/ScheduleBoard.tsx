@@ -14,6 +14,7 @@ import {
   type Occurrence,
   type RecurringDue,
 } from "@/lib/calc/events";
+import type { HolidayMap } from "@/lib/calc/holidays";
 import { addDays, monthOf, monthRange, type DateString, type MonthString } from "@/lib/date";
 import type { MemberNames } from "@/lib/domain";
 import type { HouseholdMember } from "@/lib/household";
@@ -30,6 +31,8 @@ type Props = {
   recurring: RecurringItem[];
   names: MemberNames;
   members: HouseholdMember[];
+  /** 이 달 공휴일 (F-55) */
+  holidays: HolidayMap;
 };
 
 /** 창에 띄운 일정: id와 회차 시작일로 들고, 그릴 때마다 최신 일정에서 다시 만든다 (저장 뒤 새 내용) */
@@ -42,7 +45,7 @@ function toOccurrence(event: CalendarEvent, start: DateString): Occurrence {
 }
 
 /** 일정 화면 (F-19): 월 달력 + 고른 날 목록 + 다가오는 일정. ?event=id(알림·홈)면 그 일정을, ?new=1(홈)이면 추가 창을 연다 */
-export function ScheduleBoard({ month, today, events, recurring, names, members }: Props) {
+export function ScheduleBoard({ month, today, events, recurring, names, members, holidays }: Props) {
   const params = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -103,7 +106,15 @@ export function ScheduleBoard({ month, today, events, recurring, names, members 
           <Plus size={20} strokeWidth={1.75} aria-hidden />
           일정 추가
         </Button>
-        <ScheduleCalendar month={month} today={today} selected={selected} byDay={byDay} dues={dues} onSelect={setSelected} />
+        <ScheduleCalendar
+          month={month}
+          today={today}
+          selected={selected}
+          byDay={byDay}
+          dues={dues}
+          holidays={holidays}
+          onSelect={setSelected}
+        />
       </div>
 
       <div className="flex min-w-0 flex-col gap-4">
@@ -111,6 +122,7 @@ export function ScheduleBoard({ month, today, events, recurring, names, members 
           date={selected}
           occurrences={byDay.get(selected) ?? []}
           dues={dues.get(selected) ?? []}
+          holidayNames={holidays[selected] ?? []}
           names={names}
           onOpen={openOccurrence}
           onAdd={openNew}
