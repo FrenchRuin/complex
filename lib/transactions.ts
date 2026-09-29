@@ -1,5 +1,5 @@
 import type { PersonFilter, TransactionFilters } from "./calc/filters";
-import { monthRange, type DateRange } from "./date";
+import type { DateRange } from "./date";
 import { toCategoryType, toScope, toSlot, type CategoryType, type Scope, type Slot } from "./domain";
 import { createClient } from "./supabase/server";
 
@@ -59,9 +59,12 @@ async function fetchTransactions(q: Query): Promise<TransactionRecord[]> {
   return data.map(toRecord);
 }
 
-/** 한 달치 내역. 캘린더 합계도 같은 목록으로 내므로 day 필터는 여기서 쓰지 않는다. */
-export function getMonthTransactions(filters: TransactionFilters): Promise<TransactionRecord[]> {
-  return fetchTransactions({ ...filters, range: monthRange(filters.month) });
+/**
+ * 한 달치 내역. range는 그 달의 기간 (한 달 기준 F-56, 1일 기준이면 달력의 한 달).
+ * 캘린더 합계도 같은 목록으로 내므로 day 필터는 여기서 쓰지 않는다.
+ */
+export function getMonthTransactions(filters: TransactionFilters, range: DateRange): Promise<TransactionRecord[]> {
+  return fetchTransactions({ ...filters, range });
 }
 
 /** 전체 기간 검색: 날짜 제한 없이 최근 것부터 최대 2000건 (요약 합계용), 화면에는 limit건만 */

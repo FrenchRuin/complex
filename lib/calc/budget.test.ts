@@ -6,10 +6,11 @@ import {
   barWidth,
   budgetSummary,
   categoryBudgetRows,
-  daysLeftInMonth,
+  daysLeftInRange,
   overText,
   spentByCategory,
 } from "./budget";
+import { monthRange } from "@/lib/date";
 
 describe("spentByCategory", () => {
   it("지출만 카테고리별로 더한다", () => {
@@ -45,16 +46,20 @@ describe("categoryBudgetRows", () => {
   });
 });
 
-describe("daysLeftInMonth", () => {
+describe("daysLeftInRange", () => {
   it("오늘 포함 남은 날", () => {
-    expect(daysLeftInMonth("2026-09", "2026-09-27")).toBe(4);
-    expect(daysLeftInMonth("2026-09", "2026-09-30")).toBe(1);
-    expect(daysLeftInMonth("2026-09", "2026-09-01")).toBe(30);
+    expect(daysLeftInRange(monthRange("2026-09"), "2026-09-27")).toBe(4);
+    expect(daysLeftInRange(monthRange("2026-09"), "2026-09-30")).toBe(1);
+    expect(daysLeftInRange(monthRange("2026-09"), "2026-09-01")).toBe(30);
   });
 
-  it("지난달은 0, 다음 달은 전체", () => {
-    expect(daysLeftInMonth("2026-08", "2026-09-27")).toBe(0);
-    expect(daysLeftInMonth("2026-10", "2026-09-27")).toBe(31);
+  it("지난 기간은 0, 앞으로의 기간은 전체", () => {
+    expect(daysLeftInRange(monthRange("2026-08"), "2026-09-27")).toBe(0);
+    expect(daysLeftInRange(monthRange("2026-10"), "2026-09-27")).toBe(31);
+  });
+
+  it("월급날 주기(9/23~10/22)는 달을 넘어 센다 (F-56)", () => {
+    expect(daysLeftInRange({ start: "2026-09-23", end: "2026-10-22" }, "2026-09-29")).toBe(24);
   });
 });
 
@@ -67,7 +72,7 @@ describe("budgetSummary", () => {
       ],
       { food: 300000, cafe: 50000 },
     );
-    expect(budgetSummary(rows, "2026-09", "2026-09-27")).toEqual({
+    expect(budgetSummary(rows, monthRange("2026-09"), "2026-09-27")).toEqual({
       budgetTotal: 500000,
       spentTotal: 350000,
       percent: 70,
@@ -79,11 +84,11 @@ describe("budgetSummary", () => {
 
   it("넘었으면 남은 예산은 음수, 하루 예산 0", () => {
     const rows = categoryBudgetRows([{ categoryId: "food", amount: 100 }], { food: 130 });
-    expect(budgetSummary(rows, "2026-09", "2026-09-27")).toMatchObject({ remaining: -30, dailyAllowance: 0, percent: 130 });
+    expect(budgetSummary(rows, monthRange("2026-09"), "2026-09-27")).toMatchObject({ remaining: -30, dailyAllowance: 0, percent: 130 });
   });
 
   it("예산이 없으면 0", () => {
-    expect(budgetSummary([], "2026-09", "2026-09-27")).toMatchObject({ budgetTotal: 0, percent: 0 });
+    expect(budgetSummary([], monthRange("2026-09"), "2026-09-27")).toMatchObject({ budgetTotal: 0, percent: 0 });
   });
 });
 

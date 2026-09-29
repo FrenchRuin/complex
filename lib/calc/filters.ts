@@ -59,12 +59,23 @@ function amountOf(raw: string): number | null {
   return Number.isSafeInteger(value) && value > 0 ? value : null;
 }
 
-export function parseFilters(params: RawParams, currentMonth: MonthString): TransactionFilters {
+/**
+ * 주소 → 필터. periodOfDate: 날짜 → 그 날짜가 속한 달 (한 달 기준 F-56, 기본은 달력의 달).
+ * month 없이 day(그날 선택)나 at(그날이 든 달만)이 있으면 그 날짜가 속한 달을 연다 (알림에서 온 주소).
+ */
+export function parseFilters(
+  params: RawParams,
+  currentMonth: MonthString,
+  periodOfDate: (date: string) => MonthString = monthOf,
+): TransactionFilters {
   const monthParam = single(params.month);
-  const month = MONTH.test(monthParam) ? monthParam : currentMonth;
+  const day = single(params.day);
+  const at = single(params.at);
+  const validDay = DAY.test(day) ? day : null;
+  const anchor = validDay ?? (DAY.test(at) ? at : null);
+  const month = MONTH.test(monthParam) ? monthParam : anchor ? periodOfDate(anchor) : currentMonth;
   const who = single(params.who);
   const type = single(params.type);
-  const day = single(params.day);
   const rawQ = single(params.q);
   const amount = amountOf(rawQ);
   const limit = Number(single(params.limit));
@@ -81,7 +92,7 @@ export function parseFilters(params: RawParams, currentMonth: MonthString): Tran
     thisMonthOnly: single(params.period) === "month",
     limit:
       Number.isInteger(limit) && limit > SEARCH_PAGE_SIZE ? Math.min(limit, MAX_SEARCH_LIMIT) : SEARCH_PAGE_SIZE,
-    day: DAY.test(day) && monthOf(day) === month ? day : null,
+    day: validDay && periodOfDate(validDay) === month ? validDay : null,
   };
 }
 
@@ -101,7 +112,8 @@ export function filtersToHref(
   if (f.q) params.set("q", f.q);
   if (f.q && f.thisMonthOnly) params.set("period", "month");
   if (f.q && !f.thisMonthOnly && f.limit > SEARCH_PAGE_SIZE) params.set("limit", String(f.limit));
-  if (f.day && monthOf(f.day) === f.month) params.set("day", f.day);
+  // 고른 날은 그 달 안의 날짜만 (parseFilters가 맞춰 둔다)
+  if (f.day) params.set("day", f.day);
   const query = params.toString();
   return query ? `/transactions?${query}` : "/transactions";
 }

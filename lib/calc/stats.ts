@@ -20,12 +20,16 @@ export function recentMonths(month: MonthString, count: number): MonthString[] {
   return Array.from({ length: count }, (_, i) => shiftMonth(month, i - (count - 1)));
 }
 
-/** 달별 지출 합계 */
-export function monthlyExpense(rows: readonly Row[], months: readonly MonthString[]): { month: MonthString; expense: number }[] {
+/** 달별 지출 합계. periodOfDate: 날짜 → 그 날짜가 속한 달 (한 달 기준 F-56, 기본은 달력의 달) */
+export function monthlyExpense(
+  rows: readonly Row[],
+  months: readonly MonthString[],
+  periodOfDate: (date: string) => MonthString = monthOf,
+): { month: MonthString; expense: number }[] {
   return months.map((month) => ({
     month,
     expense: rows
-      .filter((r) => r.type === "expense" && monthOf(r.occurredOn) === month)
+      .filter((r) => r.type === "expense" && periodOfDate(r.occurredOn) === month)
       .reduce((sum, r) => sum + r.amount, 0),
   }));
 }

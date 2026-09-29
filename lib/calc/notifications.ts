@@ -155,9 +155,9 @@ export function notificationHref(
     return item.noteId && item.kind !== "note_deleted" ? `/notes?note=${item.noteId}` : "/notes";
   }
   if (!item.occurredOn) return "/transactions";
-  const params = new URLSearchParams({ month: monthOf(item.occurredOn) });
-  if (item.kind === "sms_batch") return `/transactions?${params}`;
-  params.set("day", item.occurredOn);
+  // month 없이 날짜만 주면 내역 화면이 한 달 기준(F-56)으로 그 날짜가 든 달을 연다. 문자 묶음은 그 달만(at)
+  if (item.kind === "sms_batch") return `/transactions?at=${item.occurredOn}`;
+  const params = new URLSearchParams({ day: item.occurredOn });
   // 지운 내역(체크를 푼 정기지출 포함)은 날짜만
   if (item.transactionId && item.kind !== "deleted" && item.kind !== "recurring_unchecked") {
     params.set("tx", item.transactionId);
