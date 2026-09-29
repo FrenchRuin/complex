@@ -42,7 +42,7 @@ export function AllowanceEditor({ monthLabel, monthFirst, names, allowances }: P
     <SettingsSection
       id="allowance"
       title={`${monthLabel} 용돈`}
-      description="각자 한 달에 개인 지출로 쓸 금액이에요. 공동 지출은 들어가지 않아요. 빈칸은 용돈 없음이고, 다음 달에 자동으로 복사돼요."
+      description="각자 한 달 용돈이에요. 용돈 통장·카드로 쓴 지출과 비교해요. 빈칸은 용돈 없음이고, 다음 달에 자동으로 복사돼요."
     >
       <ul>
         {SLOTS.map((slot) => {

@@ -46,6 +46,7 @@ export function PaymentMethodSection({ methods, names }: Props) {
           const Icon = KIND_ICONS[method.kind];
           const details = [
             PAYMENT_KIND_LABEL[method.kind],
+            method.is_allowance ? "용돈" : null,
             method.sms_aliases.length > 0 ? `별칭 ${method.sms_aliases.join(", ")}` : null,
             method.is_hidden ? "숨김" : null,
           ]

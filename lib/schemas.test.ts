@@ -77,12 +77,14 @@ describe("paymentMethodInputSchema", () => {
       kind: "card",
       owner: "joint",
       smsAliases: "신한, 신한카드 , ,",
+      isAllowance: false,
     });
     expect(parsed).toEqual({
       name: "가족카드",
       kind: "card",
       owner: "joint",
       smsAliases: ["신한", "신한카드"],
+      isAllowance: false,
     });
   });
 
@@ -92,13 +94,20 @@ describe("paymentMethodInputSchema", () => {
       kind: "cash",
       owner: "a",
       smsAliases: "",
+      isAllowance: false,
     });
     expect(parsed.smsAliases).toEqual([]);
   });
 
+  it("용돈 통장·카드는 한 사람 소유일 때만 (공동이면 꺼진다)", () => {
+    const base = { name: "용돈 통장", kind: "account", smsAliases: "", isAllowance: true } as const;
+    expect(paymentMethodInputSchema.parse({ ...base, owner: "a" }).isAllowance).toBe(true);
+    expect(paymentMethodInputSchema.parse({ ...base, owner: "joint" }).isAllowance).toBe(false);
+  });
+
   it("잘못된 소유는 거부한다", () => {
     expect(
-      paymentMethodInputSchema.safeParse({ name: "x", kind: "card", owner: "c", smsAliases: "" })
+      paymentMethodInputSchema.safeParse({ name: "x", kind: "card", owner: "c", smsAliases: "", isAllowance: false })
         .success,
     ).toBe(false);
   });

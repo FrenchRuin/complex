@@ -787,6 +787,7 @@ export type Database = {
           created_at: string
           household_id: string
           id: string
+          is_allowance: boolean
           is_hidden: boolean
           kind: string
           name: string
@@ -798,6 +799,7 @@ export type Database = {
           created_at?: string
           household_id: string
           id?: string
+          is_allowance?: boolean
           is_hidden?: boolean
           kind: string
           name: string
@@ -809,6 +811,7 @@ export type Database = {
           created_at?: string
           household_id?: string
           id?: string
+          is_allowance?: boolean
           is_hidden?: boolean
           kind?: string
           name?: string

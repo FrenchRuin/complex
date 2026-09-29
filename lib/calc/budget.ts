@@ -91,13 +91,13 @@ export function barWidth(percent: number): number {
   return Math.min(100, Math.max(0, percent));
 }
 
-/** 용돈: 사람별 한 달 개인 지출 한도 */
+/** 용돈: 사람별 한 달 한도 (용돈 통장·카드로 쓴 금액과 비교) */
 export type AllowanceItem = { slot: Slot; amount: number };
 
 export type AllowanceRow = {
   slot: Slot;
   limit: number;
-  /** 그 사람의 개인 지출 합계 (공동 지출 제외) */
+  /** 그 사람의 용돈 통장·카드로 쓴 지출 합계 */
   spent: number;
   percent: number;
   /** 남은 금액 (넘었으면 음수) */
@@ -106,12 +106,28 @@ export type AllowanceRow = {
   overBy: number;
 };
 
-/** 한도가 있는 사람만, A → B 순. personalSpent는 splitByOwner의 a·b (개인 지출 합계) */
-export function allowanceRows(allowances: readonly AllowanceItem[], personalSpent: Record<Slot, number>): AllowanceRow[] {
+/**
+ * 사람별 용돈 사용: 그 사람의 용돈 통장·카드(결제수단 id → 소유자)로 쓴 지출 합계.
+ * 공동으로 적은 지출도 용돈 카드로 냈으면 포함한다 (실제로 용돈에서 돈이 나갔으니). 수입은 세지 않는다.
+ */
+export function allowanceSpent(
+  rows: readonly { type: string; amount: number; paymentMethodId: string | null }[],
+  allowanceMethods: Readonly<Record<string, Slot>>,
+): Record<Slot, number> {
+  const spent: Record<Slot, number> = { a: 0, b: 0 };
+  for (const row of rows) {
+    const slot = row.paymentMethodId ? allowanceMethods[row.paymentMethodId] : undefined;
+    if (row.type === "expense" && slot) spent[slot] += row.amount;
+  }
+  return spent;
+}
+
+/** 한도가 있는 사람만, A → B 순. spentBySlot은 allowanceSpent 결과 */
+export function allowanceRows(allowances: readonly AllowanceItem[], spentBySlot: Record<Slot, number>): AllowanceRow[] {
   return SLOTS.flatMap((slot) => {
     const item = allowances.find((a) => a.slot === slot);
     if (!item) return [];
-    const spent = personalSpent[slot];
+    const spent = spentBySlot[slot];
     return [
       {
         slot,
