@@ -63,3 +63,32 @@ export function previousBusinessDay(date: DateString, holidays: HolidayMap): Dat
   for (let i = 0; i < 31 && !isBusinessDay(d, holidays); i += 1) d = addDays(d, -1);
   return d;
 }
+
+/** 받아 온 공휴일 파일 한 줄 (DB holiday_presets) */
+export type PresetRow = { date: DateString; year: number; names: string[] };
+
+const YEAR = /^\d{4}$/;
+const DAY = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
+
+/**
+ * 인터넷 공휴일 파일(basic.json: { "2026": { "2026-01-01": ["1월 1일"], ... }, ... }) 검사·변환.
+ * 형식이 조금이라도 이상하면 전부 버린다 (null). 해마다 공휴일이 5~40일이어야 정상으로 본다.
+ */
+export function parseHolidayFile(data: unknown): PresetRow[] | null {
+  if (typeof data !== "object" || data === null || Array.isArray(data)) return null;
+  const rows: PresetRow[] = [];
+  const years = Object.entries(data as Record<string, unknown>);
+  if (years.length === 0) return null;
+  for (const [year, days] of years) {
+    if (!YEAR.test(year) || typeof days !== "object" || days === null || Array.isArray(days)) return null;
+    const entries = Object.entries(days as Record<string, unknown>);
+    if (entries.length < 5 || entries.length > 40) return null;
+    for (const [date, names] of entries) {
+      if (!DAY.test(date) || !date.startsWith(`${year}-`)) return null;
+      if (!Array.isArray(names) || names.length < 1 || names.length > 5) return null;
+      if (!names.every((n) => typeof n === "string" && n.trim().length >= 1 && n.length <= 30)) return null;
+      rows.push({ date, year: Number(year), names: names.map((n: string) => n.trim()) });
+    }
+  }
+  return rows;
+}

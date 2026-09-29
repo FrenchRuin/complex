@@ -2,22 +2,10 @@
  * 휴대폰 알림 보내기 (F-57). 서버 전용: 서비스 키로 DB를 읽고, web-push로 폰에 보낸다.
  * app/api/push(DB가 부름)와 시험 알림 서버 액션에서만 가져다 쓴다.
  */
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import webpush from "web-push";
 import { isPushable, pushPayload, type PushPayload } from "./calc/push";
 import { toNotificationKind } from "./calc/notifications";
-import type { Database } from "./supabase/types";
-
-if (typeof window !== "undefined") {
-  throw new Error("push-server는 서버에서만 쓸 수 있어요");
-}
-
-function admin() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) throw new Error("SUPABASE_SERVICE_ROLE_KEY가 비어 있어요. .env.local과 Vercel 환경변수를 확인해 주세요");
-  return createSupabaseClient<Database>(url, key, { auth: { persistSession: false } });
-}
+import { createAdminClient } from "./supabase/admin";
 
 /**
  * 알림 공개키. 브라우저가 알아야 하는 공개 값이지만, 번들에 넣지 않고 서버가 설정 화면에 넘겨준다
@@ -39,7 +27,7 @@ function configure(): boolean {
 
 /** 한 사람의 모든 기기로 보낸다. 사라진 기기(404·410)는 지운다. 보낸 기기 수를 돌려준다 */
 async function sendToMember(memberId: string, payload: PushPayload): Promise<number> {
-  const db = admin();
+  const db = createAdminClient();
   const { data: subs, error } = await db.from("push_subscriptions").select("id, endpoint, p256dh, auth").eq("member_id", memberId);
   if (error) throw new Error(`기기 목록을 불러오지 못했어요: ${error.message}`);
 
@@ -73,7 +61,7 @@ async function sendToMember(memberId: string, payload: PushPayload): Promise<num
  */
 export async function sendPushForNotification(id: string): Promise<{ sent: number; skipped?: string }> {
   if (!configure()) return { sent: 0, skipped: "no_keys" };
-  const db = admin();
+  const db = createAdminClient();
   const { data: n, error } = await db
     .from("notifications")
     .select("id, created_at, pushed_at, kind, recipient_id, actor_id, transaction_id, note_id, event_id, occurred_on, subject, amount, count")

@@ -485,6 +485,45 @@ export type Database = {
           },
         ]
       }
+      holiday_presets: {
+        Row: {
+          date: string
+          fetched_at: string
+          names: string[]
+          year: number
+        }
+        Insert: {
+          date: string
+          fetched_at?: string
+          names: string[]
+          year: number
+        }
+        Update: {
+          date?: string
+          fetched_at?: string
+          names?: string[]
+          year?: number
+        }
+        Relationships: []
+      }
+      holiday_sync: {
+        Row: {
+          checked_at: string | null
+          fetched_at: string | null
+          id: number
+        }
+        Insert: {
+          checked_at?: string | null
+          fetched_at?: string | null
+          id?: number
+        }
+        Update: {
+          checked_at?: string | null
+          fetched_at?: string | null
+          id?: number
+        }
+        Relationships: []
+      }
       households: {
         Row: {
           created_at: string
