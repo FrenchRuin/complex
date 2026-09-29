@@ -78,3 +78,13 @@ test("공휴일 규칙: 가구는 DB가 채움, 같은 날짜는 하나만, 추�
   expect(again.error).toBeNull();
   expect(todayKST()).toMatch(/^\d{4}-\d{2}-\d{2}$/);
 });
+
+test("최신 공휴일 받기: 인터넷 공휴일 파일을 받아 저장하고, 마지막으로 받은 날을 보여준다 (F-55)", async ({ page }) => {
+  await login(page, "a", "/settings/holidays?year=2026");
+  await page.getByRole("button", { name: "최신 공휴일 받기" }).click();
+  // 앱에 들어 있는 해만 있으면 "이미 최신", 새 해가 발표됐으면 "새로 받았어요"
+  await expect(page.getByText(/이미 최신이에요 \(2018~\d{4}년\)|\d{4}년 공휴일을 새로 받았어요/)).toBeVisible({ timeout: 15000 });
+  await expect(page.getByText(/마지막으로 받은 날: \d{4}년/)).toBeVisible();
+  // 받은 뒤에도 목록은 그대로 (추석)
+  await expect(page.getByRole("region", { name: "공휴일 목록" })).toContainText("추석");
+});
