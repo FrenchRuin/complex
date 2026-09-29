@@ -46,10 +46,10 @@ describe("formatWonTiny", () => {
     expect(formatWonTiny(999999)).toBe("100만");
   });
 
-  it("100만 이상은 소수 없이 만 단위", () => {
+  it("100만 이상은 소수·쉼표 없이 만 단위", () => {
     expect(formatWonTiny(1716000)).toBe("172만");
     expect(formatWonTiny(8078000)).toBe("808만");
-    expect(formatWonTiny(12345678)).toBe("1,235만");
+    expect(formatWonTiny(12345678)).toBe("1235만");
   });
 
   it("1억 이상(반올림해서 1억 포함)은 억 단위 소수 첫째 자리", () => {
