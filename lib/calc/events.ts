@@ -3,7 +3,7 @@
  * 날짜는 "yyyy-MM-dd", 시각은 "HH:mm" 문자열. 매달·매년 반복에서 그 달에 없는 날은 말일로 (정기지출과 같은 규칙).
  */
 import { dueDate, isActiveInMonth } from "@/lib/calc/recurring";
-import { addDays, monthOf, shiftMonth, type DateRange, type DateString, type MonthString } from "@/lib/date";
+import { addDays, daysBetween, monthOf, shiftMonth, type DateRange, type DateString, type MonthString } from "@/lib/date";
 import type { Owner } from "@/lib/domain";
 
 export type EventRepeat = "none" | "weekly" | "monthly" | "yearly";
@@ -32,13 +32,8 @@ export type Occurrence = { event: CalendarEvent; start: DateString; end: DateStr
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
-export function daysBetween(from: DateString, to: DateString): number {
-  const utc = (d: DateString) => {
-    const [y, m, day] = d.split("-").map(Number);
-    return Date.UTC(y, m - 1, day);
-  };
-  return Math.round((utc(to) - utc(from)) / 86_400_000);
-}
+// 예전부터 여기서 가져다 쓰는 곳이 있어 다시 내보낸다
+export { daysBetween };
 
 function weekday(date: DateString): number {
   const [y, m, d] = date.split("-").map(Number);

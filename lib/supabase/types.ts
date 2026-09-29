@@ -528,16 +528,25 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          period_label: string
+          period_shift: boolean
+          period_start_day: number
         }
         Insert: {
           created_at?: string
           id?: string
           name?: string
+          period_label?: string
+          period_shift?: boolean
+          period_start_day?: number
         }
         Update: {
           created_at?: string
           id?: string
           name?: string
+          period_label?: string
+          period_shift?: boolean
+          period_start_day?: number
         }
         Relationships: []
       }
@@ -877,6 +886,41 @@ export type Database = {
           },
         ]
       }
+      period_overrides: {
+        Row: {
+          created_at: string
+          household_id: string
+          id: string
+          month: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          household_id: string
+          id?: string
+          month: string
+          start_date: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          household_id?: string
+          id?: string
+          month?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "period_overrides_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recurring_items: {
         Row: {
           amount: number
@@ -1117,6 +1161,10 @@ export type Database = {
       }
       set_event_occurrence_skipped: {
         Args: { p_date: string; p_event_id: string; p_skipped: boolean }
+        Returns: undefined
+      }
+      set_period_settings: {
+        Args: { p_label: string; p_shift: boolean; p_start_day: number }
         Returns: undefined
       }
       toggle_note_item: {
