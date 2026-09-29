@@ -1,6 +1,6 @@
 import { cache } from "react";
 import {
-  dueDate,
+  dueDateInRange,
   dueUnpaidCount,
   isActiveInMonth,
   recurringStatus,
@@ -8,8 +8,9 @@ import {
   type RecurringStatus,
   type RecurringSummary,
 } from "./calc/recurring";
-import { currentMonthKST, todayKST, type DateString, type MonthString } from "./date";
+import { todayKST, type DateString, type MonthString } from "./date";
 import { toScope, toSlot, type Scope, type Slot } from "./domain";
+import { getCurrentPeriod } from "./period";
 import { createClient } from "./supabase/server";
 
 export type RecurringItem = {
@@ -46,9 +47,12 @@ export type RecurringOverview = {
   items: RecurringItem[];
 };
 
-/** 이번 달 정기지출 현황. 레이아웃(배지)·홈·정기지출 화면이 같이 쓴다. */
+/**
+ * 이번 달 정기지출 현황. 레이아웃(배지)·홈·정기지출 화면이 같이 쓴다.
+ * "이번 달"은 한 달 기준(F-56)의 기간이고, 결제일은 그 기간 안의 날짜다.
+ */
 export const getRecurringOverview = cache(async (): Promise<RecurringOverview> => {
-  const month = currentMonthKST();
+  const { month, range } = await getCurrentPeriod();
   const today = todayKST();
   const monthFirst = `${month}-01`;
   const supabase = await createClient();
@@ -93,7 +97,7 @@ export const getRecurringOverview = cache(async (): Promise<RecurringOverview> =
       const payments = paidRes.data.filter((p) => p.recurring_item_id === item.id);
       const thisMonth = payments.find((p) => p.recurring_month === monthFirst);
       const previous = payments.find((p) => p.recurring_month !== monthFirst);
-      const due = dueDate(month, item.dayOfMonth);
+      const due = dueDateInRange(range, item.dayOfMonth);
       return {
         item,
         due,

@@ -6,18 +6,30 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { SettingsSection } from "@/components/settings/SettingsSection";
 import { getAssetsOverview } from "@/lib/assets";
 import { netWorth, netWorthTrend } from "@/lib/calc/assets";
-import { currentMonthKST, todayKST } from "@/lib/date";
+import { periodOf, periodRange } from "@/lib/calc/period";
+import { todayKST } from "@/lib/date";
 import { getHouseholdMembers, requireMember, toMemberNames } from "@/lib/household";
 import { formatWon } from "@/lib/money";
+import { getPeriodConfig } from "@/lib/period";
 
 export const metadata: Metadata = { title: "자산·목표 · 우리 둘 가계부" };
 
 /** 자산·목표 (F-40~F-42): 순자산, 자산·부채, 추이, 저축 목표 */
 export default async function AssetsPage() {
   const me = await requireMember();
-  const [overview, members] = await Promise.all([getAssetsOverview(), getHouseholdMembers()]);
+  const [overview, members, cfg] = await Promise.all([getAssetsOverview(), getHouseholdMembers(), getPeriodConfig()]);
   const names = toMemberNames(members);
   const worth = netWorth(overview.assets);
+  // 순자산 추이도 한 달 기준(F-56): 각 기간 마지막 날 기준
+  const today = todayKST();
+  const trend = netWorthTrend(
+    overview.history.assets,
+    overview.history.values,
+    periodOf(today, cfg),
+    today,
+    (date) => periodOf(date, cfg),
+    (month) => periodRange(month, cfg).end,
+  );
 
   return (
     <>
@@ -45,7 +57,7 @@ export default async function AssetsPage() {
             title="순자산 추이"
             description="매달 말일 기준으로, 그때까지의 가장 최근 금액 기록을 더해 계산해요. 이번 달은 오늘 기준이에요."
           >
-            <NetWorthChart points={netWorthTrend(overview.history.assets, overview.history.values, currentMonthKST(), todayKST())} />
+            <NetWorthChart points={trend} />
           </SettingsSection>
           <SettingsSection title="저축 목표" description="적립은 목표에만 기록되고 가계부 지출에는 들어가지 않아요.">
             <GoalList goals={overview.goals} names={names} mySlot={me.slot} />

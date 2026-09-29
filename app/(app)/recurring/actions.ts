@@ -2,12 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { dbErrorMessage, fail, ok, type ActionResult } from "@/lib/action-result";
-import { currentMonthKST } from "@/lib/date";
+import { dueDateInRange } from "@/lib/calc/recurring";
 import { requireMember } from "@/lib/household";
+import { getCurrentPeriod } from "@/lib/period";
 import { dateStringSchema, firstError, idSchema, recurringInputSchema, type RecurringInput } from "@/lib/schemas";
 import { createClient } from "@/lib/supabase/server";
 
-const thisMonthFirst = () => `${currentMonthKST()}-01`;
+/** 이번 달(한 달 기준 F-56의 기간) 이름의 1일 */
+const thisMonthFirst = async () => `${(await getCurrentPeriod()).month}-01`;
 
 /** 정기지출 등록·수정 (F-30). 새로 만들면 이번 달부터 보인다. */
 export async function saveRecurringItem(input: RecurringInput): Promise<ActionResult> {
@@ -33,7 +35,7 @@ export async function saveRecurringItem(input: RecurringInput): Promise<ActionRe
     ? await supabase.from("recurring_items").update(values).eq("id", id)
     : await supabase
         .from("recurring_items")
-        .insert({ ...values, household_id: me.householdId, start_month: thisMonthFirst() });
+        .insert({ ...values, household_id: me.householdId, start_month: await thisMonthFirst() });
   if (error) return fail(dbErrorMessage(error));
 
   revalidatePath("/", "layout");
@@ -42,7 +44,7 @@ export async function saveRecurringItem(input: RecurringInput): Promise<ActionRe
 
 /** 중지: 이번 달까지만 보이고 다음 달부터 안 보인다 */
 export async function stopRecurringItem(rawId: string): Promise<ActionResult> {
-  return setEndMonth(rawId, thisMonthFirst());
+  return setEndMonth(rawId, await thisMonthFirst());
 }
 
 export async function resumeRecurringItem(rawId: string): Promise<ActionResult> {
@@ -82,11 +84,18 @@ export async function checkRecurring(
 
   await requireMember();
   const supabase = await createClient();
+  const { month, range } = await getCurrentPeriod();
+  // 결제일을 따로 고르지 않았으면 이번 기간 안의 결제일 (DB 기본값은 달력의 달 기준이라 여기서 정해 준다)
+  let date = occurredOn;
+  if (date === null) {
+    const { data: item } = await supabase.from("recurring_items").select("day_of_month").eq("id", id.data).single();
+    if (item) date = dueDateInRange(range, item.day_of_month);
+  }
   const { error } = await supabase.rpc("check_recurring", {
     p_item_id: id.data,
-    p_month: thisMonthFirst(),
+    p_month: `${month}-01`,
     ...(amount !== null ? { p_amount: amount } : {}),
-    ...(occurredOn !== null ? { p_occurred_on: occurredOn } : {}),
+    ...(date !== null ? { p_occurred_on: date } : {}),
   });
   if (error) return fail(dbErrorMessage(error));
 
@@ -103,7 +112,7 @@ export async function uncheckRecurring(rawId: string): Promise<ActionResult> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("uncheck_recurring", {
     p_item_id: id.data,
-    p_month: thisMonthFirst(),
+    p_month: await thisMonthFirst(),
   });
   if (error) return fail(dbErrorMessage(error));
 

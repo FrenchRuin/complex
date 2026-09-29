@@ -1,7 +1,7 @@
 /**
  * 정기지출 계산 (F-30, F-31). 날짜는 "yyyy-MM-dd", 월은 "yyyy-MM" 문자열.
  */
-import { monthRange, type DateString, type MonthString } from "@/lib/date";
+import { addDays, monthOf, monthRange, type DateRange, type DateString, type MonthString } from "@/lib/date";
 import { formatWon } from "@/lib/money";
 
 /** 그 달의 결제일. 그 달에 없는 날(예: 31일)은 말일로 */
@@ -9,6 +9,17 @@ export function dueDate(month: MonthString, dayOfMonth: number): DateString {
   const lastDay = Number(monthRange(month).end.slice(8, 10));
   const day = Math.min(Math.max(dayOfMonth, 1), lastDay);
   return `${month}-${String(day).padStart(2, "0")}`;
+}
+
+/**
+ * 기간 안의 결제일 (한 달 기준 F-56). 예: 9/25~10/24 기간에 매월 1일 → 10/1, 매월 28일 → 9/28.
+ * 달력의 한 달이면 dueDate와 같다. 기간이 짧아 그날이 없으면 기간 마지막 날.
+ */
+export function dueDateInRange(range: DateRange, dayOfMonth: number): DateString {
+  for (let date = range.start; date <= range.end; date = addDays(date, 1)) {
+    if (date === dueDate(monthOf(date), dayOfMonth)) return date;
+  }
+  return range.end;
 }
 
 /** start_month·end_month(각 달 1일, "yyyy-MM-01")로 그 달에 보여야 하는지 */
