@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   dueDate,
+  dueDateInRange,
   dueUnpaidCount,
   isActiveInMonth,
   recurringStatus,
@@ -102,5 +103,21 @@ describe("summarize / summaryText", () => {
       "1/1 납부 · 10,000원 모두 냈어요",
     );
     expect(summaryText(summarize([]))).toBe("이번 달 정기지출이 없어요");
+  });
+});
+
+describe("dueDateInRange (한 달 기준 F-56)", () => {
+  const range = { start: "2026-09-25", end: "2026-10-24" };
+
+  it("기간 안의 그날: 1일 → 10/1, 28일 → 9/28, 25일 → 9/25", () => {
+    expect(dueDateInRange(range, 1)).toBe("2026-10-01");
+    expect(dueDateInRange(range, 28)).toBe("2026-09-28");
+    expect(dueDateInRange(range, 25)).toBe("2026-09-25");
+    expect(dueDateInRange(range, 24)).toBe("2026-10-24");
+  });
+
+  it("31일은 그 달 말일, 달력의 한 달이면 dueDate와 같다", () => {
+    expect(dueDateInRange(range, 31)).toBe("2026-09-30");
+    expect(dueDateInRange({ start: "2026-02-01", end: "2026-02-28" }, 31)).toBe(dueDate("2026-02", 31));
   });
 });

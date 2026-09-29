@@ -106,22 +106,25 @@ export function netWorthOn(date: DateString, assets: readonly HistoryAsset[], va
 }
 
 /**
- * 순자산 추이 (F-41): 최근 12개월 각 달 말일 기준 + 이번 달은 오늘 기준("지금").
+ * 순자산 추이 (F-41): 최근 12개월 각 달 마지막 날 기준 + 이번 달은 오늘 기준("지금").
  * 금액 기록이 처음 생긴 달부터 보여준다. 지난 날짜로 기록을 넣으면 그 달 값도 바뀐다.
+ * periodOfDate·endOf: 한 달 기준(F-56)의 기간 (기본은 달력의 달과 말일)
  */
 export function netWorthTrend(
   assets: readonly HistoryAsset[],
   values: readonly HistoryValue[],
   currentMonth: MonthString,
   today: DateString,
+  periodOfDate: (date: DateString) => MonthString = monthOf,
+  endOf: (month: MonthString) => DateString = (month) => monthRange(month).end,
 ): TrendPoint[] {
   if (values.length === 0) return [];
-  const firstMonth = values.reduce((min, v) => (monthOf(v.asOf) < min ? monthOf(v.asOf) : min), currentMonth);
+  const firstMonth = values.reduce((min, v) => (periodOfDate(v.asOf) < min ? periodOfDate(v.asOf) : min), currentMonth);
   const points: TrendPoint[] = [];
   for (let i = 11; i >= 1; i--) {
     const month = shiftMonth(currentMonth, -i);
     if (month < firstMonth) continue;
-    points.push({ month, net: netWorthOn(monthRange(month).end, assets, values), current: false });
+    points.push({ month, net: netWorthOn(endOf(month), assets, values), current: false });
   }
   points.push({ month: currentMonth, net: netWorthOn(today, assets, values), current: true });
   return points;
