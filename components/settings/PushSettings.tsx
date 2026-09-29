@@ -8,8 +8,6 @@ import { deviceLabel } from "@/lib/calc/push";
 
 type Status = "checking" | "unsupported" | "ios-install" | "denied" | "off" | "on";
 
-const PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "";
-
 /** base64url 공개키 → 브라우저가 받는 바이트 */
 function keyBytes(base64: string): Uint8Array<ArrayBuffer> {
   const padded = (base64 + "=".repeat((4 - (base64.length % 4)) % 4)).replace(/-/g, "+").replace(/_/g, "/");
@@ -32,8 +30,8 @@ async function currentSubscription(): Promise<PushSubscription | null> {
   return registration ? registration.pushManager.getSubscription() : null;
 }
 
-/** 이 폰에서 휴대폰 알림 켜기·끄기, 시험 알림 (F-57) */
-export function PushSettings() {
+/** 이 폰에서 휴대폰 알림 켜기·끄기, 시험 알림 (F-57). publicKey는 서버가 넘겨주는 알림 공개키 */
+export function PushSettings({ publicKey }: { publicKey: string }) {
   const toast = useToast();
   const [pending, startTransition] = useTransition();
   const [status, setStatus] = useState<Status>("checking");
@@ -41,12 +39,12 @@ export function PushSettings() {
 
   useEffect(() => {
     (async () => {
-      const supported = "serviceWorker" in navigator && "PushManager" in window && "Notification" in window && PUBLIC_KEY !== "";
+      const supported = "serviceWorker" in navigator && "PushManager" in window && "Notification" in window && publicKey !== "";
       if (!supported) return setStatus(isIos() && !isStandalone() ? "ios-install" : "unsupported");
       if (Notification.permission === "denied") return setStatus("denied");
       setStatus((await currentSubscription()) ? "on" : "off");
     })();
-  }, []);
+  }, [publicKey]);
 
   function turnOn() {
     setError(null);
@@ -58,7 +56,7 @@ export function PushSettings() {
         await navigator.serviceWorker.ready;
         const subscription =
           (await registration.pushManager.getSubscription()) ??
-          (await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(PUBLIC_KEY) }));
+          (await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(publicKey) }));
         const json = subscription.toJSON();
         const result = await savePushSubscription({
           endpoint: subscription.endpoint,

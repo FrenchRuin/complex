@@ -19,9 +19,17 @@ function admin() {
   return createSupabaseClient<Database>(url, key, { auth: { persistSession: false } });
 }
 
+/**
+ * 알림 공개키. 브라우저가 알아야 하는 공개 값이지만, 번들에 넣지 않고 서버가 설정 화면에 넘겨준다
+ * (Vercel에 VAPID_PUBLIC_KEY로 등록. 예전 이름 NEXT_PUBLIC_VAPID_PUBLIC_KEY도 읽는다)
+ */
+export function vapidPublicKey(): string {
+  return process.env.VAPID_PUBLIC_KEY ?? process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "";
+}
+
 /** 알림 키가 모두 있을 때만 보낸다 (없으면 조용히 건너뜀: 개발 PC 등) */
 function configure(): boolean {
-  const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  const publicKey = vapidPublicKey();
   const privateKey = process.env.VAPID_PRIVATE_KEY;
   const subject = process.env.VAPID_SUBJECT;
   if (!publicKey || !privateKey || !subject) return false;
