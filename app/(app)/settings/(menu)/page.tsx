@@ -1,5 +1,6 @@
 import {
   CalendarOff,
+  CalendarRange,
   ChevronRight,
   CreditCard,
   Gauge,
@@ -17,6 +18,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { FREE_DB_LIMIT_BYTES, usagePercent } from "@/lib/calc/usage";
 import { getHouseholdMembers, requireMember } from "@/lib/household";
 import { getCustomHolidays } from "@/lib/holidays";
+import { getPeriodSettings } from "@/lib/period";
 import { getAllCategories, getAllPaymentMethods, getUsage } from "@/lib/settings-data";
 import { logout } from "../actions";
 
@@ -27,12 +29,13 @@ type MenuItem = { href: string; label: string; icon: LucideIcon; summary: string
 /** 설정 첫 화면: 메뉴 목록 + 각 메뉴의 현재 상태 요약 */
 export default async function SettingsPage() {
   const me = await requireMember();
-  const [members, categories, methods, usage, customHolidays] = await Promise.all([
+  const [members, categories, methods, usage, customHolidays, period] = await Promise.all([
     getHouseholdMembers(),
     getAllCategories(),
     getAllPaymentMethods(),
     getUsage(),
     getCustomHolidays(),
+    getPeriodSettings(),
   ]);
 
   const visible = categories.filter((c) => !c.is_hidden);
@@ -59,6 +62,15 @@ export default async function SettingsPage() {
       label: "계좌·카드",
       icon: CreditCard,
       summary: `${methods.filter((m) => !m.is_hidden).length}개`,
+    },
+    {
+      href: "/settings/period",
+      label: "한 달 기준",
+      icon: CalendarRange,
+      summary:
+        period.startDay === 1
+          ? "매달 1일 (달력의 한 달)"
+          : `${period.startDay}일부터 · ${period.label === "end" ? "끝나는 달" : "시작하는 달"} 이름`,
     },
     {
       href: "/settings/holidays",
