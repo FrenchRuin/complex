@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { activeFilterCount, filtersToHref, type TransactionFilters } from "@/lib/calc/filters";
 import { dailyTotals, groupByDay } from "@/lib/calc/group";
-import { todayKST, type MonthString } from "@/lib/date";
+import { isCalendarRange } from "@/lib/calc/period";
+import { todayKST, type DateRange, type MonthString } from "@/lib/date";
 import type { MemberNames } from "@/lib/domain";
 import type { LabelMaps, TransactionRecord } from "@/lib/transactions";
 import { MonthCalendar } from "./MonthCalendar";
@@ -13,10 +14,12 @@ type Props = {
   rows: TransactionRecord[];
   labels: LabelMaps;
   names: MemberNames;
+  /** 그 달의 기간 (한 달 기준 F-56) */
+  range: DateRange;
 };
 
 /** 한 달 보기: 캘린더 + 날짜별 목록 (F-12, F-13) */
-export function MonthView({ filters, currentMonth, rows, labels, names }: Props) {
+export function MonthView({ filters, currentMonth, rows, labels, names, range }: Props) {
   const visibleRows = filters.day ? rows.filter((r) => r.occurredOn === filters.day) : rows;
   const filtered = activeFilterCount(filters) > 0 || filters.who !== "all" || filters.q !== "";
 
@@ -35,7 +38,14 @@ export function MonthView({ filters, currentMonth, rows, labels, names }: Props)
         </p>
       ) : null}
       <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(340px,400px)_1fr] xl:grid-cols-[460px_1fr] lg:items-start lg:gap-6">
-        <MonthCalendar filters={filters} currentMonth={currentMonth} today={todayKST()} totals={dailyTotals(rows)} />
+        <MonthCalendar
+          filters={filters}
+          currentMonth={currentMonth}
+          today={todayKST()}
+          totals={dailyTotals(rows)}
+          range={range}
+          calendarMonth={isCalendarRange(range)}
+        />
         <TransactionList
           groups={groupByDay(visibleRows)}
           labels={labels}

@@ -3,10 +3,10 @@
 import { CalendarDays, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { WEEKDAY_LABELS, calendarWeeks } from "@/lib/calc/calendar";
+import { WEEKDAY_LABELS, dayCellLabel, rangeWeeks } from "@/lib/calc/calendar";
 import { filtersToHref, type TransactionFilters } from "@/lib/calc/filters";
 import type { DayTotal } from "@/lib/calc/group";
-import { formatDayHeader, type DateString, type MonthString } from "@/lib/date";
+import { formatDayHeader, type DateRange, type DateString, type MonthString } from "@/lib/date";
 import { formatWon, formatWonShort, formatWonTiny } from "@/lib/money";
 
 /** 날짜 칸 금액. 항상 한 줄. 폰(640px 미만)은 칸이 좁아 더 짧은 표기(172만, 1.2억) */
@@ -31,15 +31,20 @@ type Props = {
   currentMonth: MonthString;
   today: DateString;
   totals: Record<DateString, DayTotal>;
+  /** 그 달의 기간 (한 달 기준 F-56. 1일 기준이면 달력의 한 달) */
+  range: DateRange;
+  /** 기간이 달력의 한 달과 같은지 (날짜 글자에 월을 붙일지) */
+  calendarMonth: boolean;
 };
 
 /**
  * 월 달력 (F-13). 날짜마다 지출 합계를 짧게, 수입은 파란 +로.
  * 날짜를 누르면 그날만 보고, 다시 누르면 해제. 모바일에서는 접을 수 있다.
+ * 월급날 주기면 기간(예: 9/25~10/24)만 그리고, 첫날과 달이 바뀌는 날은 "10/1"처럼 월을 붙인다.
  */
-export function MonthCalendar({ filters, currentMonth, today, totals }: Props) {
+export function MonthCalendar({ filters, currentMonth, today, totals, range, calendarMonth }: Props) {
   const [open, setOpen] = useState(true);
-  const weeks = calendarWeeks(filters.month);
+  const weeks = rangeWeeks(range);
 
   return (
     <section aria-label="달력" className="rounded-md bg-surface-raised p-3 lg:sticky lg:top-24">
@@ -94,7 +99,7 @@ export function MonthCalendar({ filters, currentMonth, today, totals }: Props) {
                 <span
                   className={`text-caption ${date === today ? "font-bold text-primary" : "text-ink"}`}
                 >
-                  {Number(date.slice(8))}
+                  {dayCellLabel(date, range, calendarMonth)}
                 </span>
                 {total?.expense ? <DayAmount amount={total.expense} className="text-expense" /> : null}
                 {total?.income ? <DayAmount amount={total.income} prefix="+" className="text-primary" /> : null}
