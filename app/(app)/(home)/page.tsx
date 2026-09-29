@@ -11,8 +11,10 @@ import { TransactionList } from "@/components/transactions/TransactionList";
 import { compareWithLastMonth, matchesPerson, splitByOwner } from "@/lib/calc/dashboard";
 import { parseFilters, type PersonFilter } from "@/lib/calc/filters";
 import { groupByDay, sumTotals } from "@/lib/calc/group";
-import { currentMonthKST, monthRange, samePeriodLastMonth, todayKST } from "@/lib/date";
+import { formatPeriodRange, isCalendarRange, samePeriodLastPeriod } from "@/lib/calc/period";
+import { todayKST } from "@/lib/date";
 import { getHouseholdMembers, requireMember, toMemberNames } from "@/lib/household";
+import { getCurrentPeriod, getPeriodConfig } from "@/lib/period";
 import { getRecurringOverview } from "@/lib/recurring";
 import {
   getLabelMaps,
@@ -28,7 +30,8 @@ const hrefFor = (who: PersonFilter) => (who === "all" ? "/" : `/?who=${who}`);
  */
 export default async function HomePage({ searchParams }: PageProps<"/">) {
   const me = await requireMember();
-  const month = currentMonthKST();
+  // "이번 달"은 한 달 기준(F-56)으로 오늘이 속한 기간. 1일 기준이면 달력의 한 달
+  const [{ month, range }, periodConfig] = await Promise.all([getCurrentPeriod(), getPeriodConfig()]);
   const today = todayKST();
   const { who } = parseFilters(await searchParams, month);
   const members = await getHouseholdMembers();
@@ -36,8 +39,8 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
 
   const [thisMonthRows, lastPeriodRows, recent, recurring, labels, budgets, allowances, allowanceMethods] =
     await Promise.all([
-      getTransactionsInRange(monthRange(month)),
-      getTransactionsInRange(samePeriodLastMonth(today)),
+      getTransactionsInRange(range),
+      getTransactionsInRange(samePeriodLastPeriod(today, periodConfig)),
       getRecentTransactions(who, 6),
       getRecurringOverview(),
       getLabelMaps(),
@@ -78,6 +81,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
           <div className="flex flex-col gap-4">
             <MonthSummary
               monthLabel={`${Number(month.slice(5, 7))}월`}
+              rangeLabel={isCalendarRange(range) ? null : formatPeriodRange(range)}
               totals={totals}
               compareText={compareWithLastMonth(totals.expense, lastExpense)}
               split={who === "all" ? split : null}
@@ -99,7 +103,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
             {/* "공동"을 고르면 보여줄 예산이 없다 */}
             {who === "joint" ? null : (
               <BudgetCard
-                category={budgetRows ? { summary: budgetSummary(budgetRows, month, today), top: budgetRows.slice(0, 5) } : null}
+                category={budgetRows ? { summary: budgetSummary(budgetRows, range, today), top: budgetRows.slice(0, 5) } : null}
                 categoryNames={labels.categories}
                 allowances={allowanceUsage}
                 names={names}

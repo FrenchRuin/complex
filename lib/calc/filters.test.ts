@@ -59,6 +59,14 @@ describe("parseFilters", () => {
     expect(parseFilters({ month: "2026-08", day: "2026-09-01" }, "2026-09").day).toBeNull();
     expect(parseFilters({ month: "2026-08", day: "2026-08-31" }, "2026-09").day).toBe("2026-08-31");
   });
+
+  it("month 없이 day나 at만 오면 그 날짜가 든 달 (알림 주소, F-56)", () => {
+    // 월급날 25일·끝나는 달 이름: 9/28은 "10월"
+    const payPeriod = (date: string) => (date >= "2026-09-25" && date <= "2026-10-24" ? "2026-10" : date.slice(0, 7));
+    expect(parseFilters({ day: "2026-09-28" }, "2026-10", payPeriod)).toMatchObject({ month: "2026-10", day: "2026-09-28" });
+    expect(parseFilters({ at: "2026-09-28" }, "2026-11", payPeriod)).toMatchObject({ month: "2026-10", day: null });
+    expect(parseFilters({ day: "2026-08-15" }, "2026-09")).toMatchObject({ month: "2026-08", day: "2026-08-15" });
+  });
 });
 
 describe("filtersToHref", () => {

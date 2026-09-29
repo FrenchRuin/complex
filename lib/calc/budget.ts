@@ -1,7 +1,7 @@
 /**
  * 예산 계산 (F-21, F-22).
  */
-import { monthRange, type DateString, type MonthString } from "@/lib/date";
+import { daysBetween, type DateRange, type DateString } from "@/lib/date";
 import { SLOTS, type Slot } from "@/lib/domain";
 import { formatWon } from "@/lib/money";
 
@@ -56,21 +56,21 @@ export function categoryBudgetRows(budgets: readonly BudgetItem[], spent: Record
     .sort((a, b) => b.spent / b.budget - a.spent / a.budget);
 }
 
-/** 오늘 포함 남은 일수. today가 그 달이 아니면(지난달) 0, 앞으로의 달이면 그 달 전체 */
-export function daysLeftInMonth(month: MonthString, today: DateString): number {
-  const { start, end } = monthRange(month);
-  if (today > end) return 0;
-  const lastDay = Number(end.slice(8, 10));
-  if (today < start) return lastDay;
-  return lastDay - Number(today.slice(8, 10)) + 1;
+/**
+ * 오늘 포함 남은 일수. 기간(달력의 한 달 또는 월급날 주기, F-56)이 지났으면 0, 앞으로의 기간이면 전체.
+ */
+export function daysLeftInRange(range: DateRange, today: DateString): number {
+  if (today > range.end) return 0;
+  if (today < range.start) return daysBetween(range.start, range.end) + 1;
+  return daysBetween(today, range.end) + 1;
 }
 
-/** 변동지출 예산 카드: 예산이 있는 카테고리들의 지출 합계 / 예산 합계 */
-export function budgetSummary(rows: readonly CategoryBudgetRow[], month: MonthString, today: DateString): BudgetSummary {
+/** 변동지출 예산 카드: 예산이 있는 카테고리들의 지출 합계 / 예산 합계. range는 그 달의 기간 */
+export function budgetSummary(rows: readonly CategoryBudgetRow[], range: DateRange, today: DateString): BudgetSummary {
   const budgetTotal = rows.reduce((sum, r) => sum + r.budget, 0);
   const spentTotal = rows.reduce((sum, r) => sum + r.spent, 0);
   const remaining = budgetTotal - spentTotal;
-  const daysLeft = daysLeftInMonth(month, today);
+  const daysLeft = daysLeftInRange(range, today);
   return {
     budgetTotal,
     spentTotal,

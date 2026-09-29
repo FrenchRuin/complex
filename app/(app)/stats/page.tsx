@@ -10,32 +10,37 @@ import { MonthPicker } from "@/components/transactions/MonthPicker";
 import { getMonthBudgets } from "@/lib/budget";
 import { parseFilters } from "@/lib/calc/filters";
 import { categoryStats, monthlyExpense, personStats, recentMonths, unbudgetedFixedTotal } from "@/lib/calc/stats";
-import { currentMonthKST, monthOf, monthRange, shiftMonth, type MonthString } from "@/lib/date";
+import { formatPeriodRangeShort, isCalendarRange, periodOf, periodRange } from "@/lib/calc/period";
+import { shiftMonth, todayKST, type MonthString } from "@/lib/date";
 import { getHouseholdMembers, requireMember, toMemberNames } from "@/lib/household";
 import { formatWon } from "@/lib/money";
+import { getPeriodConfig } from "@/lib/period";
 import { getLabelMaps, getTransactionsInRange } from "@/lib/transactions";
 
 export const metadata: Metadata = { title: "통계 · 우리 둘 가계부" };
 
 const hrefFor = (month: MonthString, current: MonthString) => (month === current ? "/stats" : `/stats?month=${month}`);
 
-/** 통계 (F-23): 최근 6개월 지출, 카테고리별 예산 대비, 사람별, 예산 없는 고정지출 */
+/** 통계 (F-23): 최근 6개월 지출, 카테고리별 예산 대비, 사람별, 예산 없는 고정지출. 달은 한 달 기준(F-56)의 기간 */
 export default async function StatsPage({ searchParams }: PageProps<"/stats">) {
   await requireMember();
-  const current = currentMonthKST();
+  const cfg = await getPeriodConfig();
+  const current = periodOf(todayKST(), cfg);
   const { month } = parseFilters(await searchParams, current);
   const months = recentMonths(month, 6);
+  const range = periodRange(month, cfg);
+  const inPeriod = (date: string) => periodOf(date, cfg);
 
   const [rows, budgets, labels, members] = await Promise.all([
-    getTransactionsInRange({ start: monthRange(months[0]).start, end: monthRange(month).end }),
+    getTransactionsInRange({ start: periodRange(months[0], cfg).start, end: range.end }),
     getMonthBudgets(month),
     getLabelMaps(),
     getHouseholdMembers(),
   ]);
   const memberNames = toMemberNames(members);
 
-  const thisMonth = rows.filter((r) => monthOf(r.occurredOn) === month);
-  const lastMonth = rows.filter((r) => monthOf(r.occurredOn) === shiftMonth(month, -1));
+  const thisMonth = rows.filter((r) => inPeriod(r.occurredOn) === month);
+  const lastMonth = rows.filter((r) => inPeriod(r.occurredOn) === shiftMonth(month, -1));
   const fixed = unbudgetedFixedTotal(thisMonth, budgets);
 
   const monthNav = (direction: -1 | 1) => (
@@ -58,12 +63,19 @@ export default async function StatsPage({ searchParams }: PageProps<"/stats">) {
       <PageHeader
         title={<MonthPicker month={month} currentMonth={current} path="/stats" query="" />}
         titleStart={monthNav(-1)}
-        titleEnd={monthNav(1)}
+        titleEnd={
+          <>
+            {monthNav(1)}
+            {isCalendarRange(range) ? null : (
+              <span className="text-caption text-ink-muted tabular-nums">{formatPeriodRangeShort(range)}</span>
+            )}
+          </>
+        }
       />
       <div className="grid grid-cols-1 gap-4 px-5 py-6 lg:grid-cols-2 lg:items-start lg:px-8">
         <div className="flex flex-col gap-4">
           <SettingsSection title="최근 6개월 지출">
-            <MonthlyChart data={monthlyExpense(rows, months)} currentMonth={current} />
+            <MonthlyChart data={monthlyExpense(rows, months, inPeriod)} currentMonth={current} />
           </SettingsSection>
           <SettingsSection title="사람별 지출">
             <PersonStats stats={personStats(thisMonth)} names={memberNames} categoryNames={labels.categories} />

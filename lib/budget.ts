@@ -1,7 +1,8 @@
 import { cache } from "react";
 import type { AllowanceItem, BudgetItem } from "./calc/budget";
-import { currentMonthKST, type MonthString } from "./date";
+import type { MonthString } from "./date";
 import { SLOTS, type Slot } from "./domain";
+import { getCurrentPeriod } from "./period";
 import { createClient } from "./supabase/server";
 
 /**
@@ -9,7 +10,8 @@ import { createClient } from "./supabase/server";
  * (복사는 DB 함수가 한 달에 한 번만 한다)
  */
 const ensureMonth = cache(async (month: MonthString) => {
-  if (month !== currentMonthKST()) return;
+  // "이번 달"은 한 달 기준(F-56)으로 오늘이 속한 기간
+  if (month !== (await getCurrentPeriod()).month) return;
   const supabase = await createClient();
   const { error } = await supabase.rpc("ensure_month_budgets", { p_month: `${month}-01` });
   if (error) throw new Error(`예산을 준비하지 못했어요: ${error.message}`);

@@ -6,6 +6,8 @@ import { SplitBar } from "./SplitBar";
 
 type Props = {
   monthLabel: string;
+  /** 월급날 주기면 "9월 25일 ~ 10월 24일" (달력의 한 달이면 null, F-56) */
+  rangeLabel: string | null;
   totals: DayTotal;
   compareText: string;
   /** 사람 필터가 "전체"일 때만 분할 막대를 보여준다 */
@@ -14,11 +16,14 @@ type Props = {
 };
 
 /** 이번 달 지출(큰 숫자) + 지난달 비교 + 분할 막대 + 수입·지출 (F-20) */
-export function MonthSummary({ monthLabel, totals, compareText, split, names }: Props) {
+export function MonthSummary({ monthLabel, rangeLabel, totals, compareText, split, names }: Props) {
   return (
     <div className="flex flex-col gap-4">
       <section className="rounded-md bg-surface-raised p-5">
-        <h2 className="text-heading text-ink">{monthLabel} 지출</h2>
+        <div className="flex flex-wrap items-baseline justify-between gap-x-2">
+          <h2 className="text-heading text-ink">{monthLabel} 지출</h2>
+          {rangeLabel ? <span className="text-caption text-ink-muted tabular-nums">{rangeLabel}</span> : null}
+        </div>
         <p className="mt-2 text-amount-hero text-expense tabular-nums">{formatWon(totals.expense)}</p>
         <p className="mt-1 text-caption text-ink-muted tabular-nums">{compareText}</p>
         {split ? (

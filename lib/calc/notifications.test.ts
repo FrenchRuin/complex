@@ -94,22 +94,22 @@ describe("메모 알림 (F-18)", () => {
 describe("notificationHref", () => {
   it("내역이 있으면 그 날짜 + 편집 창", () => {
     expect(notificationHref({ kind: "updated", transactionId: "t1", occurredOn: "2026-09-27" })).toBe(
-      "/transactions?month=2026-09&day=2026-09-27&tx=t1",
+      "/transactions?day=2026-09-27&tx=t1",
     );
   });
 
   it("삭제된 내역은 날짜만", () => {
     expect(notificationHref({ kind: "deleted", transactionId: "t1", occurredOn: "2026-08-31" })).toBe(
-      "/transactions?month=2026-08&day=2026-08-31",
+      "/transactions?day=2026-08-31",
     );
     expect(notificationHref({ kind: "recurring_unchecked", transactionId: "t1", occurredOn: "2026-08-31" })).toBe(
-      "/transactions?month=2026-08&day=2026-08-31",
+      "/transactions?day=2026-08-31",
     );
   });
 
-  it("문자 묶음은 그 달만, 날짜가 없으면 내역 화면", () => {
+  it("문자 묶음은 그 날짜가 든 달만(at), 날짜가 없으면 내역 화면", () => {
     expect(notificationHref({ kind: "sms_batch", transactionId: null, occurredOn: "2026-09-02" })).toBe(
-      "/transactions?month=2026-09",
+      "/transactions?at=2026-09-02",
     );
     expect(notificationHref({ kind: "created", transactionId: "t1", occurredOn: null })).toBe("/transactions");
   });
