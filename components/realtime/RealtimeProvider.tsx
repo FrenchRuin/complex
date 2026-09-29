@@ -82,6 +82,11 @@ export function RealtimeProvider({ householdId, children }: { householdId: strin
         )
         .on(
           "postgres_changes",
+          { event: "*", schema: "public", table: "custom_holidays", filter: `household_id=eq.${householdId}` },
+          scheduleRefresh,
+        )
+        .on(
+          "postgres_changes",
           { event: "*", schema: "public", table: "assets", filter: `household_id=eq.${householdId}` },
           scheduleRefresh,
         )
