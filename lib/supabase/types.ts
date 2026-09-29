@@ -272,6 +272,54 @@ export type Database = {
           },
         ]
       }
+      custom_holidays: {
+        Row: {
+          created_at: string
+          created_by: string
+          date: string
+          deleted_at: string | null
+          household_id: string
+          id: string
+          kind: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          date: string
+          deleted_at?: string | null
+          household_id: string
+          id?: string
+          kind: string
+          name?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          date?: string
+          deleted_at?: string | null
+          household_id?: string
+          id?: string
+          kind?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_holidays_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "custom_holidays_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           all_day: boolean
