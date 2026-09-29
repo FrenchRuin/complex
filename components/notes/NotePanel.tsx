@@ -53,7 +53,7 @@ export function NotePanel({ note, members, onClose }: Props) {
   return (
     <Dialog.Root open onOpenChange={(open) => (open ? undefined : onClose())}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-40 bg-ink/30 motion-safe:animate-[fade-in_150ms_ease-out]" />
+        <Dialog.Overlay className="fixed inset-0 z-40 bg-scrim motion-safe:animate-[fade-in_150ms_ease-out]" />
         <Dialog.Content
           aria-describedby={undefined}
           className="fixed inset-x-0 bottom-0 z-50 flex max-h-[92dvh] flex-col rounded-t-lg bg-surface-raised shadow-sheet outline-none motion-safe:animate-[sheet-in_200ms_ease-out] lg:inset-y-0 lg:right-0 lg:left-auto lg:max-h-none lg:w-[440px] lg:rounded-none lg:shadow-float lg:motion-safe:animate-[panel-in_200ms_ease-out]"

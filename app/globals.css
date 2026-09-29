@@ -12,7 +12,7 @@
   --surface-raised: #ffffff;
   --surface-sunken: #e9edf1;
   --line: #dce2e8;
-  --line-strong: #8a95a1;
+  --line-strong: #7b8794;
   --ink: #151b23;
   --ink-muted: #56616e;
   --primary: #1b5faf;
@@ -29,6 +29,7 @@
   --online: #1f9d55;
   --expense: #cc2f2f;
   --holiday: #c2362b;
+  --scrim: rgb(11 18 32 / 0.4);
 
   --shadow-float-value: 0 2px 6px #151b2314, 0 10px 24px -4px #151b2324;
   --shadow-sheet-value: 0 -8px 32px #151b2329;
@@ -44,12 +45,12 @@
   --surface: #0f1318;
   --surface-raised: #181d24;
   --surface-sunken: #0a0d11;
-  --line: #262d36;
+  --line: #2c343e;
   --line-strong: #6b7682;
   --ink: #eef1f4;
   --ink-muted: #a3adb8;
   --primary: #78aef2;
-  --primary-soft: #172636;
+  --primary-soft: #203854;
   --on-primary: #0b1220;
   --joint: #a9b8cc;
   --joint-soft: #1e2733;
@@ -62,6 +63,7 @@
   --online: #4ade80;
   --expense: #ff7a7a;
   --holiday: #ff8a7e;
+  --scrim: rgb(0 0 0 / 0.6);
 
   --shadow-float-value: 0 10px 24px -4px #000000cc;
   --shadow-sheet-value: 0 -8px 32px #000000e6;
@@ -74,12 +76,12 @@
     --surface: #0f1318;
     --surface-raised: #181d24;
     --surface-sunken: #0a0d11;
-    --line: #262d36;
+    --line: #2c343e;
     --line-strong: #6b7682;
     --ink: #eef1f4;
     --ink-muted: #a3adb8;
     --primary: #78aef2;
-    --primary-soft: #172636;
+    --primary-soft: #203854;
     --on-primary: #0b1220;
     --joint: #a9b8cc;
     --joint-soft: #1e2733;
@@ -92,6 +94,7 @@
     --online: #4ade80;
     --expense: #ff7a7a;
     --holiday: #ff8a7e;
+    --scrim: rgb(0 0 0 / 0.6);
 
     --shadow-float-value: 0 10px 24px -4px #000000cc;
     --shadow-sheet-value: 0 -8px 32px #000000e6;
@@ -124,6 +127,7 @@
   --color-income: var(--primary);
   --color-expense: var(--expense);
   --color-holiday: var(--holiday);
+  --color-scrim: var(--scrim);
 
   --font-sans: "Pretendard Variable", "Pretendard", "IBM Plex Sans KR", -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
 

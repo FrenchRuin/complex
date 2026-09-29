@@ -20,7 +20,7 @@ export function MobileMenuProvider({ data, children }: { data: SidebarData; chil
       {children}
       <Dialog.Root open={open} onOpenChange={setOpen}>
         <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 z-40 bg-ink/30 motion-safe:animate-[fade-in_150ms_ease-out] lg:hidden" />
+          <Dialog.Overlay className="fixed inset-0 z-40 bg-scrim motion-safe:animate-[fade-in_150ms_ease-out] lg:hidden" />
           <Dialog.Content
             aria-describedby={undefined}
             className="fixed inset-y-0 left-0 z-50 flex w-[280px] max-w-[85vw] flex-col bg-surface-raised pt-[env(safe-area-inset-top,0px)] shadow-float outline-none motion-safe:animate-[drawer-in_200ms_ease-out] lg:hidden"
