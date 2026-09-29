@@ -13,12 +13,11 @@ import { formatWon, formatWonShort, formatWonTiny } from "@/lib/money";
 const AMOUNT = "block max-w-full whitespace-nowrap text-[11px] leading-4 xl:text-[12px]";
 
 function DayAmount({ amount, prefix = "", className }: { amount: number; prefix?: string; className: string }) {
+  const tiny = `${prefix}${formatWonTiny(amount)}`;
   return (
     <span className={`${AMOUNT} ${className}`}>
-      <span className="sm:hidden">
-        {prefix}
-        {formatWonTiny(amount)}
-      </span>
+      {/* 1,000만 이상(+1235만처럼 6자 이상)은 360px 폰 칸을 넘치지 않게 한 단계 작게 */}
+      <span className={`sm:hidden ${tiny.length >= 6 ? "text-[10px] tracking-[-0.02em]" : ""}`}>{tiny}</span>
       <span className="hidden sm:inline">
         {prefix}
         {formatWonShort(amount)}
