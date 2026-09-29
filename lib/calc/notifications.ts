@@ -18,7 +18,9 @@ export type NotificationKind =
   | "event_created"
   | "event_updated"
   | "event_deleted"
-  | "event_restored";
+  | "event_restored"
+  | "event_occurrence_deleted"
+  | "event_occurrence_restored";
 
 export type NotificationItem = {
   id: string;
@@ -51,6 +53,8 @@ const KINDS: readonly NotificationKind[] = [
   "event_updated",
   "event_deleted",
   "event_restored",
+  "event_occurrence_deleted",
+  "event_occurrence_restored",
 ];
 
 const EVENT_ACTION_TEXT = {
@@ -58,6 +62,9 @@ const EVENT_ACTION_TEXT = {
   event_updated: "수정했어요",
   event_deleted: "삭제했어요",
   event_restored: "되돌렸어요",
+  // 반복 일정의 회차 하나 ("이 일정만")
+  event_occurrence_deleted: "삭제했어요",
+  event_occurrence_restored: "되돌렸어요",
 } as const;
 
 function isEventKind(kind: NotificationKind): kind is keyof typeof EVENT_ACTION_TEXT {
@@ -91,8 +98,12 @@ const ACTION_TEXT: Record<"created" | "updated" | "deleted" | "restored", string
  * "서연님이 월세 700,000원 납부를 체크했어요"
  * "서연님이 월세 700,000원 납부 체크를 풀었어요"
  * "서연님이 문자로 5건을 추가했어요"
+ * "지훈님이 9월 30일 일정 ‘치과’를 삭제했어요" (반복 일정의 그날만)
  */
-export function notificationSentence(item: Pick<NotificationItem, "kind" | "subject" | "amount" | "count">, actorName: string): string {
+export function notificationSentence(
+  item: Pick<NotificationItem, "kind" | "subject" | "amount" | "count"> & { occurredOn?: DateString | null },
+  actorName: string,
+): string {
   const who = `${actorName}님이`;
   if (isNoteKind(item.kind)) {
     const title = item.subject ?? "제목 없는 메모";
@@ -100,6 +111,11 @@ export function notificationSentence(item: Pick<NotificationItem, "kind" | "subj
   }
   if (isEventKind(item.kind)) {
     const title = item.subject ?? "일정";
+    const occurrence = item.kind === "event_occurrence_deleted" || item.kind === "event_occurrence_restored";
+    if (occurrence && item.occurredOn) {
+      const day = `${Number(item.occurredOn.slice(5, 7))}월 ${Number(item.occurredOn.slice(8, 10))}일`;
+      return `${who} ${day} 일정 ‘${title}’${objectParticle(title)} ${EVENT_ACTION_TEXT[item.kind]}`;
+    }
     return `${who} 일정 ‘${title}’${objectParticle(title)} ${EVENT_ACTION_TEXT[item.kind]}`;
   }
   if (item.kind === "sms_batch") return `${who} 문자로 ${item.count}건을 추가했어요`;
@@ -128,7 +144,10 @@ export function notificationHref(
   if (isEventKind(item.kind)) {
     const params = new URLSearchParams();
     if (item.occurredOn) params.set("month", monthOf(item.occurredOn));
-    if (item.eventId && item.kind !== "event_deleted") params.set("event", item.eventId);
+    // 지운 일정(그날만 지운 것 포함)은 그 달만
+    if (item.eventId && item.kind !== "event_deleted" && item.kind !== "event_occurrence_deleted") {
+      params.set("event", item.eventId);
+    }
     const query = params.toString();
     return query ? `/schedule?${query}` : "/schedule";
   }

@@ -20,6 +20,8 @@ export type CalendarEvent = {
   endTime: string | null;
   repeat: EventRepeat;
   repeatUntil: DateString | null;
+  /** 반복에서 빠진 회차의 시작 날짜 ("이 일정만" 지우거나 떼어 낸 날) */
+  skipDates: readonly DateString[];
   createdBy: string;
   updatedBy: string;
   updatedAt: string;
@@ -63,6 +65,7 @@ export function occurrencesBetween(events: readonly CalendarEvent[], range: Date
   const out: Occurrence[] = [];
   for (const event of events) {
     const span = daysBetween(event.startDate, event.endDate);
+    const skip = new Set(event.skipDates);
     // 매주 반복은 기간 근처 회차부터 센다
     let n =
       event.repeat === "weekly"
@@ -73,7 +76,7 @@ export function occurrencesBetween(events: readonly CalendarEvent[], range: Date
       if (start > range.end) break;
       if (event.repeatUntil && start > event.repeatUntil) break;
       const end = addDays(start, span);
-      if (end >= range.start) out.push({ event, start, end, key: `${event.id}:${start}` });
+      if (end >= range.start && !skip.has(start)) out.push({ event, start, end, key: `${event.id}:${start}` });
       if (event.repeat === "none") break;
     }
   }

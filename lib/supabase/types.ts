@@ -240,6 +240,7 @@ export type Database = {
           created_at: string
           created_by: string
           deleted_at: string | null
+          detached_from: string | null
           end_date: string
           end_time: string | null
           household_id: string
@@ -248,6 +249,7 @@ export type Database = {
           owner: string
           repeat: string
           repeat_until: string | null
+          skip_dates: string[]
           start_date: string
           start_time: string | null
           title: string
@@ -259,6 +261,7 @@ export type Database = {
           created_at?: string
           created_by: string
           deleted_at?: string | null
+          detached_from?: string | null
           end_date: string
           end_time?: string | null
           household_id: string
@@ -267,6 +270,7 @@ export type Database = {
           owner?: string
           repeat?: string
           repeat_until?: string | null
+          skip_dates?: string[]
           start_date: string
           start_time?: string | null
           title: string
@@ -278,6 +282,7 @@ export type Database = {
           created_at?: string
           created_by?: string
           deleted_at?: string | null
+          detached_from?: string | null
           end_date?: string
           end_time?: string | null
           household_id?: string
@@ -286,6 +291,7 @@ export type Database = {
           owner?: string
           repeat?: string
           repeat_until?: string | null
+          skip_dates?: string[]
           start_date?: string
           start_time?: string | null
           title?: string
@@ -298,6 +304,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_detached_from_fkey"
+            columns: ["detached_from"]
+            isOneToOne: false
+            referencedRelation: "events"
             referencedColumns: ["id"]
           },
           {
@@ -984,6 +997,10 @@ export type Database = {
       create_household: { Args: { p_display_name: string }; Returns: string }
       create_invite: { Args: never; Returns: string }
       delete_asset_value: { Args: { p_value_id: string }; Returns: undefined }
+      detach_event_occurrence: {
+        Args: { p_date: string; p_event_id: string }
+        Returns: string
+      }
       ensure_month_budgets: { Args: { p_month: string }; Returns: undefined }
       get_invite: {
         Args: { p_token: string }
@@ -1007,6 +1024,10 @@ export type Database = {
       note_subject: { Args: { p_body: string; p_items: Json }; Returns: string }
       set_asset_value: {
         Args: { p_amount: number; p_as_of: string; p_asset_id: string }
+        Returns: undefined
+      }
+      set_event_occurrence_skipped: {
+        Args: { p_date: string; p_event_id: string; p_skipped: boolean }
         Returns: undefined
       }
       toggle_note_item: {
