@@ -20,7 +20,7 @@ export const getAllPaymentMethods = cache(async () => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("payment_methods")
-    .select("id, name, kind, owner, sms_aliases, is_allowance, sort_order, is_hidden");
+    .select("id, name, kind, owner, sms_aliases, sort_order, is_hidden");
   if (error) throw loadError("결제수단", error);
   return data.map((m) => ({ ...m, kind: toPaymentKind(m.kind), owner: toOwner(m.owner) }));
 });

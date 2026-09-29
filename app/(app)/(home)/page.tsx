@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { BudgetCard } from "@/components/dashboard/BudgetCard";
-import { getAllowanceMethods, getMonthAllowances, getMonthBudgets } from "@/lib/budget";
-import { allowanceRows, allowanceSpent, budgetSummary, categoryBudgetRows, spentByCategory } from "@/lib/calc/budget";
+import { getMonthBudgets, getSpendBudgets } from "@/lib/budget";
+import { budgetSummary, categoryBudgetRows, spendBudgetRows, spentByCategory } from "@/lib/calc/budget";
 import { MonthSummary } from "@/components/dashboard/MonthSummary";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { RecurringChecklist } from "@/components/recurring/RecurringChecklist";
@@ -25,7 +25,7 @@ import {
 const hrefFor = (who: PersonFilter) => (who === "all" ? "/" : `/?who=${who}`);
 
 /**
- * 홈 대시보드 (F-20). 돈 중심: 이번 달 지출, 예산·용돈, 정기지출, 최근 내역.
+ * 홈 대시보드 (F-20). 돈 중심: 이번 달 지출, 예산(카테고리·통장·카드), 정기지출, 최근 내역.
  * 일정·메모·자산은 각자 메뉴로 (2026-09-29). 사람 필터를 바꾸면 모든 숫자가 그 기준으로 바뀐다.
  */
 export default async function HomePage({ searchParams }: PageProps<"/">) {
@@ -37,22 +37,22 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
   const members = await getHouseholdMembers();
   const partner = members.find((m) => m.id !== me.id) ?? null;
 
-  const [thisMonthRows, lastPeriodRows, recent, recurring, labels, budgets, allowances, allowanceMethods] =
-    await Promise.all([
-      getTransactionsInRange(range),
-      getTransactionsInRange(samePeriodLastPeriod(today, periodConfig)),
-      getRecentTransactions(who, 6),
-      getRecurringOverview(),
-      getLabelMaps(),
-      getMonthBudgets(month),
-      getMonthAllowances(month),
-      getAllowanceMethods(),
-    ]);
-  // 카테고리 예산은 가구 전체 기준이라 "전체"일 때만. 용돈은 전체면 두 사람, 사람을 고르면 그 사람만
+  const [thisMonthRows, lastPeriodRows, recent, recurring, labels, budgets, spendBudgets] = await Promise.all([
+    getTransactionsInRange(range),
+    getTransactionsInRange(samePeriodLastPeriod(today, periodConfig)),
+    getRecentTransactions(who, 6),
+    getRecurringOverview(),
+    getLabelMaps(),
+    getMonthBudgets(month),
+    getSpendBudgets(month),
+  ]);
+  // 카테고리 예산은 가구 전체 기준이라 "전체"일 때만.
+  // 통장·카드 예산은 전체면 모두, 사람(공동)을 고르면 그 사람(공동) 계좌·카드가 들어간 예산만
   const budgetRows = who === "all" ? categoryBudgetRows(budgets, spentByCategory(thisMonthRows)) : null;
   const split = splitByOwner(thisMonthRows);
-  const allowanceUsage = allowanceRows(allowances, allowanceSpent(thisMonthRows, allowanceMethods)).filter(
-    (r) => who === "all" || r.slot === who,
+  const spendUsage = spendBudgetRows(
+    spendBudgets.filter((b) => who === "all" || b.owners.includes(who)),
+    thisMonthRows,
   );
 
   const names = toMemberNames(members);
@@ -100,13 +100,12 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
           </div>
 
           <div className="flex flex-col gap-4">
-            {/* "공동"을 고르면 보여줄 예산이 없다 */}
-            {who === "joint" ? null : (
+            {/* 사람(공동)을 골랐는데 그 사람 통장·카드 예산이 없으면 카드를 숨긴다 */}
+            {who !== "all" && spendUsage.length === 0 ? null : (
               <BudgetCard
                 category={budgetRows ? { summary: budgetSummary(budgetRows, range, today), top: budgetRows.slice(0, 5) } : null}
                 categoryNames={labels.categories}
-                allowances={allowanceUsage}
-                names={names}
+                spendBudgets={spendUsage}
               />
             )}
 

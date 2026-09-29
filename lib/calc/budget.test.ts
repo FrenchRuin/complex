@@ -1,13 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
-  allowanceRows,
-  allowanceSpent,
-  allowanceText,
   barWidth,
   budgetSummary,
   categoryBudgetRows,
   daysLeftInRange,
   overText,
+  spendBudgetRows,
+  spendBudgetText,
   spentByCategory,
 } from "./budget";
 import { monthRange } from "@/lib/date";
@@ -100,38 +99,31 @@ describe("overText / barWidth", () => {
   });
 });
 
-describe("allowanceSpent (용돈 통장·카드로 쓴 금액)", () => {
-  it("용돈 결제수단으로 쓴 지출만 그 소유자에게, 공동으로 적은 것도 포함, 수입·다른 결제수단은 빼기", () => {
-    const methods = { "a-card": "a", "a-account": "a", "b-card": "b" } as const;
-    expect(
-      allowanceSpent(
-        [
-          { type: "expense", amount: 10000, paymentMethodId: "a-card" },
-          { type: "expense", amount: 5000, paymentMethodId: "a-account" }, // 한 사람이 여러 개
-          { type: "expense", amount: 30000, paymentMethodId: "salary-card" }, // 월급 카드: 용돈 아님
-          { type: "expense", amount: 7000, paymentMethodId: null },
-          { type: "income", amount: 99999, paymentMethodId: "a-card" },
-          { type: "expense", amount: 20000, paymentMethodId: "b-card" },
-        ],
-        methods,
-      ),
-    ).toEqual({ a: 15000, b: 20000 });
-  });
-});
+describe("spendBudgetRows (통장·카드 예산)", () => {
+  const budgets = [
+    { id: "life", name: "생활비", methodIds: ["joint-account", "joint-card"], amount: 100000 },
+    { id: "jh", name: "지훈 용돈", methodIds: ["a-card"], amount: 50000 },
+    { id: "none", name: "금액 없음", methodIds: ["b-card"], amount: null },
+  ];
+  const rows = [
+    { type: "expense", amount: 60000, paymentMethodId: "joint-account" },
+    { type: "expense", amount: 30000, paymentMethodId: "joint-card" }, // 여러 결제수단을 합쳐서
+    { type: "expense", amount: 70000, paymentMethodId: "a-card" }, // 공동으로 적었어도 지훈 카드면 지훈 용돈
+    { type: "expense", amount: 9999, paymentMethodId: "salary-card" }, // 어느 예산에도 없는 카드
+    { type: "expense", amount: 5000, paymentMethodId: null },
+    { type: "income", amount: 99999, paymentMethodId: "joint-card" },
+  ];
 
-describe("allowanceRows (용돈)", () => {
-  it("한도가 있는 사람만, 개인 지출과 비교한다", () => {
-    const rows = allowanceRows([{ slot: "b", amount: 300000 }, { slot: "a", amount: 200000 }], { a: 230000, b: 120000 });
-    expect(rows).toEqual([
-      { slot: "a", limit: 200000, spent: 230000, percent: 115, remaining: -30000, over: true, overBy: 30000 },
-      { slot: "b", limit: 300000, spent: 120000, percent: 40, remaining: 180000, over: false, overBy: 0 },
+  it("예산마다 그 결제수단들로 쓴 지출만, 금액 없는 예산은 빼기", () => {
+    expect(spendBudgetRows(budgets, rows)).toEqual([
+      { id: "life", name: "생활비", limit: 100000, spent: 90000, percent: 90, remaining: 10000, over: false, overBy: 0 },
+      { id: "jh", name: "지훈 용돈", limit: 50000, spent: 70000, percent: 140, remaining: -20000, over: true, overBy: 20000 },
     ]);
-    expect(allowanceRows([{ slot: "a", amount: 100000 }], { a: 0, b: 50000 }).map((r) => r.slot)).toEqual(["a"]);
   });
 
-  it("문구: 남은 금액, 넘으면 이름과 초과 금액", () => {
-    const [over, under] = allowanceRows([{ slot: "a", amount: 200000 }, { slot: "b", amount: 300000 }], { a: 230000, b: 120000 });
-    expect(allowanceText(over, "지훈")).toBe("지훈님 용돈을 30,000원 넘었어요");
-    expect(allowanceText(under, "서연")).toBe("180,000원 남았어요");
+  it("문구: 남은 금액, 넘으면 예산 이름과 초과 금액", () => {
+    const [life, jh] = spendBudgetRows(budgets, rows);
+    expect(spendBudgetText(life)).toBe("10,000원 남았어요");
+    expect(spendBudgetText(jh)).toBe("지훈 용돈 예산을 20,000원 넘었어요");
   });
 });
