@@ -4,6 +4,7 @@ import { CalendarDays, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { WEEKDAY_LABELS, dayCellLabel, rangeWeeks } from "@/lib/calc/calendar";
+import { formatPeriodRangeShort } from "@/lib/calc/period";
 import { filtersToHref, type TransactionFilters } from "@/lib/calc/filters";
 import type { DayTotal } from "@/lib/calc/group";
 import { formatDayHeader, type DateRange, type DateString, type MonthString } from "@/lib/date";
@@ -56,7 +57,13 @@ export function MonthCalendar({ filters, currentMonth, today, totals, range, cal
         className="flex h-10 w-full items-center gap-2 rounded-sm px-2 text-body text-ink hover:bg-surface-sunken lg:hidden"
       >
         <CalendarDays size={18} strokeWidth={1.75} aria-hidden />
-        <span className="flex-1 text-left">달력</span>
+        <span className="flex-1 text-left">
+          달력
+          {/* 폰: 머리에 못 넣은 기간 (한 달 기준 F-56) */}
+          {calendarMonth ? null : (
+            <span className="ml-2 text-caption text-ink-muted tabular-nums">{formatPeriodRangeShort(range)}</span>
+          )}
+        </span>
         <ChevronDown
           size={18}
           strokeWidth={1.75}

@@ -40,7 +40,7 @@ export function MonthPicker({ month, currentMonth, path, query }: Props) {
     >
       <Popover.Trigger
         aria-label={`${formatMonthLabel(month)}, 연월 고르기`}
-        className="inline-flex items-center gap-1 rounded-sm px-1 hover:bg-surface-sunken"
+        className="inline-flex items-center gap-1 whitespace-nowrap rounded-sm px-1 hover:bg-surface-sunken"
       >
         {formatMonthLabel(month)}
         <ChevronDown size={18} strokeWidth={1.75} className="text-ink-muted" aria-hidden />
