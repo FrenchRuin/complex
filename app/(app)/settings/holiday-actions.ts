@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { dbErrorMessage, fail, ok, type ActionResult } from "@/lib/action-result";
 import { requireMember } from "@/lib/household";
-import { getPresetHolidays } from "@/lib/holidays";
+import { getPresetHolidays, syncHolidayPresets } from "@/lib/holidays";
 import { dateStringSchema, firstError, idSchema } from "@/lib/schemas";
 import { createClient } from "@/lib/supabase/server";
 
@@ -74,4 +74,26 @@ export async function setCustomHolidayDeleted(id: string, deleted: boolean): Pro
   if (error) return fail(duplicateMessage(error));
   refresh();
   return ok();
+}
+
+/** "최신 공휴일 받기": 인터넷 공휴일 파일을 받아 저장 (F-55) */
+export async function refreshHolidays(): Promise<ActionResult & { message?: string }> {
+  await requireMember();
+  try {
+    const result = await syncHolidayPresets();
+    if (!result.ok) {
+      return fail(
+        result.reason === "network"
+          ? "지금은 공휴일을 받을 수 없어요. 잠시 후 다시 시도해 주세요"
+          : "받아 온 공휴일 형식이 이상해서 저장하지 않았어요. 나중에 다시 시도해 주세요",
+      );
+    }
+    revalidatePath("/", "layout");
+    const message = result.newYears.length
+      ? `${result.newYears.join(", ")}년 공휴일을 새로 받았어요`
+      : `이미 최신이에요 (${result.years[0]}~${result.years.at(-1)}년)`;
+    return { ...ok(), message };
+  } catch {
+    return fail("공휴일을 저장하지 못했어요. 잠시 후 다시 시도해 주세요");
+  }
 }
