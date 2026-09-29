@@ -73,6 +73,15 @@ export function weekdayOf(date: DateString): number {
   return new Date(Date.UTC(year, month - 1, day)).getUTCDay();
 }
 
+/** 두 날짜 사이 일수 (to − from) */
+export function daysBetween(from: DateString, to: DateString): number {
+  const utc = (d: DateString) => {
+    const { year, month, day } = parseDate(d);
+    return Date.UTC(year, month - 1, day);
+  };
+  return Math.round((utc(to) - utc(from)) / 86_400_000);
+}
+
 /** 날짜를 n일 앞뒤로 */
 export function addDays(date: DateString, days: number): DateString {
   const { year, month, day } = parseDate(date);
