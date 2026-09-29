@@ -93,7 +93,7 @@ export function SettingsSkeleton() {
   return (
     <PageSkeleton title="설정" className="flex w-full max-w-[720px] flex-col gap-4 px-5 py-6 lg:px-8">
       <ul className="rounded-md bg-surface-raised">
-        {Array.from({ length: 9 }, (_, i) => (
+        {Array.from({ length: 10 }, (_, i) => (
           <li key={i} className="flex min-h-14 items-center gap-3 border-b border-line px-5 py-3 last:border-b-0">
             <Skeleton className="size-6 shrink-0 rounded-full" />
             <Skeleton className="h-4 w-28" />

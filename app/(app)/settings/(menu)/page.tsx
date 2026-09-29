@@ -1,4 +1,5 @@
 import {
+  BellRing,
   CalendarOff,
   CalendarRange,
   ChevronRight,
@@ -19,6 +20,7 @@ import { FREE_DB_LIMIT_BYTES, usagePercent } from "@/lib/calc/usage";
 import { getHouseholdMembers, requireMember } from "@/lib/household";
 import { getCustomHolidays } from "@/lib/holidays";
 import { getPeriodSettings } from "@/lib/period";
+import { createClient } from "@/lib/supabase/server";
 import { getAllCategories, getAllPaymentMethods, getUsage } from "@/lib/settings-data";
 import { logout } from "../actions";
 
@@ -29,13 +31,16 @@ type MenuItem = { href: string; label: string; icon: LucideIcon; summary: string
 /** 설정 첫 화면: 메뉴 목록 + 각 메뉴의 현재 상태 요약 */
 export default async function SettingsPage() {
   const me = await requireMember();
-  const [members, categories, methods, usage, customHolidays, period] = await Promise.all([
+  const supabase = await createClient();
+  const [members, categories, methods, usage, customHolidays, period, devices] = await Promise.all([
     getHouseholdMembers(),
     getAllCategories(),
     getAllPaymentMethods(),
     getUsage(),
     getCustomHolidays(),
     getPeriodSettings(),
+    // RLS가 내 기기만 센다
+    supabase.from("push_subscriptions").select("id", { count: "exact", head: true }),
   ]);
 
   const visible = categories.filter((c) => !c.is_hidden);
@@ -77,6 +82,12 @@ export default async function SettingsPage() {
       label: "공휴일",
       icon: CalendarOff,
       summary: customHolidays.length ? `기본 공휴일 + 직접 고친 날 ${customHolidays.length}일` : "기본 공휴일",
+    },
+    {
+      href: "/settings/push",
+      label: "휴대폰 알림",
+      icon: BellRing,
+      summary: devices.count ? `내 기기 ${devices.count}대에서 받는 중` : "꺼져 있어요",
     },
     { href: "/settings/theme", label: "화면 모드", icon: SunMoon, summary: "시스템·라이트·다크" },
     { href: "/settings/app", label: "앱으로 설치", icon: Smartphone, summary: "홈 화면에 추가" },
