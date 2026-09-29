@@ -1,11 +1,7 @@
 import Link from "next/link";
-import { AssetsCard } from "@/components/dashboard/AssetsCard";
 import { BudgetCard } from "@/components/dashboard/BudgetCard";
-import { NotesCard } from "@/components/dashboard/NotesCard";
-import { UpcomingEventsCard } from "@/components/dashboard/UpcomingEventsCard";
-import { getAssetsOverview } from "@/lib/assets";
-import { getMonthBudgets } from "@/lib/budget";
-import { budgetSummary, categoryBudgetRows, spentByCategory } from "@/lib/calc/budget";
+import { getMonthAllowances, getMonthBudgets } from "@/lib/budget";
+import { allowanceRows, budgetSummary, categoryBudgetRows, spentByCategory } from "@/lib/calc/budget";
 import { MonthSummary } from "@/components/dashboard/MonthSummary";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { RecurringChecklist } from "@/components/recurring/RecurringChecklist";
@@ -17,8 +13,6 @@ import { parseFilters, type PersonFilter } from "@/lib/calc/filters";
 import { groupByDay, sumTotals } from "@/lib/calc/group";
 import { currentMonthKST, monthRange, samePeriodLastMonth, todayKST } from "@/lib/date";
 import { getHouseholdMembers, requireMember, toMemberNames } from "@/lib/household";
-import { getEvents } from "@/lib/events";
-import { getNotes } from "@/lib/notes";
 import { getRecurringOverview } from "@/lib/recurring";
 import {
   getLabelMaps,
@@ -28,7 +22,10 @@ import {
 
 const hrefFor = (who: PersonFilter) => (who === "all" ? "/" : `/?who=${who}`);
 
-/** 홈 대시보드 (F-20). 사람 필터를 바꾸면 모든 숫자가 그 기준으로 바뀐다. */
+/**
+ * 홈 대시보드 (F-20). 돈 중심: 이번 달 지출, 예산·용돈, 정기지출, 최근 내역.
+ * 일정·메모·자산은 각자 메뉴로 (2026-09-29). 사람 필터를 바꾸면 모든 숫자가 그 기준으로 바뀐다.
+ */
 export default async function HomePage({ searchParams }: PageProps<"/">) {
   const me = await requireMember();
   const month = currentMonthKST();
@@ -37,18 +34,21 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
   const members = await getHouseholdMembers();
   const partner = members.find((m) => m.id !== me.id) ?? null;
 
-  const [thisMonthRows, lastPeriodRows, recent, recurring, labels, budgets, assets, notes, events] = await Promise.all([
+  const [thisMonthRows, lastPeriodRows, recent, recurring, labels, budgets, allowances] = await Promise.all([
     getTransactionsInRange(monthRange(month)),
     getTransactionsInRange(samePeriodLastMonth(today)),
     getRecentTransactions(who, 6),
     getRecurringOverview(),
     getLabelMaps(),
     getMonthBudgets(month),
-    getAssetsOverview(),
-    getNotes(),
-    getEvents(),
+    getMonthAllowances(month),
   ]);
+  // 카테고리 예산은 가구 전체 기준이라 "전체"일 때만. 용돈은 전체면 두 사람, 사람을 고르면 그 사람만
   const budgetRows = who === "all" ? categoryBudgetRows(budgets, spentByCategory(thisMonthRows)) : null;
+  const split = splitByOwner(thisMonthRows);
+  const allowanceUsage = allowanceRows(allowances, { a: split.a, b: split.b }).filter(
+    (r) => who === "all" || r.slot === who,
+  );
 
   const names = toMemberNames(members);
   const mine = thisMonthRows.filter((r) => matchesPerson(r, who));
@@ -78,23 +78,9 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
               monthLabel={`${Number(month.slice(5, 7))}월`}
               totals={totals}
               compareText={compareWithLastMonth(totals.expense, lastExpense)}
-              split={who === "all" ? splitByOwner(thisMonthRows) : null}
+              split={who === "all" ? split : null}
               names={names}
             />
-            {/* 예산은 가구 전체 기준이라 "전체"일 때만 보여준다 */}
-            {budgetRows ? (
-              <BudgetCard
-                summary={budgetSummary(budgetRows, month, today)}
-                top={budgetRows.slice(0, 5)}
-                categoryNames={labels.categories}
-              />
-            ) : null}
-          </div>
-
-          <div className="flex flex-col gap-4">
-            <UpcomingEventsCard events={events} today={today} names={names} />
-            <NotesCard notes={notes} />
-            {who === "all" ? <AssetsCard overview={assets} /> : null}
             <SettingsSection title="이번 달 정기지출">
               <RecurringChecklist
                 overview={{ rows: recurringRows }}
@@ -105,6 +91,18 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
                 정기지출 관리
               </Link>
             </SettingsSection>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            {/* "공동"을 고르면 보여줄 예산이 없다 */}
+            {who === "joint" ? null : (
+              <BudgetCard
+                category={budgetRows ? { summary: budgetSummary(budgetRows, month, today), top: budgetRows.slice(0, 5) } : null}
+                categoryNames={labels.categories}
+                allowances={allowanceUsage}
+                names={names}
+              />
+            )}
 
             <section aria-labelledby="home-recent">
               <div className="mb-2 flex items-center justify-between">

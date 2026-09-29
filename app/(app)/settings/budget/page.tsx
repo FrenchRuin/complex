@@ -1,25 +1,6 @@
-import type { Metadata } from "next";
-import { BudgetEditor } from "@/components/settings/BudgetEditor";
-import { SettingsSubpage } from "@/components/settings/SettingsSubpage";
-import { getMonthBudgets } from "@/lib/budget";
-import { currentMonthKST, formatMonthLabel } from "@/lib/date";
-import { requireMember } from "@/lib/household";
-import { getVisibleCategories } from "@/lib/household-data";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = { title: "예산 · 설정 · 우리 둘 가계부" };
-
-export default async function BudgetSettingsPage() {
-  await requireMember();
-  const month = currentMonthKST();
-  const [categories, budgets] = await Promise.all([getVisibleCategories(), getMonthBudgets(month)]);
-  return (
-    <SettingsSubpage title="예산">
-      <BudgetEditor
-        monthLabel={formatMonthLabel(month)}
-        monthFirst={`${month}-01`}
-        categories={categories}
-        budgets={budgets}
-      />
-    </SettingsSubpage>
-  );
+/** 예산은 설정에서 사이드바 "예산" 화면으로 옮겼다 (2026-09-29). 옛 주소는 넘겨준다 */
+export default function OldBudgetSettingsPage() {
+  redirect("/budget");
 }

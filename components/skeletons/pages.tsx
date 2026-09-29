@@ -130,3 +130,18 @@ export function ScheduleSkeleton() {
     </PageSkeleton>
   );
 }
+
+export function BudgetSkeleton() {
+  return (
+    <PageSkeleton title="예산" className="grid grid-cols-1 gap-4 px-5 py-6 lg:grid-cols-2 lg:items-start lg:px-8">
+      <div className="flex flex-col gap-4">
+        <CardSkeleton lines={5} />
+        <CardSkeleton lines={3} />
+      </div>
+      <div className="flex flex-col gap-4">
+        <CardSkeleton rows={6} />
+        <CardSkeleton rows={2} />
+      </div>
+    </PageSkeleton>
+  );
+}

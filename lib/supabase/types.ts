@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      allowances: {
+        Row: {
+          amount: number
+          created_at: string
+          household_id: string
+          id: string
+          member_slot: string
+          month: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          household_id: string
+          id?: string
+          member_slot: string
+          month: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          household_id?: string
+          id?: string
+          member_slot?: string
+          month?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "allowances_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       asset_values: {
         Row: {
           amount: number
