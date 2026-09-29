@@ -1,6 +1,6 @@
 "use client";
 
-import { Check } from "lucide-react";
+import { Check, LoaderCircle } from "lucide-react";
 import { useOptimistic, useState, useTransition } from "react";
 import { checkRecurring, uncheckRecurring } from "@/app/(app)/recurring/actions";
 import { PersonChip } from "@/components/ui/PersonChip";
@@ -41,25 +41,40 @@ type Change = { id: string; paidAmount: number | null };
 export function RecurringChecklist({ overview, names, paymentMethodNames }: Props) {
   const toast = useToast();
   const [, startTransition] = useTransition();
+  // 저장 중인 항목: 동그라미에 도는 표시, 끝날 때까지 다시 누를 수 없다
+  const [saving, setSaving] = useState<ReadonlySet<string>>(new Set());
   const [prompt, setPrompt] = useState<MonthlyRecurring | null>(null);
   const [rows, applyChange] = useOptimistic(overview.rows, (current: MonthlyRecurring[], change: Change) =>
     current.map((r) => (r.item.id === change.id ? withPaidAmount(r, change.paidAmount, todayKST()) : r)),
   );
 
+  function markSaving(id: string, on: boolean) {
+    setSaving((current) => {
+      const next = new Set(current);
+      if (on) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  }
+
   function check(row: MonthlyRecurring, amount: number | null, occurredOn: string | null) {
     setPrompt(null);
+    markSaving(row.item.id, true);
     startTransition(async () => {
       applyChange({ id: row.item.id, paidAmount: amount ?? row.expectedAmount });
       const result = await checkRecurring(row.item.id, amount, occurredOn);
+      markSaving(row.item.id, false);
       toast(result.error ?? `${row.item.name} 납부를 기록했어요`);
     });
   }
 
   function uncheck(row: MonthlyRecurring) {
     const paid = row.paidAmount;
+    markSaving(row.item.id, true);
     startTransition(async () => {
       applyChange({ id: row.item.id, paidAmount: null });
       const result = await uncheckRecurring(row.item.id);
+      markSaving(row.item.id, false);
       if (result.error) return toast(result.error);
       toast(`${row.item.name} 체크를 풀었어요`, {
         durationMs: 5000,
@@ -72,6 +87,7 @@ export function RecurringChecklist({ overview, names, paymentMethodNames }: Prop
   }
 
   function onToggle(row: MonthlyRecurring) {
+    if (saving.has(row.item.id)) return;
     if (row.paidAmount !== null) return uncheck(row);
     if (row.item.isVariable || row.item.hasVariableDate) return setPrompt(row);
     check(row, null, null);
@@ -83,6 +99,7 @@ export function RecurringChecklist({ overview, names, paymentMethodNames }: Prop
       <ul className="mt-2">
         {rows.map((row) => {
           const paid = row.paidAmount !== null;
+          const busy = saving.has(row.item.id);
           const owner = ownerOfTransaction(row.item.scope, row.item.memberSlot);
           const method = row.item.paymentMethodId ? paymentMethodNames[row.item.paymentMethodId] : null;
           return (
@@ -92,14 +109,25 @@ export function RecurringChecklist({ overview, names, paymentMethodNames }: Prop
                 role="checkbox"
                 aria-checked={paid}
                 aria-label={`${row.item.name} 납부 ${paid ? "완료" : "안 함"}`}
+                aria-busy={busy || undefined}
+                aria-disabled={busy || undefined}
                 onClick={() => onToggle(row)}
-                className={`inline-flex size-8 shrink-0 items-center justify-center rounded-full border-2 transition-colors duration-150 ${
+                className={`inline-flex size-8 shrink-0 items-center justify-center rounded-full border-2 transition-colors duration-150 aria-disabled:cursor-progress ${
                   paid
                     ? "border-primary bg-primary text-on-primary hover:bg-primary/90"
                     : "border-line-strong text-transparent hover:border-primary"
                 }`}
               >
-                <Check size={18} strokeWidth={2.5} aria-hidden />
+                {busy ? (
+                  <LoaderCircle
+                    size={18}
+                    strokeWidth={2.5}
+                    aria-hidden
+                    className={`animate-spin motion-reduce:animate-none ${paid ? "" : "text-primary"}`}
+                  />
+                ) : (
+                  <Check size={18} strokeWidth={2.5} aria-hidden />
+                )}
               </button>
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-body text-ink">{row.item.name}</span>

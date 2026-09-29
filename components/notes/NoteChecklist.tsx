@@ -1,6 +1,6 @@
 "use client";
 
-import { useOptimistic, useTransition } from "react";
+import { useOptimistic, useState, useTransition } from "react";
 import { toggleNoteItem } from "@/app/(app)/notes/actions";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { LinkifiedText } from "@/components/ui/LinkifiedText";
@@ -19,6 +19,8 @@ type Props = {
 export function NoteChecklist({ noteId, items, max, linkify = false }: Props) {
   const toast = useToast();
   const [, startTransition] = useTransition();
+  // 저장 중인 항목 (체크 칸에 도는 표시)
+  const [saving, setSaving] = useState<ReadonlySet<string>>(new Set());
   const [optimistic, setOptimistic] = useOptimistic(
     items,
     (current: readonly NoteItem[], change: { id: string; done: boolean }) =>
@@ -27,10 +29,21 @@ export function NoteChecklist({ noteId, items, max, linkify = false }: Props) {
   const shown = max ? optimistic.slice(0, max) : optimistic;
   const hidden = optimistic.length - shown.length;
 
+  function markSaving(id: string, on: boolean) {
+    setSaving((current) => {
+      const next = new Set(current);
+      if (on) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  }
+
   function toggle(id: string, done: boolean) {
+    markSaving(id, true);
     startTransition(async () => {
       setOptimistic({ id, done });
       const result = await toggleNoteItem(noteId, id, done);
+      markSaving(id, false);
       if (result.error) toast(result.error);
     });
   }
@@ -39,7 +52,7 @@ export function NoteChecklist({ noteId, items, max, linkify = false }: Props) {
     <ul className="flex flex-col gap-2">
       {shown.map((item) => (
         <li key={item.id}>
-          <Checkbox checked={item.done} onChange={(done) => toggle(item.id, done)}>
+          <Checkbox checked={item.done} pending={saving.has(item.id)} onChange={(done) => toggle(item.id, done)}>
             <span className={`min-w-0 break-words ${item.done ? "text-ink-muted line-through" : ""}`}>
               {linkify ? <LinkifiedText text={item.text} /> : item.text}
             </span>
