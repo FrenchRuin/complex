@@ -11,7 +11,7 @@ self.addEventListener("push", (event) => {
   } catch {
     data = { body: event.data ? event.data.text() : "" };
   }
-  const title = data.title || "우리 둘 가계부";
+  const title = data.title || "감자밭";
   event.waitUntil(
     self.registration.showNotification(title, {
       body: data.body || "",

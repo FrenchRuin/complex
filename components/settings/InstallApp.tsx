@@ -77,7 +77,7 @@ export function InstallApp() {
           <li>
             목록을 내려서 <strong>홈 화면에 추가</strong>를 누르고, 오른쪽 위 <strong>추가</strong>를 눌러요.
           </li>
-          <li>홈 화면의 ‘우리 가계부’ 아이콘으로 열어요. 처음 한 번은 다시 로그인해야 할 수 있어요.</li>
+          <li>홈 화면의 ‘감자밭’ 아이콘으로 열어요. 처음 한 번은 다시 로그인해야 할 수 있어요.</li>
         </ol>
       ) : prompt ? (
         <Button onClick={install} className="w-full">

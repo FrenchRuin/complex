@@ -24,7 +24,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getAllCategories, getAllPaymentMethods, getUsage } from "@/lib/settings-data";
 import { logout } from "../actions";
 
-export const metadata: Metadata = { title: "설정 · 우리 둘 가계부" };
+export const metadata: Metadata = { title: "설정 · 감자밭" };
 
 type MenuItem = { href: string; label: string; icon: LucideIcon; summary: string };
 

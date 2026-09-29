@@ -100,7 +100,7 @@ export async function sendPushForNotification(id: string): Promise<{ sent: numbe
 export async function sendTestPush(memberId: string): Promise<number> {
   if (!configure()) throw new Error("알림 키가 설정되지 않았어요. 환경변수를 확인해 주세요");
   return sendToMember(memberId, {
-    title: "우리 둘 가계부",
+    title: "감자밭",
     body: "시험 알림이에요. 이렇게 알림이 와요.",
     url: "/settings/push",
     tag: "test",

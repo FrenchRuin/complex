@@ -17,7 +17,7 @@ import { formatWon } from "@/lib/money";
 import { getPeriodConfig } from "@/lib/period";
 import { getLabelMaps, getTransactionsInRange } from "@/lib/transactions";
 
-export const metadata: Metadata = { title: "통계 · 우리 둘 가계부" };
+export const metadata: Metadata = { title: "통계 · 감자밭" };
 
 const hrefFor = (month: MonthString, current: MonthString) => (month === current ? "/stats" : `/stats?month=${month}`);
 

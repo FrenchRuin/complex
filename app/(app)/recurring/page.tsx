@@ -9,7 +9,7 @@ import { getVisibleCategories, getVisiblePaymentMethods } from "@/lib/household-
 import { getRecurringOverview } from "@/lib/recurring";
 import { getLabelMaps } from "@/lib/transactions";
 
-export const metadata: Metadata = { title: "정기지출 · 우리 둘 가계부" };
+export const metadata: Metadata = { title: "정기지출 · 감자밭" };
 
 /** 정기지출: 이번 달 납부 체크 + 등록·관리 (F-30, F-31) */
 export default async function RecurringPage() {

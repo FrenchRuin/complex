@@ -4,7 +4,7 @@ import { NotesBoard } from "@/components/notes/NotesBoard";
 import { getHouseholdMembers, requireMember } from "@/lib/household";
 import { getNotes } from "@/lib/notes";
 
-export const metadata: Metadata = { title: "메모 · 우리 둘 가계부" };
+export const metadata: Metadata = { title: "메모 · 감자밭" };
 
 /** 공유 메모 (F-18): 두 사람이 함께 보는 글·체크리스트 메모 */
 export default async function NotesPage() {

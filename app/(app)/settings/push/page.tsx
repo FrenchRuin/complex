@@ -7,7 +7,7 @@ import { requireMember } from "@/lib/household";
 import { vapidPublicKey } from "@/lib/push-server";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata: Metadata = { title: "휴대폰 알림 · 설정 · 우리 둘 가계부" };
+export const metadata: Metadata = { title: "휴대폰 알림 · 설정 · 감자밭" };
 
 /** 설정 → 휴대폰 알림 (F-57): 이 폰 켜기·끄기, 시험 알림, 알림 받는 내 기기 목록 */
 export default async function PushSettingsPage() {

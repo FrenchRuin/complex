@@ -8,7 +8,7 @@ import { formatFullDate, shiftMonth, todayKST, type DateString } from "@/lib/dat
 import { requireMember } from "@/lib/household";
 import { getPeriodConfig } from "@/lib/period";
 
-export const metadata: Metadata = { title: "한 달 기준 · 설정 · 우리 둘 가계부" };
+export const metadata: Metadata = { title: "한 달 기준 · 설정 · 감자밭" };
 
 /** "9월 23일 (수)" */
 const short = (date: DateString) => formatFullDate(date).replace(/^\d+년 /, "");

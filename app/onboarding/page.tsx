@@ -5,7 +5,7 @@ import { CenteredCard } from "@/components/layout/CenteredCard";
 import { getCurrentMember } from "@/lib/household";
 import { createHousehold } from "./actions";
 
-export const metadata: Metadata = { title: "가구 만들기 · 우리 둘 가계부" };
+export const metadata: Metadata = { title: "가구 만들기 · 감자밭" };
 
 export default async function OnboardingPage() {
   if (await getCurrentMember()) redirect("/");

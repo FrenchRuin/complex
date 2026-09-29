@@ -28,7 +28,7 @@ describe("pushPayload", () => {
       "서연",
     );
     expect(payload).toEqual({
-      title: "우리 둘 가계부",
+      title: "감자밭",
       body: "서연님이 다이소 12,000원을 추가했어요",
       url: "/transactions?day=2026-09-29&tx=t1",
       tag: "t1",
