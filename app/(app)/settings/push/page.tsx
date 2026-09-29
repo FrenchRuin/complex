@@ -4,6 +4,7 @@ import { SettingsSection } from "@/components/settings/SettingsSection";
 import { SettingsSubpage } from "@/components/settings/SettingsSubpage";
 import { notificationTimeLabel } from "@/lib/calc/notifications";
 import { requireMember } from "@/lib/household";
+import { vapidPublicKey } from "@/lib/push-server";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "휴대폰 알림 · 설정 · 우리 둘 가계부" };
@@ -24,7 +25,7 @@ export default async function PushSettingsPage() {
         title="이 기기"
         description="앱을 닫아도 잠금 화면에 알림이 와요. 기기마다 따로 켜요. 아이폰은 홈 화면에 추가한 앱에서만 돼요."
       >
-        <PushSettings />
+        <PushSettings publicKey={vapidPublicKey()} />
       </SettingsSection>
       <SettingsSection title="알림 받는 내 기기" description="폰을 바꿨다면 새 폰에서 다시 켜 주세요. 쓰지 않는 기기는 알림을 보낼 때 자동으로 정리돼요.">
         {devices && devices.length > 0 ? (
