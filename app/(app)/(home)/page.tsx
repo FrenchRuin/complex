@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { BudgetCard } from "@/components/dashboard/BudgetCard";
-import { getMonthAllowances, getMonthBudgets } from "@/lib/budget";
-import { allowanceRows, budgetSummary, categoryBudgetRows, spentByCategory } from "@/lib/calc/budget";
+import { getAllowanceMethods, getMonthAllowances, getMonthBudgets } from "@/lib/budget";
+import { allowanceRows, allowanceSpent, budgetSummary, categoryBudgetRows, spentByCategory } from "@/lib/calc/budget";
 import { MonthSummary } from "@/components/dashboard/MonthSummary";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { RecurringChecklist } from "@/components/recurring/RecurringChecklist";
@@ -34,19 +34,21 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
   const members = await getHouseholdMembers();
   const partner = members.find((m) => m.id !== me.id) ?? null;
 
-  const [thisMonthRows, lastPeriodRows, recent, recurring, labels, budgets, allowances] = await Promise.all([
-    getTransactionsInRange(monthRange(month)),
-    getTransactionsInRange(samePeriodLastMonth(today)),
-    getRecentTransactions(who, 6),
-    getRecurringOverview(),
-    getLabelMaps(),
-    getMonthBudgets(month),
-    getMonthAllowances(month),
-  ]);
+  const [thisMonthRows, lastPeriodRows, recent, recurring, labels, budgets, allowances, allowanceMethods] =
+    await Promise.all([
+      getTransactionsInRange(monthRange(month)),
+      getTransactionsInRange(samePeriodLastMonth(today)),
+      getRecentTransactions(who, 6),
+      getRecurringOverview(),
+      getLabelMaps(),
+      getMonthBudgets(month),
+      getMonthAllowances(month),
+      getAllowanceMethods(),
+    ]);
   // 카테고리 예산은 가구 전체 기준이라 "전체"일 때만. 용돈은 전체면 두 사람, 사람을 고르면 그 사람만
   const budgetRows = who === "all" ? categoryBudgetRows(budgets, spentByCategory(thisMonthRows)) : null;
   const split = splitByOwner(thisMonthRows);
-  const allowanceUsage = allowanceRows(allowances, { a: split.a, b: split.b }).filter(
+  const allowanceUsage = allowanceRows(allowances, allowanceSpent(thisMonthRows, allowanceMethods)).filter(
     (r) => who === "all" || r.slot === who,
   );
 

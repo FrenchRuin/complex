@@ -4,9 +4,9 @@ import { AllowanceList, BudgetTotals, CategoryBudgetList } from "@/components/bu
 import { BudgetEditor } from "@/components/budget/BudgetEditor";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { SettingsSection } from "@/components/settings/SettingsSection";
-import { getMonthAllowances, getMonthBudgets } from "@/lib/budget";
-import { allowanceRows, budgetSummary, categoryBudgetRows, spentByCategory } from "@/lib/calc/budget";
-import { splitByOwner } from "@/lib/calc/dashboard";
+import { AllowanceMethodHint } from "@/components/budget/AllowanceMethodHint";
+import { getAllowanceMethods, getMonthAllowances, getMonthBudgets } from "@/lib/budget";
+import { allowanceRows, allowanceSpent, budgetSummary, categoryBudgetRows, spentByCategory } from "@/lib/calc/budget";
 import { currentMonthKST, formatMonthLabel, monthRange, todayKST } from "@/lib/date";
 import { getHouseholdMembers, requireMember, toMemberNames } from "@/lib/household";
 import { getVisibleCategories } from "@/lib/household-data";
@@ -19,19 +19,20 @@ export default async function BudgetPage() {
   await requireMember();
   const month = currentMonthKST();
   const today = todayKST();
-  const [members, categories, budgets, allowances, rows, labels] = await Promise.all([
+  const [members, categories, budgets, allowances, allowanceMethods, rows, labels] = await Promise.all([
     getHouseholdMembers(),
     getVisibleCategories(),
     getMonthBudgets(month),
     getMonthAllowances(month),
+    getAllowanceMethods(),
     getTransactionsInRange(monthRange(month)),
     getLabelMaps(),
   ]);
   const names = toMemberNames(members);
   const monthLabel = formatMonthLabel(month);
   const categoryRows = categoryBudgetRows(budgets, spentByCategory(rows));
-  const personal = splitByOwner(rows);
-  const allowanceUsage = allowanceRows(allowances, { a: personal.a, b: personal.b });
+  const allowanceUsage = allowanceRows(allowances, allowanceSpent(rows, allowanceMethods));
+  const hasAllowanceMethod = Object.keys(allowanceMethods).length > 0;
 
   return (
     <>
@@ -50,12 +51,13 @@ export default async function BudgetPage() {
               </>
             )}
           </SettingsSection>
-          <SettingsSection title="용돈 사용" description="각자 개인 지출이 용돈을 얼마나 썼는지예요. 공동 지출은 빠져요.">
+          <SettingsSection title="용돈 사용" description="각자 용돈 통장·카드로 쓴 금액이에요. 월급에서 나가는 카드값은 빠져요.">
             {allowanceUsage.length === 0 ? (
               <p className="text-body text-ink-muted">아직 용돈이 없어요. 용돈에서 정해 보세요.</p>
             ) : (
               <AllowanceList rows={allowanceUsage} names={names} />
             )}
+            {hasAllowanceMethod ? null : <AllowanceMethodHint />}
           </SettingsSection>
         </div>
 

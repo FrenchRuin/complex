@@ -22,6 +22,7 @@ export async function savePaymentMethod(
     kind: formData.get("kind"),
     owner: formData.get("owner"),
     smsAliases: formData.get("smsAliases") ?? "",
+    isAllowance: formData.get("isAllowance") === "on",
   });
   if (!parsed.success) return fail(firstError(parsed.error));
 
@@ -32,6 +33,7 @@ export async function savePaymentMethod(
     kind: parsed.data.kind,
     owner: parsed.data.owner,
     sms_aliases: parsed.data.smsAliases,
+    is_allowance: parsed.data.isAllowance,
   };
   const rawId = formData.get("id");
 

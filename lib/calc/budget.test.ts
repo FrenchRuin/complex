@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   allowanceRows,
+  allowanceSpent,
   allowanceText,
   barWidth,
   budgetSummary,
@@ -91,6 +92,25 @@ describe("overText / barWidth", () => {
     expect(overText("식비", 32000)).toBe("식비 예산을 32,000원 넘었어요");
     expect(barWidth(130)).toBe(100);
     expect(barWidth(-5)).toBe(0);
+  });
+});
+
+describe("allowanceSpent (용돈 통장·카드로 쓴 금액)", () => {
+  it("용돈 결제수단으로 쓴 지출만 그 소유자에게, 공동으로 적은 것도 포함, 수입·다른 결제수단은 빼기", () => {
+    const methods = { "a-card": "a", "a-account": "a", "b-card": "b" } as const;
+    expect(
+      allowanceSpent(
+        [
+          { type: "expense", amount: 10000, paymentMethodId: "a-card" },
+          { type: "expense", amount: 5000, paymentMethodId: "a-account" }, // 한 사람이 여러 개
+          { type: "expense", amount: 30000, paymentMethodId: "salary-card" }, // 월급 카드: 용돈 아님
+          { type: "expense", amount: 7000, paymentMethodId: null },
+          { type: "income", amount: 99999, paymentMethodId: "a-card" },
+          { type: "expense", amount: 20000, paymentMethodId: "b-card" },
+        ],
+        methods,
+      ),
+    ).toEqual({ a: 15000, b: 20000 });
   });
 });
 

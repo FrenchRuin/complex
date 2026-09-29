@@ -24,7 +24,17 @@ export const getMonthBudgets = cache(async (month: MonthString): Promise<BudgetI
   return data.map((b) => ({ categoryId: b.category_id, amount: b.amount }));
 });
 
-/** 그 달 용돈 (사람별 개인 지출 한도) */
+/** 용돈 통장·카드: 결제수단 id → 소유자. 숨긴 결제수단도 포함 (그 달에 쓴 내역이 있을 수 있어서) */
+export const getAllowanceMethods = cache(async (): Promise<Record<string, Slot>> => {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("payment_methods").select("id, owner").eq("is_allowance", true);
+  if (error) throw new Error(`용돈 통장·카드를 불러오지 못했어요: ${error.message}`);
+  return Object.fromEntries(
+    data.filter((m): m is { id: string; owner: Slot } => (SLOTS as readonly string[]).includes(m.owner)).map((m) => [m.id, m.owner]),
+  );
+});
+
+/** 그 달 용돈 (사람별 한도) */
 export const getMonthAllowances = cache(async (month: MonthString): Promise<AllowanceItem[]> => {
   await ensureMonth(month);
   const supabase = await createClient();
