@@ -57,7 +57,9 @@ export default async function TransactionsPage({ searchParams }: PageProps<"/tra
             <>
               <MonthLink filters={filters} currentMonth={currentMonth} direction="next" />
               {isCalendarRange(range) ? null : (
-                <span className="text-caption text-ink-muted tabular-nums">{formatPeriodRangeShort(range)}</span>
+                <span className="hidden whitespace-nowrap text-caption text-ink-muted tabular-nums sm:inline">
+                  {formatPeriodRangeShort(range)}
+                </span>
               )}
             </>
           )
