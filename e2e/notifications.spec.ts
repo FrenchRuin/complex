@@ -82,19 +82,19 @@ test("알림 규칙: 문자 여러 건은 하나로, 같은 내역 수정은 하
   await a.from("transactions").update({ deleted_at: new Date().toISOString() }).eq("id", tx!.id);
   // 정기지출 납부 체크로 생긴 내역 (source = recurring)
   await a.from("transactions").insert(row("E2E 월세", 700000, "recurring"));
-  // 진짜 정기지출을 체크했다가 풀면 "삭제" 대신 "납부 체크를 풀었어요"
+  // 진짜 정기지출을 체크했다가 풀면 "삭제" 대신 "납부 체크를 풀었어요" (지난달에만 있는 항목: 다른 테스트의 미납 개수에 안 섞이게)
   const { data: item, error: itemError } = await a
     .from("recurring_items")
     .insert({
       name: "E2E 관리비", amount: 150000, day_of_month: 25, category_id: categoryId,
-      scope: "joint", member_slot: "a", start_month: "2026-09-01",
+      scope: "joint", member_slot: "a", start_month: "2026-08-01", end_month: "2026-08-01",
       household_id: "00000000-0000-0000-0000-000000000000",
     })
     .select("id")
     .single();
   expect(itemError).toBeNull();
-  expect((await a.rpc("check_recurring", { p_item_id: item!.id, p_month: "2026-09-01" })).error).toBeNull();
-  expect((await a.rpc("uncheck_recurring", { p_item_id: item!.id, p_month: "2026-09-01" })).error).toBeNull();
+  expect((await a.rpc("check_recurring", { p_item_id: item!.id, p_month: "2026-08-01" })).error).toBeNull();
+  expect((await a.rpc("uncheck_recurring", { p_item_id: item!.id, p_month: "2026-08-01" })).error).toBeNull();
 
   const { data: forB } = await b
     .from("notifications")
