@@ -74,3 +74,21 @@ test("모바일: 360px 폰 달력에서 1,000만 원 넘는 금액도 칸을 넘
 
   await b.from("transactions").update({ deleted_at: new Date().toISOString() }).in("id", added.data!.map((r) => r.id));
 });
+
+test("모바일: 아래로 스크롤하면 필터 줄이 접히고, 조금 올리면 다시 나온다", async ({ page }) => {
+  await login(page, "a", "/");
+  const header = page.locator("header").first();
+  const filter = header.getByRole("navigation", { name: "사람 필터" });
+  await expect(filter).toBeVisible();
+  const height = async () => (await header.boundingBox())!.height;
+  const open = await height();
+
+  for (const y of [100, 200, 300, 400]) {
+    await page.evaluate((to) => window.scrollTo(0, to), y);
+    await page.waitForTimeout(80);
+  }
+  await expect.poll(height).toBeLessThan(open - 40);
+
+  await page.evaluate(() => window.scrollBy(0, -40));
+  await expect.poll(height).toBe(open);
+});
