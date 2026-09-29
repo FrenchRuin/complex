@@ -16,6 +16,8 @@ type Props = { slot: Slot; name: string; avatarUrl?: string | null; size?: keyof
 export function Avatar({ slot, name, avatarUrl = null, size = "sm" }: Props) {
   if (avatarUrl) {
     return (
+      // 32·64px 작은 사진이라 next/image 최적화(Vercel 이미지 사용량)를 쓰지 않는다
+      // eslint-disable-next-line @next/next/no-img-element
       <img
         src={avatarUrl}
         alt=""
