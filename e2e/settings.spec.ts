@@ -29,3 +29,21 @@ test("설정: 메뉴 목록에서 각 화면으로 가고 돌아온다", async (
 
   await expect(page.getByRole("button", { name: "로그아웃" })).toBeVisible();
 });
+
+test("사이드바: 계좌·카드 목록을 접으면 새로고침해도 접혀 있고, 다시 펼칠 수 있다", async ({ page }) => {
+  await login(page, "a", "/");
+  const sidebar = page.getByRole("complementary");
+  const toggle = sidebar.getByRole("button", { name: /함께 보는 계좌·카드/ });
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  await expect(sidebar.locator("#sidebar-methods-list")).toBeVisible();
+
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await expect(sidebar.locator("#sidebar-methods-list")).toBeHidden();
+
+  await page.reload();
+  await expect(sidebar.getByRole("button", { name: /함께 보는 계좌·카드/ })).toHaveAttribute("aria-expanded", "false");
+
+  await sidebar.getByRole("button", { name: /함께 보는 계좌·카드/ }).click();
+  await expect(sidebar.locator("#sidebar-methods-list")).toBeVisible();
+});
