@@ -54,8 +54,8 @@ export function LoanProfileForm({ profile, names }: Props) {
         </Checkbox>
       ) : null}
       <div className="flex items-baseline justify-between gap-2 rounded-sm bg-surface px-4 py-3">
-        <span className="text-caption text-ink-muted">순자산 (자산 메뉴 기준)</span>
-        <span className="text-amount text-ink tabular-nums">{formatWon(profile.netWorth)}</span>
+        <span className="min-w-0 text-caption text-ink-muted">순자산 (자산 메뉴 기준)</span>
+        <span className="shrink-0 text-amount whitespace-nowrap text-ink tabular-nums">{formatWon(profile.netWorth)}</span>
       </div>
       <p role="alert" className="min-h-[18px] text-caption text-danger">
         {error}
