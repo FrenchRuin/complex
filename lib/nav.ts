@@ -2,6 +2,7 @@ import {
   CalendarDays,
   ChartColumn,
   House,
+  Landmark,
   NotebookPen,
   PiggyBank,
   ReceiptText,
@@ -30,6 +31,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/schedule", label: "일정", icon: CalendarDays, inTabBar: false, inSidebar: true },
   { href: "/notes", label: "메모", icon: NotebookPen, inTabBar: false, inSidebar: true },
   { href: "/assets", label: "자산·목표", icon: PiggyBank, inTabBar: false, inSidebar: true },
+  { href: "/loans", label: "대출", icon: Landmark, inTabBar: false, inSidebar: true },
   { href: "/settings", label: "설정", icon: Settings, inTabBar: true, inSidebar: false },
 ];
 
