@@ -49,7 +49,29 @@ export function formatWonTiny(amount: number): string {
   return formatWonShort(amount);
 }
 
-const eokFormatter = new Intl.NumberFormat("ko-KR", { maximumFractionDigits: 2 });
+const KOREAN_UNITS = [
+  { unit: "조", size: 1_000_000_000_000 },
+  { unit: "억", size: 100_000_000 },
+  { unit: "만", size: 10_000 },
+] as const;
+
+/**
+ * 금액 입력칸 아래 읽기 도움말: 123456000 → "1억 2,345만 6,000원", 300000000 → "3억 원".
+ */
+export function formatWonKorean(amount: number): string {
+  const sign = amount < 0 ? "-" : "";
+  let rest = Math.abs(Math.trunc(amount));
+  const parts: string[] = [];
+  for (const { unit, size } of KOREAN_UNITS) {
+    const n = Math.floor(rest / size);
+    if (n > 0) parts.push(`${wonFormatter.format(n)}${unit}`);
+    rest %= size;
+  }
+  if (parts.length === 0) return `${sign}${wonFormatter.format(rest)}원`;
+  return rest > 0 ? `${sign}${parts.join(" ")} ${wonFormatter.format(rest)}원` : `${sign}${parts.join(" ")} 원`;
+}
+
+const eokFormatter =new Intl.NumberFormat("ko-KR", { maximumFractionDigits: 2 });
 
 /**
  * 대출 한도·조건처럼 큰 금액을 글로: 600000000 → "6억 원", 511000000 → "5.11억 원", 85000000 → "8,500만 원".

@@ -8,7 +8,7 @@ import { TextField } from "@/components/ui/TextField";
 import { useToast } from "@/components/ui/Toast";
 import { RULE_FIELDS, RULE_GROUP_LABEL, type LoanRules, type RuleField, type RuleGroup } from "@/lib/calc/loan-rules";
 import { parseRateBp } from "@/lib/calc/loans";
-import { formatNumber, parseWon } from "@/lib/money";
+import { formatNumber, formatWonKorean, parseWon } from "@/lib/money";
 
 type Props = { group: RuleGroup; value: LoanRules[RuleGroup]; isDefault: boolean };
 
@@ -83,13 +83,15 @@ export function RuleGroupEditor({ group, value, isDefault }: Props) {
               />
             </label>
           ) : (
-            <TextField
-              key={f.key}
-              label={`${f.label} (${UNIT_SUFFIX[f.unit]})`}
-              value={texts[f.key] ?? ""}
-              onChange={(e) => setTexts((t) => ({ ...t, [f.key]: e.target.value }))}
-              inputMode={f.unit === "won" || f.unit === "years" ? "numeric" : "decimal"}
-            />
+            <div key={f.key} className="flex flex-col gap-1">
+              <TextField
+                label={`${f.label} (${UNIT_SUFFIX[f.unit]})`}
+                value={texts[f.key] ?? ""}
+                onChange={(e) => setTexts((t) => ({ ...t, [f.key]: e.target.value }))}
+                inputMode={f.unit === "won" || f.unit === "years" ? "numeric" : "decimal"}
+              />
+              {f.unit === "won" ? <WonReading text={texts[f.key] ?? ""} /> : null}
+            </div>
           ),
         )}
       </div>
@@ -108,4 +110,11 @@ export function RuleGroupEditor({ group, value, isDefault }: Props) {
       </div>
     </form>
   );
+}
+
+/** 금액 칸 아래 한글로 읽은 금액 (1만 원 이상일 때만) */
+function WonReading({ text }: { text: string }) {
+  const amount = parseWon(text);
+  if (amount === null || amount < 10_000) return null;
+  return <p className="text-right text-caption text-ink-muted tabular-nums">{formatWonKorean(amount)}</p>;
 }

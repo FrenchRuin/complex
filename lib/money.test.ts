@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatEok, formatNumber, formatWon, formatWonShort, formatWonTiny, parseWon } from "./money";
+import { formatEok, formatNumber, formatWon, formatWonKorean, formatWonShort, formatWonTiny, parseWon } from "./money";
 
 describe("formatEok", () => {
   it("1억 이상은 억 원, 소수 둘째 자리까지", () => {
@@ -89,5 +89,23 @@ describe("parseWon", () => {
 
   it("너무 큰 수는 null", () => {
     expect(parseWon("99999999999999999999")).toBeNull();
+  });
+});
+
+describe("formatWonKorean", () => {
+  it("조·억·만 단위로 읽는다", () => {
+    expect(formatWonKorean(123_456_000)).toBe("1억 2,345만 6,000원");
+    expect(formatWonKorean(12_000)).toBe("1만 2,000원");
+    expect(formatWonKorean(100_000_123)).toBe("1억 123원");
+    expect(formatWonKorean(1_234_500_000_000)).toBe("1조 2,345억 원");
+  });
+  it("딱 떨어지면 짧게", () => {
+    expect(formatWonKorean(300_000_000)).toBe("3억 원");
+    expect(formatWonKorean(50_000_000)).toBe("5,000만 원");
+    expect(formatWonKorean(10_000)).toBe("1만 원");
+  });
+  it("1만 미만은 쉼표만", () => {
+    expect(formatWonKorean(8_000)).toBe("8,000원");
+    expect(formatWonKorean(0)).toBe("0원");
   });
 });
