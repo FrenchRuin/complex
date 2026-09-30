@@ -73,6 +73,7 @@
 | F-40 | 자산·부채 수기 관리, 순자산 (M7에서 구현, 2026-09-27) | 3차 | `spec/assets.md` |
 | F-41 | 월말 순자산 기록과 추이 | 3차 | `spec/assets.md` |
 | F-42 | 저축 목표 | 3차 | `spec/assets.md` |
+| F-43 | 대출 계산: 매매·전세 최대 대출 금액 (사용자 요청, 2026-09-30 추가) | 개선 | `spec/loans.md` |
 | F-50 | 카테고리 관리 | MVP | `spec/settings.md` |
 | F-51 | 계좌·카드(결제수단) 관리 | MVP | `spec/settings.md` |
 | F-52 | CSV 내보내기 (가져오기는 제외됨) | 2차 | `spec/settings.md` |
