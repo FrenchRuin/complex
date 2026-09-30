@@ -2,7 +2,8 @@
 
 import { Plus } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/Button";
 import {
   daysBetween,
@@ -25,6 +26,10 @@ import { OccurrenceRow } from "./OccurrenceRow";
 import { ScheduleCalendar } from "./ScheduleCalendar";
 
 type Props = {
+  /** 머리 제목·월 이동 (서버에서 만든 것) */
+  title: ReactNode;
+  titleStart: ReactNode;
+  titleEnd: ReactNode;
   month: MonthString;
   today: DateString;
   events: CalendarEvent[];
@@ -45,7 +50,7 @@ function toOccurrence(event: CalendarEvent, start: DateString): Occurrence {
 }
 
 /** 일정 화면 (F-19): 월 달력 + 고른 날 목록 + 다가오는 일정. ?event=id(알림·홈)면 그 일정을, ?new=1(홈)이면 추가 창을 연다 */
-export function ScheduleBoard({ month, today, events, recurring, names, members, holidays }: Props) {
+export function ScheduleBoard({ title, titleStart, titleEnd, month, today, events, recurring, names, members, holidays }: Props) {
   const params = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -99,53 +104,73 @@ export function ScheduleBoard({ month, today, events, recurring, names, members,
     );
   }
 
-  return (
-    <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[1fr_360px]">
-      <div className="flex min-w-0 flex-col gap-4">
-        <Button onClick={() => openNew(selected)} className="h-11 self-end px-4">
+  // 폰은 알림 종 옆 + 아이콘, 웹은 글자 버튼 (보이는 쪽 하나만 화면 읽기에 잡힌다)
+  const addButtons = (
+    <>
+      <button
+        type="button"
+        aria-label="일정 추가"
+        onClick={() => openNew(selected)}
+        className="inline-flex size-11 items-center justify-center rounded-sm text-primary hover:bg-surface-sunken lg:hidden"
+      >
+        <Plus size={22} strokeWidth={1.75} aria-hidden />
+      </button>
+      {/* Button의 inline-flex가 hidden을 이겨서 감싸는 칸으로 숨긴다 */}
+      <span className="hidden lg:contents">
+        <Button onClick={() => openNew(selected)} className="h-11 px-4">
           <Plus size={20} strokeWidth={1.75} aria-hidden />
           일정 추가
         </Button>
-        <ScheduleCalendar
-          month={month}
-          today={today}
-          selected={selected}
-          byDay={byDay}
-          dues={dues}
-          holidays={holidays}
-          onSelect={setSelected}
-        />
-      </div>
+      </span>
+    </>
+  );
 
-      <div className="flex min-w-0 flex-col gap-4">
-        <DayAgenda
-          date={selected}
-          occurrences={byDay.get(selected) ?? []}
-          dues={dues.get(selected) ?? []}
-          holidayNames={holidays[selected] ?? []}
-          names={names}
-          onOpen={openOccurrence}
-          onAdd={openNew}
-        />
-        <section aria-labelledby="upcoming" className="rounded-md bg-surface-raised p-5">
-          <h2 id="upcoming" className="text-heading text-ink">
-            다가오는 일정
-          </h2>
-          {upcoming.length === 0 ? (
-            <p className="mt-2 text-body text-ink-muted">앞으로 60일 동안 일정이 없어요.</p>
-          ) : (
-            <ul className="mt-1 divide-y divide-line">
-              {upcoming.map((occ) => (
-                <li key={occ.key}>
-                  <OccurrenceRow occurrence={occ} names={names} showDate onOpen={openOccurrence} />
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-      </div>
+  return (
+    <>
+      <PageHeader title={title} titleStart={titleStart} titleEnd={titleEnd} actions={addButtons} />
+      <div className="grid grid-cols-1 items-start gap-4 px-5 py-4 lg:grid-cols-[1fr_360px] lg:px-8 lg:py-6">
+        <div className="flex min-w-0 flex-col gap-4">
+          <ScheduleCalendar
+            month={month}
+            today={today}
+            selected={selected}
+            byDay={byDay}
+            dues={dues}
+            holidays={holidays}
+            onSelect={setSelected}
+          />
+        </div>
 
-      {panelNode}
-    </div>
+        <div className="flex min-w-0 flex-col gap-4">
+          <DayAgenda
+            date={selected}
+            occurrences={byDay.get(selected) ?? []}
+            dues={dues.get(selected) ?? []}
+            holidayNames={holidays[selected] ?? []}
+            names={names}
+            onOpen={openOccurrence}
+            onAdd={openNew}
+          />
+          <section aria-labelledby="upcoming" className="rounded-md bg-surface-raised p-5">
+            <h2 id="upcoming" className="text-heading text-ink">
+              다가오는 일정
+            </h2>
+            {upcoming.length === 0 ? (
+              <p className="mt-2 text-body text-ink-muted">앞으로 60일 동안 일정이 없어요.</p>
+            ) : (
+              <ul className="mt-1 divide-y divide-line">
+                {upcoming.map((occ) => (
+                  <li key={occ.key}>
+                    <OccurrenceRow occurrence={occ} names={names} showDate onOpen={openOccurrence} />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </div>
+
+        {panelNode}
+      </div>
+    </>
   );
 }
