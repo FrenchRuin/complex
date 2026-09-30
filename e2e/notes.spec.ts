@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { E2E_NAMES, readCreds, userClient } from "./support/accounts";
+import { E2E_NAMES, readCreds, serverNow, userClient } from "./support/accounts";
 import { login } from "./support/login";
 
 test("메모: A가 체크리스트를 쓰면 B에게 알림, 누르면 열리고, 체크는 바로 반영 (F-18)", async ({ browser }) => {
@@ -69,7 +69,7 @@ test("메모 규칙: 고정·체크는 알림 없음, 내용 고침은 하나로
   const creds = readCreds();
   const a = await userClient(creds.a.email, creds.a.password);
   const b = await userClient(creds.b.email, creds.b.password);
-  const since = new Date().toISOString();
+  const since = await serverNow();
   const fake = "00000000-0000-0000-0000-000000000000";
 
   const { data: note, error } = await a
