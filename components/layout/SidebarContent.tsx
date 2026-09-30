@@ -102,7 +102,8 @@ export function SidebarContent({ me, members, names, paymentMethods, recurringDu
         </label>
       </form>
 
-      <div className="px-3 pt-3">
+      {/* 위: 도구(검색·내역 추가) | 아래: 메뉴. 아래쪽 내 프로필 위 선과 같은 구분선 */}
+      <div className="border-b border-line px-3 pt-3 pb-4">
         <Button
           onClick={() => {
             onNavigate?.();
@@ -117,7 +118,7 @@ export function SidebarContent({ me, members, names, paymentMethods, recurringDu
 
       {/* 가운데(메뉴 + 계좌·카드)만 한 덩어리로 스크롤. 위(검색·내역 추가)와 아래(프로필)는 고정 */}
       <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
-        <nav aria-label="메뉴" className="pt-4">
+        <nav aria-label="메뉴" className="pt-3">
           <ul className="flex flex-col gap-1">
             {NAV_ITEMS.filter((item) => item.inSidebar).map((item) => {
               const active = isActivePath(pathname, item.href);
