@@ -1,7 +1,6 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PageHeader } from "@/components/layout/PageHeader";
 import { ScheduleBoard } from "@/components/schedule/ScheduleBoard";
 import { MonthPicker } from "@/components/transactions/MonthPicker";
 import { currentMonthKST, shiftMonth, todayKST, type MonthString } from "@/lib/date";
@@ -49,25 +48,20 @@ export default async function SchedulePage({ searchParams }: PageProps<"/schedul
   );
 
   return (
-    <>
-      <PageHeader
-        title={<MonthPicker month={month} currentMonth={current} path="/schedule" query="" />}
-        titleStart={<MonthNav month={month} current={current} direction="prev" />}
-        titleEnd={<MonthNav month={month} current={current} direction="next" />}
-      />
-      <div className="px-5 py-4 lg:px-8 lg:py-6">
-        {/* 달이 바뀌면 고른 날·창을 새로 시작 */}
-        <ScheduleBoard
-          key={month}
-          month={month}
-          today={todayKST()}
-          events={events}
-          recurring={recurring.items}
-          names={toMemberNames(members)}
-          members={members}
-          holidays={holidays}
-        />
-      </div>
-    </>
+    // 머리의 "일정 추가"가 추가 창을 바로 열도록 머리는 ScheduleBoard가 그린다.
+    // 달이 바뀌면 고른 날·창을 새로 시작
+    <ScheduleBoard
+      key={month}
+      title={<MonthPicker month={month} currentMonth={current} path="/schedule" query="" />}
+      titleStart={<MonthNav month={month} current={current} direction="prev" />}
+      titleEnd={<MonthNav month={month} current={current} direction="next" />}
+      month={month}
+      today={todayKST()}
+      events={events}
+      recurring={recurring.items}
+      names={toMemberNames(members)}
+      members={members}
+      holidays={holidays}
+    />
   );
 }
