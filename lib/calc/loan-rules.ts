@@ -4,6 +4,7 @@
  * 비율은 % 숫자(40 = 40%), 금리는 0.01% 단위 정수(bp), 금액은 원.
  */
 import { z } from "zod";
+import { formatEok } from "../money";
 
 const checked = { checkedOn: z.iso.date(), source: z.string().trim().min(1).max(100) };
 const pct = z.number().min(0).max(100);
@@ -205,3 +206,35 @@ export const RULE_FIELDS: Record<RuleGroup, RuleField[]> = {
     { key: "termYears", label: "기본 만기", unit: "years" },
   ],
 };
+
+const bpText = (bp: number) => `${(bp / 100).toFixed(2).replace(/\.?0+$/, "")}%`;
+
+/** 대출 화면 기준값 목록에 보일 값 한 줄 (spec §1.4) */
+export function ruleValueSummary(group: RuleGroup, rules: LoanRules): string {
+  switch (group) {
+    case "bankBuy": {
+      const b = rules.bankBuy;
+      return `LTV 규제 ${b.ltvRegulated}% · 비규제 ${b.ltvOther}% · 생애최초 ${b.ltvFirstMetro}%/${b.ltvFirstLocal}%, 상한 ${formatEok(b.cap1)}/${formatEok(b.cap2)}/${formatEok(b.cap3)}, DSR ${b.dsr}%, 최대 ${b.maxTermYears}년`;
+    }
+    case "stress": {
+      const s = rules.stress;
+      return `수도권·규제 +${bpText(s.metroBp)}, 지방 +${bpText(s.localBp)}, 신용대출 ${s.creditYears}년`;
+    }
+    case "didimdol": {
+      const d = rules.didimdol;
+      return `신혼 소득 ${formatEok(d.newlywedIncome)}·집값 ${formatEok(d.newlywedPrice)}·한도 ${formatEok(d.newlywedLimit)}, 생애최초 소득 ${formatEok(d.firstIncome)}·집값 ${formatEok(d.firstPrice)}·한도 ${formatEok(d.firstLimit)}, DTI ${d.dti}%, 금리 ${bpText(d.rateBp)}`;
+    }
+    case "bankJeonse":
+      return `보증금의 ${rules.bankJeonse.ratio}%, 한도 ${formatEok(rules.bankJeonse.limit)}`;
+    case "butimok": {
+      const t = rules.butimok;
+      return `소득 ${formatEok(t.income)}, 한도 수도권 ${formatEok(t.limitMetro)}·지방 ${formatEok(t.limitLocal)}, 금리 ${bpText(t.rateBp)}`;
+    }
+    case "regulatedAreas":
+      return rules.regulatedAreas.list;
+    case "defaults": {
+      const f = rules.defaults;
+      return `매매 ${bpText(f.buyRateBp)}, 전세 ${bpText(f.jeonseRateBp)}, 만기 ${f.termYears}년`;
+    }
+  }
+}

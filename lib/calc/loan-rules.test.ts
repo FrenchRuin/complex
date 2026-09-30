@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_RULES, isRuleStale, parseRules, RULE_FIELDS, RULE_GROUPS, ruleSchemas } from "./loan-rules";
+import { DEFAULT_RULES, isRuleStale, parseRules, RULE_FIELDS, RULE_GROUPS, ruleSchemas, ruleValueSummary } from "./loan-rules";
 
 describe("DEFAULT_RULES", () => {
   it("모든 묶음이 자기 스키마를 통과한다", () => {
@@ -36,5 +36,16 @@ describe("isRuleStale", () => {
   it("해가 바뀌어도 맞게 센다", () => {
     expect(isRuleStale("2025-08-27", "2026-02-28")).toBe(true);
     expect(isRuleStale("2025-08-31", "2026-02-28")).toBe(false);
+  });
+});
+
+describe("ruleValueSummary", () => {
+  it("묶음마다 값을 한 줄로", () => {
+    expect(ruleValueSummary("bankBuy", DEFAULT_RULES)).toBe(
+      "LTV 규제 40% · 비규제 70% · 생애최초 70%/80%, 상한 6억 원/4억 원/2억 원, DSR 40%, 최대 30년",
+    );
+    expect(ruleValueSummary("stress", DEFAULT_RULES)).toBe("수도권·규제 +3%, 지방 +0.75%, 신용대출 5년");
+    expect(ruleValueSummary("bankJeonse", DEFAULT_RULES)).toBe("보증금의 80%, 한도 5억 원");
+    expect(ruleValueSummary("defaults", DEFAULT_RULES)).toBe("매매 4%, 전세 3.8%, 만기 30년");
   });
 });
