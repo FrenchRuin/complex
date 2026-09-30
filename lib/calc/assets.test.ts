@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { goalHint, goalProgress, groupAssets, netWorth, netWorthOn, netWorthTrend, toAssetKind } from "./assets";
+import { assetComposition, goalHint, goalProgress, groupAssets, netWorth, netWorthOn, netWorthTrend, toAssetKind } from "./assets";
 
 describe("groupAssets", () => {
   const items = [
@@ -117,5 +117,37 @@ describe("toAssetKind", () => {
   it("모르는 값은 기타", () => {
     expect(toAssetKind("loan")).toBe("loan");
     expect(toAssetKind("bitcoin")).toBe("other");
+  });
+});
+
+describe("assetComposition", () => {
+  it("부채는 빼고 종류별 합계·비율, 종류 순서 고정(금액 순 아님), 비율 합은 100", () => {
+    const parts = assetComposition([
+      { kind: "savings", isLiability: false, amount: 100 },
+      { kind: "deposit", isLiability: false, amount: 50 },
+      { kind: "deposit", isLiability: false, amount: 300 },
+      { kind: "car", isLiability: false, amount: 1 },
+      { kind: "loan", isLiability: true, amount: 1000 },
+    ]);
+    expect(parts.map((p) => [p.kind, p.label, p.amount, p.percent, p.slot])).toEqual([
+      ["deposit", "예금", 350, 78, 1],
+      ["savings", "적금", 100, 22, 2],
+      ["car", "자동차", 1, 0, 6],
+    ]);
+  });
+
+  it("반올림 합이 100이 아니면 가장 큰 종류에서 맞춘다", () => {
+    const parts = assetComposition([
+      { kind: "deposit", isLiability: false, amount: 1 },
+      { kind: "savings", isLiability: false, amount: 1 },
+      { kind: "investment", isLiability: false, amount: 1 },
+    ]);
+    expect(parts.map((p) => p.percent)).toEqual([34, 33, 33]);
+  });
+
+  it("부채가 아닌 대출 종류는 기타로, 0원·자산 없음은 빈 목록", () => {
+    expect(assetComposition([{ kind: "loan", isLiability: false, amount: 10 }]).map((p) => [p.kind, p.slot])).toEqual([["other", 7]]);
+    expect(assetComposition([{ kind: "deposit", isLiability: false, amount: 0 }])).toEqual([]);
+    expect(assetComposition([])).toEqual([]);
   });
 });

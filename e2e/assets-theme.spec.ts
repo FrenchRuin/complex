@@ -21,6 +21,10 @@ test("자산·부채 추가 → 순자산, 저축 목표 적립 → 진행률 (F
   await add("E2E 대출", "2000000", "대출");
   await expect(page.getByText("자산 5,000,000원 − 부채 2,000,000원")).toBeVisible();
   await expect(page.getByText("3,000,000원").first()).toBeVisible();
+  // 자산 구성: 부채는 빼고 종류별 비율 (글자로도 보인다)
+  const composition = page.getByRole("figure").filter({ has: page.getByText("자산 종류별 비율") });
+  await expect(composition.getByRole("listitem")).toHaveCount(1);
+  await expect(composition.getByRole("listitem")).toContainText(["예금5,000,000원100%"]);
 
   // 목록은 종류별로 묶여 접혀 있다: 묶음 머리에 개수·합계, 누르면 펼쳐진다
   const depositGroup = page.getByRole("button", { name: /^예금 1개/ });

@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import { AssetCompositionChart } from "@/components/assets/AssetCompositionChart";
 import { AssetList } from "@/components/assets/AssetList";
 import { GoalList } from "@/components/assets/GoalList";
 import { NetWorthChart } from "@/components/assets/NetWorthChart";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { SettingsSection } from "@/components/settings/SettingsSection";
 import { getAssetsOverview } from "@/lib/assets";
-import { netWorth, netWorthTrend } from "@/lib/calc/assets";
+import { assetComposition, netWorth, netWorthTrend } from "@/lib/calc/assets";
 import { periodOf, periodRange } from "@/lib/calc/period";
 import { todayKST } from "@/lib/date";
 import { getHouseholdMembers, requireMember, toMemberNames } from "@/lib/household";
@@ -44,10 +45,15 @@ export default async function AssetsPage() {
               {worth.net < 0 ? "−" : ""}
               {formatWon(Math.abs(worth.net))}
             </p>
+            {/* 자산은 수입처럼 파랑, 부채는 지출처럼 빨강. "자산"·"부채" 글자와 함께 */}
             <p className="mt-1 text-caption text-ink-muted tabular-nums">
-              자산 {formatWon(worth.assets)} − 부채 {formatWon(worth.liabilities)}
+              자산 <span className="text-primary">{formatWon(worth.assets)}</span> − 부채{" "}
+              <span className="text-expense">{formatWon(worth.liabilities)}</span>
             </p>
           </section>
+          <SettingsSection title="자산 구성" description="부채를 뺀 자산을 종류별로 나눈 비율이에요.">
+            <AssetCompositionChart parts={assetComposition(overview.assets)} />
+          </SettingsSection>
           <SettingsSection title="자산·부채" description="금액이 바뀌면 항목을 눌러 금액 기록을 추가해 주세요.">
             <AssetList assets={overview.assets} names={names} />
           </SettingsSection>
