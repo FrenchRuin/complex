@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { DebtList } from "@/components/loans/DebtList";
 import { LoanProfileForm } from "@/components/loans/LoanProfileForm";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { SettingsSection } from "@/components/settings/SettingsSection";
@@ -24,6 +25,15 @@ export default async function LoansPage() {
           <div className="flex flex-col gap-4">
             <SettingsSection title="우리 정보" description="두 사람 소득을 합해서 계산해요.">
               <LoanProfileForm key={data.profile.updatedAt ?? "new"} profile={data.profile} names={names} />
+            </SettingsSection>
+            <SettingsSection title="기존 대출" description="DSR에 들어가는 1년 상환액을 계산해요. 불러온 항목은 금리와 기간을 채워 주세요.">
+              <DebtList
+                debts={data.debts}
+                importableCount={data.importableCount}
+                names={names}
+                homeStatus={data.profile.homeStatus}
+                rules={data.rules}
+              />
             </SettingsSection>
           </div>
         </div>
