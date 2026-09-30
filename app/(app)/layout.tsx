@@ -14,6 +14,8 @@ import {
 } from "@/lib/household-data";
 import { getMyNotifications } from "@/lib/notifications";
 import { getRecurringOverview } from "@/lib/recurring";
+import { SIDEBAR_COOKIE } from "@/lib/sidebar";
+import { cookies } from "next/headers";
 
 /**
  * 가구가 있어야 들어올 수 있는 화면들의 틀.
@@ -34,6 +36,8 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
   const meMember = { id: me.id, slot: me.slot, displayName: me.displayName, avatarUrl: me.avatarUrl };
 
   const sidebar = { me: meMember, members, names, paymentMethods, recurringDue: recurring.dueUnpaid };
+  // 웹 사이드바 접힘 (기기마다 쿠키)
+  const sidebarCollapsed = (await cookies()).get(SIDEBAR_COOKIE)?.value === "1";
 
   return (
     <ToastProvider>
@@ -42,7 +46,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
           <TransactionPanelProvider data={{ categories, paymentMethods, members, names, mySlot: me.slot, rules }}>
             <MobileMenuProvider data={sidebar}>
               <div className="lg:flex lg:h-dvh">
-                <Sidebar {...sidebar} />
+                <Sidebar {...sidebar} initialCollapsed={sidebarCollapsed} />
                 <main className="min-w-0 flex-1 pb-[calc(96px+env(safe-area-inset-bottom,0px))] lg:overflow-y-auto lg:pb-10">
                   <OfflineBanner />
                   {children}

@@ -47,3 +47,27 @@ test("사이드바: 계좌·카드 목록을 접으면 새로고침해도 접혀
   await sidebar.getByRole("button", { name: /함께 보는 계좌·카드/ }).click();
   await expect(sidebar.locator("#sidebar-methods-list")).toBeVisible();
 });
+
+test("웹 사이드바: 접으면 아이콘만 남고 새로고침해도 유지, Ctrl K로 펼치며 검색칸으로", async ({ page }) => {
+  await login(page, "a", "/");
+  const sidebar = page.getByRole("complementary");
+  await sidebar.getByRole("button", { name: "사이드바 접기" }).click();
+  await expect(sidebar.getByRole("searchbox")).toHaveCount(0);
+  await expect(sidebar.getByRole("link", { name: "통계" })).toBeVisible();
+
+  await page.reload();
+  await expect(sidebar.getByRole("button", { name: "사이드바 펼치기" })).toBeVisible();
+  const width = await sidebar.evaluate((el) => el.getBoundingClientRect().width);
+  expect(width).toBeLessThan(80);
+
+  // 접힌 상태에서도 메뉴 이동과 내역 추가
+  await sidebar.getByRole("link", { name: "통계" }).click();
+  await expect(page).toHaveURL(/\/stats/);
+  await sidebar.getByRole("button", { name: "내역 추가" }).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.keyboard.press("Escape");
+
+  await page.keyboard.press("Control+KeyK");
+  await expect(sidebar.getByRole("searchbox")).toBeFocused();
+  await expect(sidebar.getByRole("button", { name: "사이드바 접기" })).toBeVisible();
+});
