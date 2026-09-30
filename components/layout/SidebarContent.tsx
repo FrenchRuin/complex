@@ -15,9 +15,9 @@ import type { PaymentMethodOption } from "@/lib/household-data";
 import { NAV_ITEMS, isActivePath } from "@/lib/nav";
 import { SidebarMethods } from "./SidebarMethods";
 
-const SYNC_LABEL = { connecting: "연결하는 중", online: "실시간 연결됨", offline: "연결 끊김" } as const;
+export const SYNC_LABEL = { connecting: "연결하는 중", online: "실시간 연결됨", offline: "연결 끊김" } as const;
 /** 아바타 오른쪽 아래 상태 점: 연결됨 초록, 연결 중 회색, 끊김 속 빈 동그라미 (색만으로 구분하지 않게 모양도 다르게) */
-const DOT_STATUS = {
+export const DOT_STATUS = {
   online: "bg-online",
   connecting: "bg-line-strong",
   offline: "border-2 border-line-strong bg-surface-raised",
@@ -39,15 +39,21 @@ type Props = SidebarData & {
   onNavigate?: () => void;
   /** Ctrl K로 검색칸 (웹 사이드바만) */
   shortcut?: boolean;
+  /** 처음 그릴 때 검색칸에 포커스 (접힌 사이드바에서 Ctrl K로 펼쳤을 때) */
+  autoFocusSearch?: boolean;
 };
 
 /** 사이드바 내용 (SPEC §4.2). 웹은 왼쪽에 고정, 폰은 ☰ 메뉴에서 같은 내용을 쓴다 */
-export function SidebarContent({ me, members, names, paymentMethods, recurringDue, headerAction, onNavigate, shortcut = false }: Props) {
+export function SidebarContent({ me, members, names, paymentMethods, recurringDue, headerAction, onNavigate, shortcut = false, autoFocusSearch = false }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const { openNew } = useTransactionPanel();
   const status = useSyncStatus();
   const searchRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (autoFocusSearch) searchRef.current?.focus();
+  }, [autoFocusSearch]);
 
   useEffect(() => {
     if (!shortcut) return;
