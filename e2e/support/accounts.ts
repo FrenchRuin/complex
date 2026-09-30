@@ -26,6 +26,17 @@ export function adminClient(): SupabaseClient {
   return createClient(url, service, { auth: { persistSession: false } });
 }
 
+/**
+ * 서버 기준 지금 시각 (ISO). 알림을 "이 테스트 이후 것"으로 거를 때 쓴다.
+ * 내 컴퓨터 시계가 DB보다 빠르면 방금 생긴 알림이 빠지므로 서버 응답의 Date(초 단위 내림)를 쓴다.
+ */
+export async function serverNow(): Promise<string> {
+  const { url } = loadEnv();
+  const date = (await fetch(`${url}/auth/v1/health`, { method: "HEAD" })).headers.get("date");
+  if (!date) throw new Error("Supabase 응답에 Date 헤더가 없어요");
+  return new Date(date).toISOString();
+}
+
 export async function userClient(email: string, password: string): Promise<SupabaseClient> {
   const { url, key } = loadEnv();
   const client = createClient(url, key, { auth: { persistSession: false } });

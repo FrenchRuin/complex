@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { E2E_NAMES, readCreds, userClient } from "./support/accounts";
+import { E2E_NAMES, readCreds, serverNow, userClient } from "./support/accounts";
 import { login } from "./support/login";
 
 test("일정: A가 시각 있는 매주 일정을 추가하면 달력·알림에 나오고, 누르면 보기로 열린다 (F-19)", async ({ browser }) => {
@@ -60,7 +60,7 @@ test("일정 규칙: 가구는 DB가 채움, 바뀐 게 없으면 알림 없음,
   const creds = readCreds();
   const a = await userClient(creds.a.email, creds.a.password);
   const b = await userClient(creds.b.email, creds.b.password);
-  const since = new Date().toISOString();
+  const since = await serverNow();
   const fake = "00000000-0000-0000-0000-000000000000";
 
   const { data: event, error } = await a

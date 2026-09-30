@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { adminClient, E2E_NAMES, readCreds, userClient } from "./support/accounts";
+import { adminClient, E2E_NAMES, readCreds, serverNow, userClient } from "./support/accounts";
 import { login } from "./support/login";
 
 test("한 사람이 내역을 추가하면 다른 사람에게 알림이 오고, 누르면 그 내역이 열린다 (F-17)", async ({ browser }) => {
@@ -60,7 +60,7 @@ test("알림 규칙: 문자 여러 건은 하나로, 같은 내역 수정은 하
   const b = await userClient(creds.b.email, creds.b.password);
   const { data: category } = await a.from("categories").select("id").eq("type", "expense").eq("name", "식비").single();
   const categoryId = category!.id as string;
-  const since = new Date().toISOString();
+  const since = await serverNow();
   const row = (merchant: string, amount: number, source: string) => ({
     type: "expense", amount, occurred_on: "2026-09-10", category_id: categoryId, merchant,
     scope: "joint", member_slot: "a", source,
