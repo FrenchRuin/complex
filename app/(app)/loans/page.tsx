@@ -38,17 +38,18 @@ export default async function LoansPage() {
                 rules={data.rules}
               />
             </SettingsSection>
-            <SettingsSection
-              title="기준값"
-              description="계산에 쓰는 LTV·DSR·정책대출 조건이에요. 실제 대출 전에는 은행이나 주택도시기금에서 다시 확인해 주세요."
-            >
-              <RuleSummary rules={data.rules} today={todayKST()} />
-            </SettingsSection>
           </div>
           <SettingsSection title="집 후보" description="두 사람이 같이 보고 고쳐요. 소득이나 기존 대출을 바꾸면 결과도 바로 바뀌어요.">
             <ScenarioBoard scenarios={data.scenarios} profile={data.profile} debts={data.debts} rules={data.rules} />
           </SettingsSection>
         </div>
+        {/* 기준값은 화면 맨 아래 (폰에서도 집 후보 다음, spec §1) */}
+        <SettingsSection
+          title="기준값"
+          description="계산에 쓰는 LTV·DSR·정책대출 조건이에요. 실제 대출 전에는 은행이나 주택도시기금에서 다시 확인해 주세요."
+        >
+          <RuleSummary rules={data.rules} today={todayKST()} />
+        </SettingsSection>
       </div>
     </>
   );
