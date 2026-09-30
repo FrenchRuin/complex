@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { DebtList } from "@/components/loans/DebtList";
 import { LoanProfileForm } from "@/components/loans/LoanProfileForm";
+import { RuleSummary } from "@/components/loans/RuleSummary";
 import { ScenarioBoard } from "@/components/loans/ScenarioBoard";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { SettingsSection } from "@/components/settings/SettingsSection";
+import { todayKST } from "@/lib/date";
 import { getHouseholdMembers, requireMember, toMemberNames } from "@/lib/household";
 import { getLoansOverview } from "@/lib/loans";
 
@@ -35,6 +37,12 @@ export default async function LoansPage() {
                 homeStatus={data.profile.homeStatus}
                 rules={data.rules}
               />
+            </SettingsSection>
+            <SettingsSection
+              title="기준값"
+              description="계산에 쓰는 LTV·DSR·정책대출 조건이에요. 실제 대출 전에는 은행이나 주택도시기금에서 다시 확인해 주세요."
+            >
+              <RuleSummary rules={data.rules} today={todayKST()} />
             </SettingsSection>
           </div>
           <SettingsSection title="집 후보" description="두 사람이 같이 보고 고쳐요. 소득이나 기존 대출을 바꾸면 결과도 바로 바뀌어요.">
