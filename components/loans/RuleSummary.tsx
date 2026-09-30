@@ -1,17 +1,18 @@
 import Link from "next/link";
-import { isRuleStale, RULE_GROUP_LABEL, RULE_GROUPS, type LoanRules } from "@/lib/calc/loan-rules";
+import { isRuleStale, RULE_GROUP_LABEL, RULE_GROUPS, ruleValueSummary, type LoanRules } from "@/lib/calc/loan-rules";
 import { formatFullDate } from "@/lib/date";
 
 type Props = { rules: LoanRules; today: string };
 
-/** 기준값 묶음마다 확인한 날·출처. 6개월 넘게 지나면 확인해 달라고 표시 */
+/** 기준값 묶음마다 값·확인한 날·출처. 6개월 넘게 지나면 확인해 달라고 표시 */
 export function RuleSummary({ rules, today }: Props) {
   return (
     <div className="mt-4 flex flex-col gap-3">
-      <ul className="flex flex-col gap-2" aria-label="기준값 묶음">
+      <ul className="grid grid-cols-1 gap-2 lg:grid-cols-2" aria-label="기준값 묶음">
         {RULE_GROUPS.map((g) => (
           <li key={g} className="flex flex-col rounded-sm bg-surface px-4 py-3">
             <span className="text-body text-ink">{RULE_GROUP_LABEL[g]}</span>
+            <span className="text-caption text-ink tabular-nums">{ruleValueSummary(g, rules)}</span>
             <span className="text-caption text-ink-muted">
               {formatFullDate(rules[g].checkedOn)} 확인 · {rules[g].source}
             </span>
