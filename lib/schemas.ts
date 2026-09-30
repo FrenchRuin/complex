@@ -3,6 +3,7 @@
  */
 import { z } from "zod";
 import { ASSET_KINDS } from "./calc/assets";
+import { AMORTIZING_KINDS, DEALS, DEBT_KINDS, HOME_STATUSES, REGIONS } from "./calc/loans";
 import { CATEGORY_ICON_NAMES } from "./category-icons";
 import { CATEGORY_TYPES, OWNERS, PAYMENT_KINDS, SCOPES, SLOTS } from "./domain";
 
@@ -163,6 +164,60 @@ export const contributionInputSchema = z.object({
   memberSlot: z.enum(SLOTS),
 });
 export type ContributionInput = z.input<typeof contributionInputSchema>;
+
+const rateBpSchema = z
+  .number("금리를 입력해 주세요")
+  .int("금리를 확인해 주세요")
+  .min(0, "금리를 확인해 주세요")
+  .max(3000, "금리는 30%까지 입력할 수 있어요");
+
+/** 대출 계산: 우리 정보 (F-43). 1주택이면 생애최초는 끈다 */
+export const loanProfileSchema = z
+  .object({
+    incomeA: moneySchema("소득").min(0, "소득을 확인해 주세요"),
+    incomeB: moneySchema("소득").min(0, "소득을 확인해 주세요"),
+    homeStatus: z.enum(HOME_STATUSES, "주택 보유를 골라 주세요"),
+    firstTime: z.boolean(),
+  })
+  .transform((v) => ({ ...v, firstTime: v.homeStatus === "none" && v.firstTime }));
+export type LoanProfileInput = z.input<typeof loanProfileSchema>;
+
+/** 대출 계산: 기존 대출 (F-43) */
+export const loanDebtSchema = z
+  .object({
+    id: z.uuid().optional(),
+    name: z.string().trim().min(1, "이름을 입력해 주세요").max(30, "이름은 30자까지 쓸 수 있어요"),
+    kind: z.enum(DEBT_KINDS, "종류를 골라 주세요"),
+    owner: z.enum(OWNERS, "소유를 골라 주세요"),
+    balance: moneySchema("잔액").min(1, "잔액을 입력해 주세요"),
+    rateBp: rateBpSchema,
+    monthsLeft: z
+      .number()
+      .int("남은 기간은 개월 수로 입력해 주세요")
+      .min(1, "남은 기간을 확인해 주세요")
+      .max(600, "남은 기간은 600개월까지 입력할 수 있어요")
+      .nullable(),
+    monthlyPayment: moneySchema("매달 내는 금액").min(1, "매달 내는 금액을 확인해 주세요").nullable(),
+  })
+  .refine((v) => !AMORTIZING_KINDS.includes(v.kind) || v.monthsLeft !== null || v.monthlyPayment !== null, {
+    message: "남은 기간이나 매달 내는 금액 중 하나를 입력해 주세요",
+    path: ["monthsLeft"],
+  });
+export type LoanDebtInput = z.input<typeof loanDebtSchema>;
+
+/** 대출 계산: 집 후보 (F-43). 금리·만기를 비우면 기준값의 기본값 */
+export const loanScenarioSchema = z.object({
+  id: z.uuid().optional(),
+  name: z.string().trim().min(1, "이름을 입력해 주세요").max(30, "이름은 30자까지 쓸 수 있어요"),
+  deal: z.enum(DEALS),
+  price: moneySchema("가격").min(1, "가격을 입력해 주세요"),
+  region: z.enum(REGIONS, "지역을 골라 주세요"),
+  rateBp: rateBpSchema.nullable(),
+  termYears: z.number().int("만기를 확인해 주세요").min(1, "만기를 확인해 주세요").max(30, "만기는 30년까지 입력할 수 있어요").nullable(),
+  extraCosts: moneySchema("기타 비용").min(0, "기타 비용을 확인해 주세요"),
+  memo: z.string().trim().max(500, "메모는 500자까지 쓸 수 있어요"),
+});
+export type LoanScenarioFormInput = z.input<typeof loanScenarioSchema>;
 
 /** 공유 메모 (F-18). 빈 항목은 저장 전에 뺀다 */
 export const noteInputSchema = z

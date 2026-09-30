@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   categoryInputSchema,
   displayNameSchema,
+  loanDebtSchema,
+  loanProfileSchema,
+  loanScenarioSchema,
   paymentMethodInputSchema,
   transactionInputSchema,
 } from "./schemas";
@@ -102,5 +105,27 @@ describe("paymentMethodInputSchema", () => {
       paymentMethodInputSchema.safeParse({ name: "x", kind: "card", owner: "c", smsAliases: "" })
         .success,
     ).toBe(false);
+  });
+});
+
+describe("대출 입력 (F-43)", () => {
+  it("1주택이면 생애최초는 꺼진다", () => {
+    const r = loanProfileSchema.parse({ incomeA: 1, incomeB: 0, homeStatus: "one", firstTime: true });
+    expect(r.firstTime).toBe(false);
+  });
+  it("주담대·자동차·기타는 남은 기간이나 매달 금액이 있어야 한다", () => {
+    const base = { name: "차", kind: "car", owner: "joint", balance: 1_000_000, rateBp: 500, monthsLeft: null, monthlyPayment: null };
+    const r = loanDebtSchema.safeParse(base);
+    expect(r.success).toBe(false);
+    expect(r.error?.issues[0].message).toBe("남은 기간이나 매달 내는 금액 중 하나를 입력해 주세요");
+    expect(loanDebtSchema.safeParse({ ...base, monthsLeft: 36 }).success).toBe(true);
+    expect(loanDebtSchema.safeParse({ ...base, kind: "credit" }).success).toBe(true);
+  });
+  it("후보: 가격은 1원 이상, 만기는 30년까지, 메모 500자", () => {
+    const base = { name: "마포", deal: "buy", price: 1, region: "metro", rateBp: null, termYears: null, extraCosts: 0, memo: "" };
+    expect(loanScenarioSchema.safeParse(base).success).toBe(true);
+    expect(loanScenarioSchema.safeParse({ ...base, price: 0 }).success).toBe(false);
+    expect(loanScenarioSchema.safeParse({ ...base, termYears: 31 }).success).toBe(false);
+    expect(loanScenarioSchema.safeParse({ ...base, memo: "가".repeat(501) }).success).toBe(false);
   });
 });
