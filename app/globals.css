@@ -34,6 +34,14 @@
   --potato: #8a5a2b;
   --potato-soft: #ecd2a6;
   --sprout: #2f8a4a;
+  /* 자산 구성 도넛의 종류 색 (예금·적금·투자·보증금·부동산·자동차·기타 순). 이웃해도 색맹 검사 통과. 그래프 전용, 항상 이름·금액 글자와 함께 */
+  --chart-1: #2a78d6;
+  --chart-2: #eb6834;
+  --chart-3: #1baf7a;
+  --chart-4: #4a3aa7;
+  --chart-5: #eda100;
+  --chart-6: #e87ba4;
+  --chart-7: #008300;
 
   --shadow-float-value: 0 2px 6px #151b2314, 0 10px 24px -4px #151b2324;
   --shadow-sheet-value: 0 -8px 32px #151b2329;
@@ -71,6 +79,14 @@
   --potato: #e6c08a;
   --potato-soft: #5b3f24;
   --sprout: #6cc47a;
+  /* 자산 구성 도넛의 종류 색 (예금·적금·투자·보증금·부동산·자동차·기타 순). 이웃해도 색맹 검사 통과. 그래프 전용, 항상 이름·금액 글자와 함께 */
+  --chart-1: #3987e5;
+  --chart-2: #d95926;
+  --chart-3: #199e70;
+  --chart-4: #9085e9;
+  --chart-5: #c98500;
+  --chart-6: #d55181;
+  --chart-7: #008300;
 
   --shadow-float-value: 0 10px 24px -4px #000000cc;
   --shadow-sheet-value: 0 -8px 32px #000000e6;
@@ -105,6 +121,14 @@
     --potato: #e6c08a;
     --potato-soft: #5b3f24;
     --sprout: #6cc47a;
+    /* 자산 구성 도넛의 종류 색 (예금·적금·투자·보증금·부동산·자동차·기타 순). 이웃해도 색맹 검사 통과. 그래프 전용, 항상 이름·금액 글자와 함께 */
+    --chart-1: #3987e5;
+    --chart-2: #d95926;
+    --chart-3: #199e70;
+    --chart-4: #9085e9;
+    --chart-5: #c98500;
+    --chart-6: #d55181;
+    --chart-7: #008300;
 
     --shadow-float-value: 0 10px 24px -4px #000000cc;
     --shadow-sheet-value: 0 -8px 32px #000000e6;
@@ -141,6 +165,13 @@
   --color-potato: var(--potato);
   --color-potato-soft: var(--potato-soft);
   --color-sprout: var(--sprout);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-chart-6: var(--chart-6);
+  --color-chart-7: var(--chart-7);
 
   --font-sans: "Pretendard Variable", "Pretendard", "IBM Plex Sans KR", -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
 
