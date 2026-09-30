@@ -37,7 +37,7 @@ export function SidebarRail({ me, recurringDue, onExpand }: Props) {
 
   return (
     <>
-      <div className="flex flex-col items-center gap-1 pt-4 pb-3">
+      <div className="flex flex-col items-center gap-1 border-b border-line pt-4 pb-3">
         <button type="button" onClick={onExpand} aria-label="사이드바 펼치기" className={ITEM}>
           <PanelLeftOpen size={22} strokeWidth={1.75} aria-hidden />
           <Tip>사이드바 펼치기</Tip>
@@ -55,7 +55,7 @@ export function SidebarRail({ me, recurringDue, onExpand }: Props) {
       </div>
 
       <nav aria-label="메뉴" className="flex-1">
-        <ul className="flex flex-col items-center gap-1 py-1">
+        <ul className="flex flex-col items-center gap-1 pt-3 pb-1">
           {NAV_ITEMS.filter((item) => item.inSidebar).map((item) => {
             const due = item.href === "/recurring" && recurringDue > 0;
             return (
