@@ -9,12 +9,12 @@ import { useTransactionPanel } from "@/components/transactions/TransactionPanelP
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { CountBadge } from "@/components/ui/CountBadge";
-import { ownerLabel, type MemberNames } from "@/lib/domain";
+import type { MemberNames } from "@/lib/domain";
 import type { HouseholdMember } from "@/lib/household";
 import type { PaymentMethodOption } from "@/lib/household-data";
 import { NAV_ITEMS, isActivePath } from "@/lib/nav";
+import { SidebarMethods } from "./SidebarMethods";
 
-const DOT: Record<string, string> = { joint: "bg-joint", a: "bg-member-a", b: "bg-member-b" };
 const SYNC_LABEL = { connecting: "연결하는 중", online: "실시간 연결됨", offline: "연결 끊김" } as const;
 /** 아바타 오른쪽 아래 상태 점: 연결됨 초록, 연결 중 회색, 끊김 속 빈 동그라미 (색만으로 구분하지 않게 모양도 다르게) */
 const DOT_STATUS = {
@@ -109,60 +109,34 @@ export function SidebarContent({ me, members, names, paymentMethods, recurringDu
         </Button>
       </div>
 
-      <nav aria-label="메뉴" className="px-3 pt-4">
-        <ul className="flex flex-col gap-1">
-          {NAV_ITEMS.filter((item) => item.inSidebar).map((item) => {
-            const active = isActivePath(pathname, item.href);
-            return (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  onClick={onNavigate}
-                  aria-current={active ? "page" : undefined}
-                  className={`flex h-10 items-center gap-3 rounded-sm px-3 text-body ${
-                    active ? "bg-primary-soft font-semibold text-primary" : "text-ink hover:bg-surface-sunken"
-                  }`}
-                >
-                  <item.icon size={20} strokeWidth={1.75} aria-hidden />
-                  <span className="flex-1">{item.label}</span>
-                  {item.href === "/recurring" ? <CountBadge count={recurringDue} label="미납" /> : null}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
+      {/* 가운데(메뉴 + 계좌·카드)만 한 덩어리로 스크롤. 위(검색·내역 추가)와 아래(프로필)는 고정 */}
+      <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
+        <nav aria-label="메뉴" className="pt-4">
+          <ul className="flex flex-col gap-1">
+            {NAV_ITEMS.filter((item) => item.inSidebar).map((item) => {
+              const active = isActivePath(pathname, item.href);
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    onClick={onNavigate}
+                    aria-current={active ? "page" : undefined}
+                    className={`flex h-10 items-center gap-3 rounded-sm px-3 text-body ${
+                      active ? "bg-primary-soft font-semibold text-primary" : "text-ink hover:bg-surface-sunken"
+                    }`}
+                  >
+                    <item.icon size={20} strokeWidth={1.75} aria-hidden />
+                    <span className="flex-1">{item.label}</span>
+                    {item.href === "/recurring" ? <CountBadge count={recurringDue} label="미납" /> : null}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
 
-      <section aria-labelledby="sidebar-methods" className="min-h-0 flex-1 overflow-y-auto px-3 pt-6">
-        <div className="flex items-center justify-between px-3 pb-1">
-          <h2 id="sidebar-methods" className="text-label text-ink-muted">
-            함께 보는 계좌·카드
-          </h2>
-          <Link
-            href="/settings/payment-methods"
-            onClick={onNavigate}
-            aria-label="계좌·카드 추가"
-            className="inline-flex size-7 items-center justify-center rounded-sm text-ink-muted hover:bg-surface-sunken"
-          >
-            <Plus size={16} strokeWidth={1.75} aria-hidden />
-          </Link>
-        </div>
-        <ul>
-          {paymentMethods.map((m) => (
-            <li key={m.id}>
-              <Link
-                href={`/transactions?pm=${m.id}`}
-                onClick={onNavigate}
-                className="flex h-9 items-center gap-2 rounded-sm px-3 text-body text-ink hover:bg-surface-sunken"
-              >
-                <span aria-hidden className={`size-2 shrink-0 rounded-full ${DOT[m.owner]}`} />
-                <span className="min-w-0 flex-1 truncate">{m.name}</span>
-                <span className="shrink-0 text-caption text-ink-muted">{ownerLabel(m.owner, names)}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
+        <SidebarMethods paymentMethods={paymentMethods} names={names} onNavigate={onNavigate} />
+      </div>
 
       {/* 아래: 내 프로필 + 오른쪽 톱니바퀴(설정) */}
       <div className="flex items-center gap-2 border-t border-line pt-2 pr-3 pl-6 pb-[calc(8px+env(safe-area-inset-bottom,0px))]">
