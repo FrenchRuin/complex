@@ -27,11 +27,11 @@
 
 ### 1.2 기존 대출
 
-- 목록: 이름, 종류, 소유(공동/A/B, 이름 글자와 함께), 잔액, 금리, 남은 기간 또는 매달 내는 금액. 추가·수정·삭제(되돌리기).
+- 목록(추가한 순서): 이름, 종류, 소유(공동/A/B, 이름 글자와 함께), 잔액, 금리, 남은 기간 또는 매달 내는 금액. 추가·수정·삭제(되돌리기).
 - 종류: 주담대 / 신용대출 / 마이너스통장 / 자동차 할부 / 전세대출 / 기타.
 - 마이너스통장은 **잔액 칸에 한도**를 적는다 (안내 문구로 알려 줌).
 - 주담대·자동차 할부·기타는 남은 기간(개월)이나 매달 내는 금액 중 하나가 꼭 있어야 한다. 둘 다 있으면 매달 내는 금액이 먼저.
-- "자산 메뉴에서 불러오기": 자산 메뉴의 부채 항목 중 아직 안 불러온 것을 이름·잔액·소유만 채워 추가한다 (종류는 기타, 금리 0). 금리·기간은 직접 고치라는 안내. 이미 불러온 항목(`asset_id`가 같은 것)은 다시 불러오지 않는다. 불러온 뒤 자산 메뉴 금액이 바뀌어도 자동으로 따라가지 않는다.
+- "자산 메뉴에서 불러오기": 자산 메뉴의 부채 항목 중 아직 안 불러온 것을 이름·잔액·소유만 채워 추가한다 (종류는 기타, 금리 0, 잔액 0원인 부채는 뺌). 남은 기간·매달 금액이 비어 있는 항목에는 "정보를 채워 주세요" 표시, 채우기 전까지 DSR 계산에서 0원으로 본다. 이미 불러온 항목(`asset_id`가 같은 것)은 다시 불러오지 않는다. 불러온 뒤 자산 메뉴 금액이 바뀌어도 자동으로 따라가지 않는다.
 - 목록 아래 합계: 잔액 합, "1년에 갚는 돈(DSR 기준)" 합.
 
 ### 1.3 집 후보
@@ -130,7 +130,7 @@
 - `income_a`, `income_b` bigint ≥ 0, `home_status` text (`none`/`one`), `first_time` boolean, `rules` jsonb (기본 `{}`), `updated_by`, `updated_at`.
 
 **`loan_debts`**
-- `id`, `household_id`, `name` (1~20자), `kind` (`mortgage`/`credit`/`overdraft`/`car`/`jeonse`/`other`), `owner` (`joint`/`a`/`b`, 기존 표와 같음), `balance` bigint > 0, `rate_bp` int 0~3000, `months_left` int null (1~600), `monthly_payment` bigint null, `asset_id` null (자산 항목), `sort_order`, `created_by`, `updated_by`, `created_at`, `updated_at`, `deleted_at`.
+- `id`, `household_id`, `name` (1~30자, 자산 항목 이름과 같은 길이), `kind` (`mortgage`/`credit`/`overdraft`/`car`/`jeonse`/`other`), `owner` (`joint`/`a`/`b`, 기존 표와 같음), `balance` bigint > 0, `rate_bp` int 0~3000, `months_left` int null (1~600), `monthly_payment` bigint null, `asset_id` null (자산 항목, 자산을 지우면 null), `created_by`, `updated_by`, `created_at`, `updated_at`, `deleted_at`.
 - 같은 가구에서 삭제 안 된 `asset_id`는 하나만 (부분 유니크 인덱스).
 
 **`loan_scenarios`**
