@@ -74,6 +74,21 @@ export function AssetsSkeleton() {
   );
 }
 
+export function LoansSkeleton() {
+  return (
+    <PageSkeleton title="대출" className="flex flex-col gap-4 px-5 py-6 lg:px-8">
+      <CardSkeleton lines={1} />
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-start">
+        <div className="flex flex-col gap-4">
+          <CardSkeleton lines={4} />
+          <CardSkeleton rows={3} />
+        </div>
+        <CardSkeleton rows={4} />
+      </div>
+    </PageSkeleton>
+  );
+}
+
 export function NotesSkeleton() {
   return (
     <PageSkeleton title="메모" className="flex flex-col gap-4 px-5 py-6 lg:px-8">
