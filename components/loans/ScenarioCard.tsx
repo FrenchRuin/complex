@@ -59,16 +59,17 @@ function ProductRow({ result: r, best }: { result: ProductResult; best: boolean 
         <span className="text-amount text-ink tabular-nums">{formatWon(r.amount)}</span>
       </div>
       <p className="text-caption text-ink-muted">{r.limitedBy}</p>
-      <dl className="mt-1 grid grid-cols-3 gap-2 text-caption tabular-nums">
-        <div>
-          <dt className="text-ink-muted">한 달</dt>
+      {/* 폰 폭에서도 금액이 잘리지 않게 한 줄에 이름·값 하나씩 */}
+      <dl className="mt-1 flex flex-col gap-0.5 text-caption tabular-nums">
+        <div className="flex justify-between gap-2">
+          <dt className="text-ink-muted">한 달 {r.product === "bank_jeonse" || r.product === "butimok_newlywed" ? "이자" : "상환액"}</dt>
           <dd className="text-ink">{formatWon(r.monthly)}</dd>
         </div>
-        <div>
+        <div className="flex justify-between gap-2">
           <dt className="text-ink-muted">필요한 현금</dt>
           <dd className="text-ink">{formatWon(r.cashNeeded)}</dd>
         </div>
-        <div>
+        <div className="flex justify-between gap-2">
           <dt className="text-ink-muted">대출 뒤 DSR</dt>
           <dd className="text-ink">{r.dsrAfter === null ? "-" : `${r.dsrAfter}%`}</dd>
         </div>
