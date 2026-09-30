@@ -1,5 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { formatNumber, formatWon, formatWonShort, formatWonTiny, parseWon } from "./money";
+import { formatEok, formatNumber, formatWon, formatWonShort, formatWonTiny, parseWon } from "./money";
+
+describe("formatEok", () => {
+  it("1억 이상은 억 원, 소수 둘째 자리까지", () => {
+    expect(formatEok(600_000_000)).toBe("6억 원");
+    expect(formatEok(511_000_000)).toBe("5.11억 원");
+    expect(formatEok(2_500_000_000)).toBe("25억 원");
+  });
+  it("1억 미만은 만 원 (쉼표)", () => {
+    expect(formatEok(85_000_000)).toBe("8,500만 원");
+    expect(formatEok(70_000_000)).toBe("7,000만 원");
+  });
+});
 
 describe("formatWon", () => {
   it("쉼표와 원을 붙인다", () => {
