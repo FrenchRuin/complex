@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DebtList } from "@/components/loans/DebtList";
 import { LoanProfileForm } from "@/components/loans/LoanProfileForm";
+import { ScenarioBoard } from "@/components/loans/ScenarioBoard";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { SettingsSection } from "@/components/settings/SettingsSection";
 import { getHouseholdMembers, requireMember, toMemberNames } from "@/lib/household";
@@ -36,6 +37,9 @@ export default async function LoansPage() {
               />
             </SettingsSection>
           </div>
+          <SettingsSection title="집 후보" description="두 사람이 같이 보고 고쳐요. 소득이나 기존 대출을 바꾸면 결과도 바로 바뀌어요.">
+            <ScenarioBoard scenarios={data.scenarios} profile={data.profile} debts={data.debts} rules={data.rules} />
+          </SettingsSection>
         </div>
       </div>
     </>
