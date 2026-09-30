@@ -49,6 +49,16 @@ export function formatWonTiny(amount: number): string {
   return formatWonShort(amount);
 }
 
+const eokFormatter = new Intl.NumberFormat("ko-KR", { maximumFractionDigits: 2 });
+
+/**
+ * 대출 한도·조건처럼 큰 금액을 글로: 600000000 → "6억 원", 511000000 → "5.11억 원", 85000000 → "8,500만 원".
+ */
+export function formatEok(amount: number): string {
+  if (amount >= 100_000_000) return `${eokFormatter.format(amount / 100_000_000)}억 원`;
+  return `${wonFormatter.format(Math.floor(amount / 10_000))}만 원`;
+}
+
 /**
  * 사용자가 입력한 금액 문자열을 정수로 바꾼다. 숫자가 없으면 null.
  * "12,000원" → 12000, " 3 500 " → 3500
