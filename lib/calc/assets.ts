@@ -83,6 +83,40 @@ export function groupAssets<T extends { kind: AssetKind; isLiability: boolean; o
   return groups;
 }
 
+/** 자산 구성 도넛의 한 조각. slot은 차트 색 토큰 번호(chart-1~7) */
+export type CompositionPart = { kind: AssetKind; label: string; amount: number; percent: number; slot: number };
+
+/** 도넛에 쓰는 종류 순서 = 색 순서. 이웃한 색이 색맹 검사를 통과하도록 정한 순서라 금액 순으로 바꾸지 않는다 */
+const COMPOSITION_KINDS = ["deposit", "savings", "investment", "lease_deposit", "real_estate", "car", "other"] as const;
+
+/**
+ * 자산 구성 (F-40): 부채를 뺀 자산을 종류별로 더하고 비율(%)을 낸다.
+ * 순서는 종류 순서 고정, 0원인 종류는 뺀다. 비율은 반올림 뒤 합이 100이 되도록 가장 큰 종류에서 맞춘다.
+ * 부채가 아닌데 종류가 대출이면 기타로 센다.
+ */
+export function assetComposition(items: readonly { kind: AssetKind; isLiability: boolean; amount: number }[]): CompositionPart[] {
+  const sums = new Map<AssetKind, number>();
+  for (const item of items) {
+    if (item.isLiability) continue;
+    const kind = item.kind === "loan" ? "other" : item.kind;
+    sums.set(kind, (sums.get(kind) ?? 0) + item.amount);
+  }
+  const parts = COMPOSITION_KINDS.map((kind, i) => ({
+    kind: kind as AssetKind,
+    label: ASSET_KIND_LABEL[kind],
+    amount: sums.get(kind) ?? 0,
+    percent: 0,
+    slot: i + 1,
+  })).filter((p) => p.amount > 0);
+  const total = parts.reduce((s, p) => s + p.amount, 0);
+  if (total === 0) return [];
+
+  for (const p of parts) p.percent = Math.round((p.amount / total) * 100);
+  const largest = parts.reduce((max, p) => (p.amount > max.amount ? p : max), parts[0]);
+  largest.percent += 100 - parts.reduce((s, p) => s + p.percent, 0);
+  return parts;
+}
+
 export type TrendPoint = { month: MonthString; net: number; current: boolean };
 
 export type HistoryAsset = { id: string; isLiability: boolean; deletedOn: DateString | null };
