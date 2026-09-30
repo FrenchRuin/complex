@@ -596,6 +596,213 @@ export type Database = {
           },
         ]
       }
+      loan_debts: {
+        Row: {
+          asset_id: string | null
+          balance: number
+          created_at: string
+          created_by: string
+          deleted_at: string | null
+          household_id: string
+          id: string
+          kind: string
+          monthly_payment: number | null
+          months_left: number | null
+          name: string
+          owner: string
+          rate_bp: number
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          asset_id?: string | null
+          balance: number
+          created_at?: string
+          created_by: string
+          deleted_at?: string | null
+          household_id: string
+          id?: string
+          kind: string
+          monthly_payment?: number | null
+          months_left?: number | null
+          name: string
+          owner: string
+          rate_bp?: number
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          asset_id?: string | null
+          balance?: number
+          created_at?: string
+          created_by?: string
+          deleted_at?: string | null
+          household_id?: string
+          id?: string
+          kind?: string
+          monthly_payment?: number | null
+          months_left?: number | null
+          name?: string
+          owner?: string
+          rate_bp?: number
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loan_debts_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loan_debts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loan_debts_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loan_debts_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      loan_profiles: {
+        Row: {
+          first_time: boolean
+          home_status: string
+          household_id: string
+          income_a: number
+          income_b: number
+          rules: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          first_time?: boolean
+          home_status?: string
+          household_id: string
+          income_a?: number
+          income_b?: number
+          rules?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          first_time?: boolean
+          home_status?: string
+          household_id?: string
+          income_a?: number
+          income_b?: number
+          rules?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loan_profiles_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: true
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loan_profiles_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      loan_scenarios: {
+        Row: {
+          created_at: string
+          created_by: string
+          deal: string
+          deleted_at: string | null
+          extra_costs: number
+          household_id: string
+          id: string
+          memo: string
+          name: string
+          price: number
+          rate_bp: number | null
+          region: string
+          term_years: number | null
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          deal: string
+          deleted_at?: string | null
+          extra_costs?: number
+          household_id: string
+          id?: string
+          memo?: string
+          name: string
+          price: number
+          rate_bp?: number | null
+          region: string
+          term_years?: number | null
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          deal?: string
+          deleted_at?: string | null
+          extra_costs?: number
+          household_id?: string
+          id?: string
+          memo?: string
+          name?: string
+          price?: number
+          rate_bp?: number | null
+          region?: string
+          term_years?: number | null
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loan_scenarios_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loan_scenarios_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loan_scenarios_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       members: {
         Row: {
           avatar_path: string | null
@@ -1336,6 +1543,10 @@ export type Database = {
       }
       set_event_occurrence_skipped: {
         Args: { p_date: string; p_event_id: string; p_skipped: boolean }
+        Returns: undefined
+      }
+      set_loan_rule_group: {
+        Args: { p_group: string; p_value?: Json }
         Returns: undefined
       }
       set_period_settings: {
