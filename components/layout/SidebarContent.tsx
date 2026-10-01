@@ -79,7 +79,7 @@ export function SidebarContent({ me, members, names, paymentMethods, recurringDu
           {members.map((m) => (
             <span key={m.id} className="relative">
               <Avatar slot={m.slot} name={m.displayName} avatarUrl={m.avatarUrl} />
-              <MoodBadge mood={moods[m.id]} className="-right-1 -bottom-1" />
+              <MoodBadge name={m.displayName} mood={moods[m.id]} className="-right-1 -bottom-1" />
             </span>
           ))}
         </span>
@@ -159,7 +159,7 @@ export function SidebarContent({ me, members, names, paymentMethods, recurringDu
         <MoodPicker current={moods[me.id] ?? null}>
           <button
             type="button"
-            aria-label={`${me.displayName} · ${SYNC_LABEL[status]} · 오늘 기분 고르기, 지금 ${moods[me.id] ? moodText(moods[me.id]) : "안 정함"}`}
+            aria-label={`${me.displayName} · ${SYNC_LABEL[status]} · 오늘 기분 고르기, 지금 ${moods[me.id] ? moodText(moods[me.id]) : "아직 안 정했어요"}`}
             className="-ml-2 flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-sm px-2 text-left hover:bg-surface-sunken"
           >
             <span className="relative shrink-0" title={SYNC_LABEL[status]}>

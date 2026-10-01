@@ -89,7 +89,7 @@ export function SidebarRail({ me, mood, recurringDue, onExpand }: Props) {
         <span className="relative" title={`${me.displayName} · ${SYNC_LABEL[status]}`}>
           <Avatar slot={me.slot} name={me.displayName} avatarUrl={me.avatarUrl} />
           {/* 오늘 기분 (F-04): 고르기는 펼친 사이드바에서 */}
-          <MoodBadge mood={mood} className="-top-1 -right-1" />
+          <MoodBadge name={me.displayName} mood={mood} className="-top-1 -right-1" />
           <span aria-hidden className={`absolute -right-0.5 -bottom-0.5 size-3 rounded-full ring-2 ring-surface-raised ${DOT_STATUS[status]}`} />
           <span className="sr-only">
             {me.displayName} · {SYNC_LABEL[status]}
