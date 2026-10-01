@@ -68,6 +68,7 @@
 | F-22 | 예산 초과 표시 | 2차 | `spec/budget-stats.md` |
 | F-23 | 통계 화면 | 2차 | `spec/budget-stats.md` |
 | F-24 | ~~공동 지출 정산~~ (제거됨) | — | `spec/budget-stats.md` |
+| F-25 | 월말 결산 화면 + PDF로 저장 (사용자 요청, 2026-10-01 추가) | 개선 | `spec/budget-stats.md` |
 | F-30 | 정기지출 등록·수정·중지 | MVP | `spec/recurring.md` |
 | F-31 | 월별 납부 체크 → 내역 자동 기록 | MVP | `spec/recurring.md` |
 | F-40 | 자산·부채 수기 관리, 순자산 (M7에서 구현, 2026-09-27) | 3차 | `spec/assets.md` |
