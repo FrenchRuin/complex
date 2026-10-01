@@ -11,7 +11,7 @@ export function OfflineBanner() {
   return (
     <div
       role="status"
-      className="flex items-center gap-2 bg-primary-soft px-5 py-2 text-caption text-ink lg:px-8"
+      className="flex items-center gap-2 bg-primary-soft px-5 py-2 text-caption text-ink lg:px-8 print:hidden!"
     >
       <WifiOff size={16} strokeWidth={1.75} aria-hidden />
       연결이 끊겼어요. 다시 연결하는 중
