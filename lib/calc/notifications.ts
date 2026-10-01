@@ -1,8 +1,9 @@
 import { relativeDayLabel } from "@/lib/calc/dashboard";
+import { isMoodKey, moodOf } from "@/lib/calc/mood";
 import { formatTimeKST, monthOf, todayKST, type DateString } from "@/lib/date";
 import { formatWon } from "@/lib/money";
 
-/** 알림 종류 (F-17, 메모는 F-18). DB notifications.kind와 같다 */
+/** 알림 종류 (F-17, 메모는 F-18, 기분은 F-04). DB notifications.kind와 같다 */
 export type NotificationKind =
   | "created"
   | "updated"
@@ -20,7 +21,8 @@ export type NotificationKind =
   | "event_deleted"
   | "event_restored"
   | "event_occurrence_deleted"
-  | "event_occurrence_restored";
+  | "event_occurrence_restored"
+  | "mood_set";
 
 export type NotificationItem = {
   id: string;
@@ -31,6 +33,8 @@ export type NotificationItem = {
   noteId: string | null;
   eventId: string | null;
   occurredOn: DateString | null;
+  /** 기분 알림(F-04)의 기분 키 */
+  mood: string | null;
   subject: string | null;
   amount: number | null;
   count: number;
@@ -55,6 +59,7 @@ const KINDS: readonly NotificationKind[] = [
   "event_restored",
   "event_occurrence_deleted",
   "event_occurrence_restored",
+  "mood_set",
 ];
 
 const EVENT_ACTION_TEXT = {
@@ -99,12 +104,18 @@ const ACTION_TEXT: Record<"created" | "updated" | "deleted" | "restored", string
  * "서연님이 월세 700,000원 납부 체크를 풀었어요"
  * "서연님이 문자로 5건을 추가했어요"
  * "지훈님이 9월 30일 일정 ‘치과’를 삭제했어요" (반복 일정의 그날만)
+ * "서연님이 오늘 기분을 🥰 행복해요로 정했어요 · 야근 중" (F-04)
  */
 export function notificationSentence(
-  item: Pick<NotificationItem, "kind" | "subject" | "amount" | "count"> & { occurredOn?: DateString | null },
+  item: Pick<NotificationItem, "kind" | "subject" | "amount" | "count"> & { occurredOn?: DateString | null; mood?: string | null },
   actorName: string,
 ): string {
   const who = `${actorName}님이`;
+  if (item.kind === "mood_set") {
+    const m = item.mood && isMoodKey(item.mood) ? moodOf(item.mood) : null;
+    const what = m ? `${m.emoji} ${m.label}` : "새 기분";
+    return `${who} 오늘 기분을 ${what}로 정했어요${item.subject ? ` · ${item.subject}` : ""}`;
+  }
   if (isNoteKind(item.kind)) {
     const title = item.subject ?? "제목 없는 메모";
     return `${who} 메모 ‘${title}’${objectParticle(title)} ${NOTE_ACTION_TEXT[item.kind]}`;
@@ -141,6 +152,7 @@ export function objectParticle(word: string): "을" | "를" {
 export function notificationHref(
   item: Pick<NotificationItem, "kind" | "transactionId" | "occurredOn"> & { noteId?: string | null; eventId?: string | null },
 ): string {
+  if (item.kind === "mood_set") return "/";
   if (isEventKind(item.kind)) {
     const params = new URLSearchParams();
     if (item.occurredOn) params.set("month", monthOf(item.occurredOn));

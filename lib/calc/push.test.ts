@@ -24,6 +24,8 @@ describe("pushPayload", () => {
         noteId: null,
         eventId: null,
         occurredOn: "2026-09-29",
+        mood: null,
+        actorId: "m-b",
       },
       "서연",
     );
@@ -33,6 +35,13 @@ describe("pushPayload", () => {
       url: "/transactions?day=2026-09-29&tx=t1",
       tag: "t1",
     });
+  });
+  it("기분 알림은 사람마다 폰에서 하나로 겹친다 (F-04)", () => {
+    const p = pushPayload(
+      { id: "n1", kind: "mood_set", subject: null, amount: null, count: 1, transactionId: null, noteId: null, eventId: null, occurredOn: "2026-10-01", mood: "good", actorId: "m-b" },
+      "서연",
+    );
+    expect(p).toEqual({ title: "감자밭", body: "서연님이 오늘 기분을 😊 좋아요로 정했어요", url: "/", tag: "mood:m-b" });
   });
 });
 
