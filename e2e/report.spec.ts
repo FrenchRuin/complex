@@ -39,6 +39,21 @@ test("월말 결산: 통계에서 들어가 다섯 부분을 보고, PDF로 저�
   await expect(page.locator("html")).toHaveAttribute("data-printed", "1");
 });
 
+test("결산 화면은 웹에서 메인 영역만 스크롤된다 (자산 도넛이 있어도 바깥 스크롤이 생기지 않음, F-25)", async ({ page }) => {
+  await login(page, "a", "/assets");
+  await page.getByRole("button", { name: "자산·부채 추가" }).click();
+  const dialog = page.getByRole("dialog", { name: "자산·부채 추가" });
+  await dialog.getByLabel("이름").fill("E2E 결산 통장");
+  await dialog.getByLabel("금액", { exact: true }).fill("3000000");
+  await dialog.getByRole("button", { name: "저장" }).click();
+  await expect(dialog).toBeHidden();
+
+  await page.goto("/stats/report");
+  await expect(page.getByRole("heading", { name: "지금 자산 구성" })).toBeVisible();
+  const outer = await page.evaluate(() => document.scrollingElement!.scrollHeight - document.scrollingElement!.clientHeight);
+  expect(outer).toBe(0);
+});
+
 test("결산 인쇄: 다크 모드여도 라이트로, 제목은 파일 이름, 메뉴는 숨기고 메인은 잘리지 않음 (F-25)", async ({ page }) => {
   await page.emulateMedia({ colorScheme: "dark" });
   await login(page, "a", "/stats/report?month=2099-01"); // 미래 달 → 지난달로
