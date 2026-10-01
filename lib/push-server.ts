@@ -64,7 +64,7 @@ export async function sendPushForNotification(id: string): Promise<{ sent: numbe
   const db = createAdminClient();
   const { data: n, error } = await db
     .from("notifications")
-    .select("id, created_at, pushed_at, kind, recipient_id, actor_id, transaction_id, note_id, event_id, occurred_on, subject, amount, count")
+    .select("id, created_at, pushed_at, kind, recipient_id, actor_id, transaction_id, note_id, event_id, occurred_on, subject, amount, count, mood")
     .eq("id", id)
     .maybeSingle();
   if (error) throw new Error(`알림을 불러오지 못했어요: ${error.message}`);
@@ -90,6 +90,8 @@ export async function sendPushForNotification(id: string): Promise<{ sent: numbe
       noteId: n.note_id,
       eventId: n.event_id,
       occurredOn: n.occurred_on,
+      mood: n.mood,
+      actorId: n.actor_id,
     },
     actor?.display_name ?? "구성원",
   );
