@@ -47,7 +47,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
             <MobileMenuProvider data={sidebar}>
               <div className="lg:flex lg:h-dvh print:block! print:h-auto!">
                 <Sidebar {...sidebar} initialCollapsed={sidebarCollapsed} />
-                <main className="min-w-0 flex-1 pb-[calc(96px+env(safe-area-inset-bottom,0px))] lg:overflow-y-auto lg:pb-10 print:overflow-visible! print:pb-0!">
+                <main className="relative min-w-0 flex-1 pb-[calc(96px+env(safe-area-inset-bottom,0px))] lg:overflow-y-auto lg:pb-10 print:overflow-visible! print:pb-0!">
                   <OfflineBanner />
                   {children}
                 </main>
