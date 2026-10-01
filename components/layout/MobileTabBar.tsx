@@ -18,14 +18,14 @@ export function MobileTabBar({ recurringDue }: { recurringDue: number }) {
         type="button"
         aria-label="내역 추가"
         onClick={openNew}
-        className="fixed right-5 bottom-[calc(76px+env(safe-area-inset-bottom,0px))] z-30 inline-flex size-14 items-center justify-center rounded-full bg-primary text-on-primary shadow-float transition-colors hover:bg-primary/90 lg:hidden"
+        className="fixed right-5 bottom-[calc(76px+env(safe-area-inset-bottom,0px))] z-30 inline-flex size-14 items-center justify-center rounded-full bg-primary text-on-primary shadow-float transition-colors hover:bg-primary/90 lg:hidden print:hidden!"
       >
         <Plus size={26} strokeWidth={1.75} aria-hidden />
       </button>
 
       <nav
         aria-label="메뉴"
-        className="fixed inset-x-0 bottom-0 z-30 bg-surface-raised pb-[env(safe-area-inset-bottom,0px)] shadow-float lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-30 bg-surface-raised pb-[env(safe-area-inset-bottom,0px)] shadow-float lg:hidden print:hidden!"
       >
         <ul className="grid grid-cols-5">
           {NAV_ITEMS.filter((item) => item.inTabBar).map((item) => {

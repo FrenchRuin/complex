@@ -16,7 +16,7 @@ type Props = {
 /** 메인 영역 위쪽 헤더. 스크롤해도 붙어 있다. */
 export function PageHeader({ title, titleStart, titleEnd, actions, children }: Props) {
   return (
-    <header className="sticky top-[env(safe-area-inset-top,0px)] z-20 border-b border-line bg-surface/95 px-5 py-3 backdrop-blur lg:top-0 lg:px-8">
+    <header className="sticky top-[env(safe-area-inset-top,0px)] z-20 border-b border-line bg-surface/95 px-5 py-3 backdrop-blur lg:top-0 lg:px-8 print:hidden!">
       <div className="flex min-h-11 flex-wrap items-center justify-between gap-x-3 lg:gap-y-3">
         {/* 폰: 제목 줄이 한 줄을 다 쓰고(오른쪽 끝 종), 필터 같은 children은 다음 줄로 */}
         <div className="flex w-full min-w-0 items-center gap-1 lg:w-auto lg:flex-1">

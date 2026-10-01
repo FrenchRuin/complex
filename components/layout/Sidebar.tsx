@@ -40,7 +40,7 @@ export function Sidebar({ initialCollapsed, ...data }: Props) {
 
   return (
     <aside
-      className={`hidden h-dvh shrink-0 flex-col border-r border-line bg-surface-raised lg:flex ${collapsed ? "w-16" : "w-[248px]"}`}
+      className={`hidden h-dvh shrink-0 flex-col border-r border-line bg-surface-raised lg:flex print:hidden! ${collapsed ? "w-16" : "w-[248px]"}`}
     >
       {collapsed ? (
         <SidebarRail me={data.me} recurringDue={data.recurringDue} onExpand={() => setAndSave(false)} />

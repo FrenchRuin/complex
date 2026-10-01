@@ -283,3 +283,15 @@
     }
   }
 }
+
+/* 인쇄 (월말 결산 F-25): A4 세로, 여백 12mm. 바탕은 종이처럼 카드 색으로 (잉크 절약) */
+@page {
+  size: A4 portrait;
+  margin: 12mm;
+}
+
+@media print {
+  body {
+    background-color: var(--surface-raised);
+  }
+}
