@@ -61,7 +61,7 @@ export function MonthlyChart({ data, currentMonth }: Props) {
           </BarChart>
         </ResponsiveContainer>
       </div>
-      <details className="mt-2">
+      <details className="mt-2 print:hidden">
         <summary className="text-caption text-ink-muted hover:text-ink">표로 보기</summary>
         <table className="mt-2 w-full text-body tabular-nums">
           <caption className="sr-only">최근 6개월 지출</caption>
