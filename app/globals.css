@@ -291,6 +291,12 @@
 }
 
 @media print {
+  /* 브라우저 기본값("배경 그래픽" 끔)이어도 분할·예산·목표 막대와 배지 색을 찍는다 */
+  html {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
   body {
     background-color: var(--surface-raised);
   }

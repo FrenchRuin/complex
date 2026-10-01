@@ -55,6 +55,8 @@ test("결산 인쇄: 다크 모드여도 라이트로, 제목은 파일 이름, 
   await page.emulateMedia({ media: "print" });
   await expect(page.getByRole("complementary")).toBeHidden();
   await expect(page.getByRole("button", { name: "PDF로 저장" })).toBeHidden();
+  // 브라우저 기본값("배경 그래픽" 끔)이어도 막대·배지 색이 찍히게
+  expect(await page.evaluate(() => getComputedStyle(document.documentElement).printColorAdjust)).toBe("exact");
   expect(await page.locator("main").evaluate((el) => getComputedStyle(el).overflowY)).toBe("visible");
   expect(await page.locator("main").evaluate((el) => getComputedStyle(el.parentElement!).height)).not.toBe("800px");
 });
