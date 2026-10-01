@@ -883,6 +883,54 @@ export type Database = {
           },
         ]
       }
+      moods: {
+        Row: {
+          deleted_at: string | null
+          household_id: string
+          id: string
+          member_id: string
+          mood: string
+          mood_date: string
+          note: string | null
+          updated_at: string
+        }
+        Insert: {
+          deleted_at?: string | null
+          household_id: string
+          id?: string
+          member_id: string
+          mood: string
+          mood_date: string
+          note?: string | null
+          updated_at?: string
+        }
+        Update: {
+          deleted_at?: string | null
+          household_id?: string
+          id?: string
+          member_id?: string
+          mood?: string
+          mood_date?: string
+          note?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "moods_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "moods_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notes: {
         Row: {
           body: string
@@ -960,6 +1008,7 @@ export type Database = {
           household_id: string
           id: string
           kind: string
+          mood: string | null
           note_id: string | null
           occurred_on: string | null
           pushed_at: string | null
@@ -978,6 +1027,7 @@ export type Database = {
           household_id: string
           id?: string
           kind: string
+          mood?: string | null
           note_id?: string | null
           occurred_on?: string | null
           pushed_at?: string | null
@@ -996,6 +1046,7 @@ export type Database = {
           household_id?: string
           id?: string
           kind?: string
+          mood?: string | null
           note_id?: string | null
           occurred_on?: string | null
           pushed_at?: string | null
@@ -1509,6 +1560,7 @@ export type Database = {
         }
         Returns: string
       }
+      clear_my_mood: { Args: never; Returns: undefined }
       create_household: { Args: { p_display_name: string }; Returns: string }
       create_invite: { Args: never; Returns: string }
       delete_asset_value: { Args: { p_value_id: string }; Returns: undefined }
@@ -1547,6 +1599,10 @@ export type Database = {
       }
       set_loan_rule_group: {
         Args: { p_group: string; p_value?: Json }
+        Returns: undefined
+      }
+      set_my_mood: {
+        Args: { p_mood: string; p_note?: string }
         Returns: undefined
       }
       set_period_settings: {
