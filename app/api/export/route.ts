@@ -10,9 +10,9 @@ const TEXT = { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no
  * 로그인 안 한 요청은 proxy가 먼저 로그인 화면으로 보낸다. 한글 파일 이름은 filename*로(헤더는 ASCII만 안전).
  */
 export async function GET() {
-  const me = await getCurrentMember();
-  if (!me) return new Response("로그인이 필요해요.", { status: 401, headers: TEXT });
   try {
+    const me = await getCurrentMember();
+    if (!me) return new Response("로그인이 필요해요.", { status: 401, headers: TEXT });
     const data = await readExportData();
     const file = await buildXlsx(buildExportSheets(data));
     return new Response(new Uint8Array(file), {
