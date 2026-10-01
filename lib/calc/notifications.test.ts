@@ -139,3 +139,15 @@ describe("toNotificationKind", () => {
     expect(toNotificationKind("???")).toBe("updated");
   });
 });
+
+describe("기분 알림 (F-04)", () => {
+  it("문장과 갈 곳", () => {
+    const mood = { kind: "mood_set" as const, subject: "야근 중", amount: null, count: 1, mood: "tired" };
+    expect(notificationSentence(mood, "서연")).toBe("서연님이 오늘 기분을 😴 피곤해요로 정했어요 · 야근 중");
+    expect(notificationSentence({ ...mood, subject: null, mood: "happy" }, "서연")).toBe(
+      "서연님이 오늘 기분을 🥰 행복해요로 정했어요",
+    );
+    expect(notificationHref({ kind: "mood_set", transactionId: null, occurredOn: "2026-10-01" })).toBe("/");
+    expect(toNotificationKind("mood_set")).toBe("mood_set");
+  });
+});

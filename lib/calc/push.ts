@@ -17,7 +17,7 @@ export function isPushable(n: { createdAt: string; pushedAt: string | null }, no
 
 /** 폰에 띄울 내용 */
 export function pushPayload(
-  item: Pick<NotificationItem, "id" | "kind" | "subject" | "amount" | "count" | "transactionId" | "noteId" | "eventId" | "occurredOn">,
+  item: Pick<NotificationItem, "id" | "kind" | "subject" | "amount" | "count" | "transactionId" | "noteId" | "eventId" | "occurredOn" | "mood" | "actorId">,
   actorName: string,
 ): PushPayload {
   return {
@@ -25,7 +25,8 @@ export function pushPayload(
     body: notificationSentence(item, actorName),
     url: notificationHref(item),
     // 같은 내역·메모·일정 알림은 폰에서 하나로 겹친다
-    tag: item.transactionId ?? item.noteId ?? item.eventId ?? item.id,
+    // 기분 알림(F-04)은 사람마다 하나로
+    tag: item.kind === "mood_set" ? `mood:${item.actorId}` : (item.transactionId ?? item.noteId ?? item.eventId ?? item.id),
   };
 }
 
