@@ -55,3 +55,35 @@ test("오늘 기분 규칙: 하루 한 줄, 알림은 하나로, 같은 값·지
   await admin.from("moods").delete().eq("member_id", me!.id).eq("mood_date", yesterday);
   await a.rpc("clear_my_mood");
 });
+
+test("어제 안 읽은 기분 알림이 있어도 오늘 기분은 새 알림으로 간다 (휴대폰 알림이 다시 가게) (F-04)", async () => {
+  const creds = readCreds();
+  const a = await userClient(creds.a.email, creds.a.password);
+  const b = await userClient(creds.b.email, creds.b.password);
+  await a.rpc("clear_my_mood");
+  await b.from("notifications").update({ read_at: new Date().toISOString() }).eq("kind", "mood_set").is("read_at", null);
+  const admin = adminClient();
+  const { data: members } = await a.from("members").select("id, slot, household_id");
+  const ma = members!.find((m) => m.slot === "a")!;
+  const mb = members!.find((m) => m.slot === "b")!;
+  const yesterday = new Date(Date.now() + 9 * 3600_000 - 86_400_000).toISOString().slice(0, 10);
+  const { data: old } = await admin
+    .from("notifications")
+    .insert({ household_id: ma.household_id, recipient_id: mb.id, actor_id: ma.id, kind: "mood_set", mood: "sad", occurred_on: yesterday })
+    .select("id")
+    .single();
+
+  await a.rpc("set_my_mood", { p_mood: "good", p_note: null });
+  const { data: unread } = await b
+    .from("notifications")
+    .select("id, mood, occurred_on")
+    .eq("kind", "mood_set")
+    .is("read_at", null)
+    .order("occurred_on");
+  expect(unread).toEqual([
+    { id: old!.id, mood: "sad", occurred_on: yesterday },
+    { id: expect.any(String), mood: "good", occurred_on: kstToday() },
+  ]);
+  await admin.from("notifications").delete().eq("id", old!.id);
+  await a.rpc("clear_my_mood");
+});
