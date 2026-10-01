@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FREE_DB_LIMIT_BYTES, daysSince, formatBytes, pauseNotice, usagePercent } from "./usage";
+import { FREE_DB_LIMIT_BYTES, formatBytes, pauseNotice, usagePercent } from "./usage";
 
 describe("formatBytes", () => {
   it("단위를 붙인다", () => {
@@ -23,17 +23,10 @@ describe("usagePercent", () => {
   });
 });
 
-describe("daysSince / pauseNotice", () => {
-  const now = new Date("2026-09-27T12:00:00Z");
-
-  it("지난 날 수", () => {
-    expect(daysSince("2026-09-27T01:00:00Z", now)).toBe(0);
-    expect(daysSince("2026-09-24T11:00:00Z", now)).toBe(3);
-  });
-
-  it("오래 안 썼으면 앱을 열라고 안내", () => {
-    expect(pauseNotice("2026-09-21T11:00:00Z", now)).toContain("6일 전");
-    expect(pauseNotice("2026-09-26T11:00:00Z", now)).toContain("열기만 해도 괜찮아요");
-    expect(pauseNotice(null, now)).toContain("7일 동안");
+describe("pauseNotice", () => {
+  it("하루 한 번 자동으로 깨운다고 안내 (앱을 안 열어도 괜찮다)", () => {
+    expect(pauseNotice()).toBe(
+      "무료 프로젝트는 7일 동안 요청이 없으면 일시 정지돼요. 하루 한 번 자동으로 깨워 둬서 앱을 안 열어도 괜찮아요.",
+    );
   });
 });

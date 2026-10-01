@@ -59,7 +59,7 @@ export function UsageSection({ usage, supabaseProjectRef }: Props) {
       </dl>
 
       <p className="mt-4 rounded-sm bg-primary-soft px-3 py-2 text-caption text-ink">
-        {pauseNotice(usage.lastActivity, now)}
+        {pauseNotice()}
       </p>
 
       <div className="mt-4 flex flex-col gap-2 sm:flex-row">

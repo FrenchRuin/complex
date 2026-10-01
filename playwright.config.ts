@@ -1,5 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
-import { allowedEmailsForE2E } from "./e2e/support/accounts";
+import { allowedEmailsForE2E, E2E_CRON_SECRET } from "./e2e/support/accounts";
 
 const PORT = 3100;
 
@@ -42,6 +42,6 @@ export default defineConfig({
     url: `http://localhost:${PORT}/login`,
     reuseExistingServer: false,
     timeout: 120_000,
-    env: { ALLOWED_EMAILS: allowedEmailsForE2E() },
+    env: { ALLOWED_EMAILS: allowedEmailsForE2E(), CRON_SECRET: E2E_CRON_SECRET },
   },
 });

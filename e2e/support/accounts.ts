@@ -8,6 +8,8 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 
 export const E2E_EMAILS = { a: "e2e-a@example.com", b: "e2e-b@example.com" } as const;
 export const E2E_NAMES = { a: "테스트지훈", b: "테스트서연" } as const;
+/** E2E 서버에만 넣는 깨우기(keep-alive) 비밀값. 운영 값과 무관 */
+export const E2E_CRON_SECRET = "e2e-cron-secret";
 const CREDS_FILE = "e2e/.auth/creds.json";
 
 export type Creds = Record<"a" | "b", { email: string; password: string }>;
