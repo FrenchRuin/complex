@@ -10,7 +10,8 @@ import {
 } from "./calc/recurring";
 import { todayKST, type DateString, type MonthString } from "./date";
 import { toScope, toSlot, type Scope, type Slot } from "./domain";
-import { getCurrentPeriod } from "./period";
+import { periodRange } from "./calc/period";
+import { getCurrentPeriod, getPeriodConfig } from "./period";
 import { createClient } from "./supabase/server";
 
 export type RecurringItem = {
@@ -48,11 +49,12 @@ export type RecurringOverview = {
 };
 
 /**
- * 이번 달 정기지출 현황. 레이아웃(배지)·홈·정기지출 화면이 같이 쓴다.
- * "이번 달"은 한 달 기준(F-56)의 기간이고, 결제일은 그 기간 안의 날짜다.
+ * 그 달 정기지출 현황 (월말 결산 F-25는 지난달도 본다).
+ * 달은 한 달 기준(F-56)의 기간이고, 결제일은 그 기간 안의 날짜다.
+ * 상태(○일 지남 등)는 오늘 기준이라 지난 달의 안 낸 항목은 "○일 지남"이 된다.
  */
-export const getRecurringOverview = cache(async (): Promise<RecurringOverview> => {
-  const { month, range } = await getCurrentPeriod();
+export const getRecurringForMonth = cache(async (month: MonthString): Promise<RecurringOverview> => {
+  const range = periodRange(month, await getPeriodConfig());
   const today = todayKST();
   const monthFirst = `${month}-01`;
   const supabase = await createClient();
@@ -116,3 +118,8 @@ export const getRecurringOverview = cache(async (): Promise<RecurringOverview> =
     items,
   };
 });
+
+/** 이번 달 정기지출 현황. 레이아웃(배지)·홈·정기지출 화면이 같이 쓴다 */
+export const getRecurringOverview = cache(
+  async (): Promise<RecurringOverview> => getRecurringForMonth((await getCurrentPeriod()).month),
+);
