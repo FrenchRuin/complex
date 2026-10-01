@@ -73,6 +73,14 @@ export default async function StatsPage({ searchParams }: PageProps<"/stats">) {
             )}
           </>
         }
+        actions={
+          <Link
+            href="/stats/report"
+            className="inline-flex h-10 items-center rounded-md px-3 text-body font-semibold text-primary hover:bg-primary-soft"
+          >
+            월말 결산
+          </Link>
+        }
       />
       <div className="grid grid-cols-1 gap-4 px-5 py-6 lg:grid-cols-2 lg:items-start lg:px-8">
         {/* 폰: 머리에 못 넣은 기간 (한 달 기준 F-56) */}
