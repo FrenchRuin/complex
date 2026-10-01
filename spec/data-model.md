@@ -151,6 +151,18 @@
 
 인덱스: `(household_id, deleted_at, updated_at desc)`. 같은 가구만 조회·추가·수정, 진짜 삭제 금지.
 
+**moods** (F-04, 2026-10-01 추가)
+| 컬럼 | 타입 | 설명 |
+| --- | --- | --- |
+| household_id | uuid fk | |
+| member_id | uuid fk → members | 기분의 주인 |
+| mood_date | date | 한국 시각 날짜, (member_id, mood_date) unique |
+| mood | text | 정해진 12개 키 중 하나 (check) |
+| note | text null | 한 줄 메모, 20자까지 |
+| updated_at | timestamptz | |
+
+지우기는 행을 실제로 지운다(소프트 삭제 아님, 기록용 데이터가 아니라 그날 상태라서). RLS: 같은 가구 조회, 본인 행만 쓰기. 트리거 `notify_mood_changed`가 상대에게 `kind = 'mood_set'` 알림(`subject` = 이모지 + 이름 + 메모).
+
 **events** (F-19, 2026-09-28 추가)
 | 컬럼 | 타입 | 설명 |
 | --- | --- | --- |

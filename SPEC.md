@@ -53,6 +53,7 @@
 | F-01 | 이메일 로그인, 미리 만든 두 계정만 사용 | MVP | `spec/accounts.md` |
 | F-02 | 가구 만들기, 초대 링크로 배우자 합류 (최대 2명) | MVP | `spec/accounts.md` |
 | F-03 | 프로필: 표시 이름, 사람 색(A/B 자동 지정) | MVP | `spec/accounts.md` |
+| F-04 | 오늘 기분: 이모지 + 한 줄, 상대에게 보이고 알림 (사용자 요청, 2026-10-01 추가) | 개선 | `spec/accounts.md` |
 | F-10 | 내역 추가 (직접 입력) | MVP | `spec/transactions.md` |
 | F-11 | 내역 수정·삭제 | MVP | `spec/transactions.md` |
 | F-12 | 내역 목록, 필터, 검색 | MVP | `spec/transactions.md` |
