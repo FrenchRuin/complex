@@ -7,7 +7,9 @@ import type { ReactNode } from "react";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { useSyncStatus } from "@/components/realtime/RealtimeProvider";
 import { useTransactionPanel } from "@/components/transactions/TransactionPanelProvider";
+import { MoodBadge } from "@/components/mood/MoodBadge";
 import { Avatar } from "@/components/ui/Avatar";
+import type { TodayMood } from "@/lib/calc/mood";
 import type { HouseholdMember } from "@/lib/household";
 import { NAV_ITEMS, isActivePath } from "@/lib/nav";
 import { DOT_STATUS, SYNC_LABEL } from "./SidebarContent";
@@ -27,10 +29,10 @@ function Tip({ children }: { children: ReactNode }) {
 const ITEM =
   "group relative inline-flex size-11 items-center justify-center rounded-sm text-ink hover:bg-surface-sunken aria-[current=page]:bg-primary-soft aria-[current=page]:text-primary";
 
-type Props = { me: HouseholdMember; recurringDue: number; onExpand: () => void };
+type Props = { me: HouseholdMember; mood: TodayMood | undefined; recurringDue: number; onExpand: () => void };
 
 /** 접힌 웹 사이드바 (폭 64px): 펼치기, 알림, 내역 추가, 메뉴 아이콘, 내 연결 상태, 설정 */
-export function SidebarRail({ me, recurringDue, onExpand }: Props) {
+export function SidebarRail({ me, mood, recurringDue, onExpand }: Props) {
   const pathname = usePathname();
   const { openNew } = useTransactionPanel();
   const status = useSyncStatus();
@@ -86,6 +88,8 @@ export function SidebarRail({ me, recurringDue, onExpand }: Props) {
       <div className="flex flex-col items-center gap-1 border-t border-line pt-3 pb-3">
         <span className="relative" title={`${me.displayName} · ${SYNC_LABEL[status]}`}>
           <Avatar slot={me.slot} name={me.displayName} avatarUrl={me.avatarUrl} />
+          {/* 오늘 기분 (F-04): 고르기는 펼친 사이드바에서 */}
+          <MoodBadge mood={mood} className="-top-1 -right-1" />
           <span aria-hidden className={`absolute -right-0.5 -bottom-0.5 size-3 rounded-full ring-2 ring-surface-raised ${DOT_STATUS[status]}`} />
           <span className="sr-only">
             {me.displayName} · {SYNC_LABEL[status]}

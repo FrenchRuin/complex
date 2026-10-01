@@ -4,6 +4,7 @@ import { getMonthBudgets, getSpendBudgets } from "@/lib/budget";
 import { budgetSummary, categoryBudgetRows, spendBudgetRows, spentByCategory } from "@/lib/calc/budget";
 import { MonthSummary } from "@/components/dashboard/MonthSummary";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { TodayMoods } from "@/components/mood/TodayMoods";
 import { RecurringChecklist } from "@/components/recurring/RecurringChecklist";
 import { SettingsSection } from "@/components/settings/SettingsSection";
 import { PersonFilterLinks } from "@/components/transactions/PersonFilterLinks";
@@ -14,6 +15,7 @@ import { groupByDay, sumTotals } from "@/lib/calc/group";
 import { formatPeriodRange, isCalendarRange, samePeriodLastPeriod } from "@/lib/calc/period";
 import { todayKST } from "@/lib/date";
 import { getHouseholdMembers, requireMember, toMemberNames } from "@/lib/household";
+import { getTodayMoods } from "@/lib/moods";
 import { getCurrentPeriod, getPeriodConfig } from "@/lib/period";
 import { getRecurringOverview } from "@/lib/recurring";
 import {
@@ -37,7 +39,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
   const members = await getHouseholdMembers();
   const partner = members.find((m) => m.id !== me.id) ?? null;
 
-  const [thisMonthRows, lastPeriodRows, recent, recurring, labels, budgets, spendBudgets] = await Promise.all([
+  const [thisMonthRows, lastPeriodRows, recent, recurring, labels, budgets, spendBudgets, moods] = await Promise.all([
     getTransactionsInRange(range),
     getTransactionsInRange(samePeriodLastPeriod(today, periodConfig)),
     getRecentTransactions(who, 6),
@@ -45,6 +47,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
     getLabelMaps(),
     getMonthBudgets(month),
     getSpendBudgets(month),
+    getTodayMoods(),
   ]);
   // 카테고리 예산은 가구 전체 기준이라 "전체"일 때만.
   // 통장·카드 예산은 전체면 모두, 사람(공동)을 고르면 그 사람(공동) 계좌·카드가 들어간 예산만
@@ -68,6 +71,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
       </PageHeader>
 
       <div className="flex flex-col gap-4 px-5 py-6 lg:px-8">
+        <TodayMoods meId={me.id} members={members} moods={moods} />
         {partner ? null : (
           <p className="rounded-md bg-primary-soft px-4 py-3 text-body text-ink">
             아직 혼자예요.{" "}
