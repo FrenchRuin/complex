@@ -133,8 +133,9 @@
 | tx_type | text null | `'expense'` / `'income'` |
 | count | int | 문자 묶음의 건수, 그 밖에는 1 |
 | read_at | timestamptz null | 읽은 시각 |
+| mood | text null | 기분 알림(`mood_set`, F-04)의 기분 키 (2026-10-01 추가) |
 
-인덱스: `(recipient_id, created_at desc)`. 행은 사용자가 직접 만들 수 없고 transactions의 트리거(`notify_transactions_inserted`, `notify_transaction_updated`)와 notes의 트리거(`notify_note_changed`)만 만든다. 메모 알림은 `kind`가 `'note_created'` / `'note_updated'` / `'note_deleted'` / `'note_restored'`이고 `note_id`(uuid fk null)를 채운다. 일정 알림은 `'event_created'` / `'event_updated'` / `'event_deleted'` / `'event_restored'`이고 `event_id`와 `occurred_on`(일정 시작일)을 채운다 (events의 트리거 `notify_event_changed`).
+인덱스: `(recipient_id, created_at desc)`. 행은 사용자가 직접 만들 수 없고 transactions의 트리거(`notify_transactions_inserted`, `notify_transaction_updated`)와 notes의 트리거(`notify_note_changed`)만 만든다. 메모 알림은 `kind`가 `'note_created'` / `'note_updated'` / `'note_deleted'` / `'note_restored'`이고 `note_id`(uuid fk null)를 채운다. 기분 알림은 `'mood_set'`(F-04). 일정 알림은 `'event_created'` / `'event_updated'` / `'event_deleted'` / `'event_restored'`이고 `event_id`와 `occurred_on`(일정 시작일)을 채운다 (events의 트리거 `notify_event_changed`).
 
 **notes** (F-18, 2026-09-28 추가)
 | 컬럼 | 타입 | 설명 |
@@ -162,7 +163,7 @@
 | updated_at | timestamptz | |
 | deleted_at | timestamptz null | 기분 지우기 (소프트 삭제). 같은 날 다시 고르면 그 행을 고치고 비운다 |
 
-RLS: 같은 가구 조회, 본인 행만 쓰기. 트리거 `notify_mood_changed`가 상대에게 `kind = 'mood_set'` 알림(`subject` = 이모지 + 이름 + 메모).
+RLS: 같은 가구 조회, 본인 행만 쓰기. 쓰기는 `set_my_mood(p_mood, p_note)`·`clear_my_mood()` 함수로만(날짜는 DB가 KST로 정함). 트리거 `notify_mood_changed`가 상대에게 `kind = 'mood_set'` 알림(`mood` = 기분 키, `subject` = 한 줄 메모, `occurred_on` = 기분 날짜). 같은 날의 안 읽은 기분 알림은 새로 만들지 않고 고친다.
 
 **events** (F-19, 2026-09-28 추가)
 | 컬럼 | 타입 | 설명 |
