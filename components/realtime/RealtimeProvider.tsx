@@ -149,6 +149,12 @@ export function RealtimeProvider({ householdId, children }: { householdId: strin
           { event: "*", schema: "public", table: "notes", filter: `household_id=eq.${householdId}` },
           scheduleRefresh,
         )
+        // 오늘 기분 (F-04)
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "moods", filter: `household_id=eq.${householdId}` },
+          scheduleRefresh,
+        )
         // 알림 (F-17): RLS 때문에 나에게 온 알림만 들어온다
         .on(
           "postgres_changes",
