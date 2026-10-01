@@ -5,10 +5,13 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, type ReactNode } from "react";
 import { useSyncStatus } from "@/components/realtime/RealtimeProvider";
+import { MoodBadge } from "@/components/mood/MoodBadge";
+import { MoodPicker } from "@/components/mood/MoodPicker";
 import { useTransactionPanel } from "@/components/transactions/TransactionPanelProvider";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { CountBadge } from "@/components/ui/CountBadge";
+import { moodOf, moodText, type TodayMood } from "@/lib/calc/mood";
 import type { MemberNames } from "@/lib/domain";
 import type { HouseholdMember } from "@/lib/household";
 import type { PaymentMethodOption } from "@/lib/household-data";
@@ -30,6 +33,8 @@ export type SidebarData = {
   paymentMethods: PaymentMethodOption[];
   /** 정기지출 미납 배지 (결제일이 오늘이거나 지난 것) */
   recurringDue: number;
+  /** 오늘 기분 (F-04), 사람 id → 기분 */
+  moods: Record<string, TodayMood>;
 };
 
 type Props = SidebarData & {
@@ -44,7 +49,7 @@ type Props = SidebarData & {
 };
 
 /** 사이드바 내용 (SPEC §4.2). 웹은 왼쪽에 고정, 폰은 ☰ 메뉴에서 같은 내용을 쓴다 */
-export function SidebarContent({ me, members, names, paymentMethods, recurringDue, headerAction, onNavigate, shortcut = false, autoFocusSearch = false }: Props) {
+export function SidebarContent({ me, members, names, paymentMethods, recurringDue, moods, headerAction, onNavigate, shortcut = false, autoFocusSearch = false }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const { openNew } = useTransactionPanel();
@@ -72,7 +77,10 @@ export function SidebarContent({ me, members, names, paymentMethods, recurringDu
       <div className="flex items-center gap-3 px-4 pt-5 pb-4">
         <span className="flex -space-x-2">
           {members.map((m) => (
-            <Avatar key={m.id} slot={m.slot} name={m.displayName} avatarUrl={m.avatarUrl} />
+            <span key={m.id} className="relative">
+              <Avatar slot={m.slot} name={m.displayName} avatarUrl={m.avatarUrl} />
+              <MoodBadge mood={moods[m.id]} className="-right-1 -bottom-1" />
+            </span>
           ))}
         </span>
         <span className="min-w-0 flex-1 truncate text-heading text-ink">감자밭</span>
@@ -147,14 +155,24 @@ export function SidebarContent({ me, members, names, paymentMethods, recurringDu
 
       {/* 아래: 내 프로필 + 오른쪽 톱니바퀴(설정) */}
       <div className="flex items-center gap-2 border-t border-line pt-2 pr-3 pl-6 pb-[calc(8px+env(safe-area-inset-bottom,0px))]">
-        <span className="relative shrink-0" title={SYNC_LABEL[status]}>
-          <Avatar slot={me.slot} name={me.displayName} avatarUrl={me.avatarUrl} />
-          <span aria-hidden className={`absolute -right-0.5 -bottom-0.5 size-3 rounded-full ring-2 ring-surface-raised ${DOT_STATUS[status]}`} />
-        </span>
-        <span className="min-w-0 flex-1 truncate text-body text-ink">
-          {me.displayName}
-          <span className="sr-only"> · {SYNC_LABEL[status]}</span>
-        </span>
+        {/* 내 프로필 줄을 누르면 오늘 기분 고르기 (F-04) */}
+        <MoodPicker current={moods[me.id] ?? null}>
+          <button
+            type="button"
+            aria-label={`${me.displayName} · ${SYNC_LABEL[status]} · 오늘 기분 고르기, 지금 ${moods[me.id] ? moodText(moods[me.id]) : "안 정함"}`}
+            className="-ml-2 flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-sm px-2 text-left hover:bg-surface-sunken"
+          >
+            <span className="relative shrink-0" title={SYNC_LABEL[status]}>
+              <Avatar slot={me.slot} name={me.displayName} avatarUrl={me.avatarUrl} />
+              <span aria-hidden className={`absolute -right-0.5 -bottom-0.5 size-3 rounded-full ring-2 ring-surface-raised ${DOT_STATUS[status]}`} />
+            </span>
+            <span className="min-w-0 flex-1 truncate text-body text-ink">
+              {me.displayName}
+              {moods[me.id] ? <span aria-hidden> {moodOf(moods[me.id].mood).emoji}</span> : null}
+              <span className="sr-only"> · {SYNC_LABEL[status]}</span>
+            </span>
+          </button>
+        </MoodPicker>
         <Link
           href="/settings"
           onClick={onNavigate}
