@@ -22,7 +22,9 @@ test("오늘 기분: A가 고르면 홈·사이드바에 보이고 B에게 알�
   // A: 홈에 아직 안 정함 → 사이드바 아래 내 프로필에서 고르기
   const homeMoods = pageA.getByRole("region", { name: "오늘 기분" });
   await expect(homeMoods.getByRole("listitem").filter({ hasText: E2E_NAMES.a })).toContainText("아직 안 정했어요");
-  await pageA.getByRole("complementary").getByRole("button", { name: /오늘 기분 고르기/ }).click();
+  const myRow = pageA.getByRole("complementary").getByRole("button", { name: /오늘 기분 고르기/ });
+  await expect(myRow).toHaveAccessibleName(/지금 아직 안 정했어요/);
+  await myRow.click();
   const picker = pageA.getByRole("dialog", { name: "오늘 기분" });
   await expect(picker.getByRole("button", { name: "저장" })).toBeDisabled();
   await picker.getByRole("radio", { name: "피곤해요" }).click();
@@ -30,6 +32,9 @@ test("오늘 기분: A가 고르면 홈·사이드바에 보이고 B에게 알�
   await picker.getByRole("button", { name: "저장" }).click();
   await expect(picker).toBeHidden();
   await expect(homeMoods.getByRole("listitem").filter({ hasText: E2E_NAMES.a })).toContainText("😴 피곤해요 · 야근 중");
+
+  // 사이드바 위 아바타 배지는 누구 기분인지 읽어 준다
+  await expect(pageA.getByRole("complementary").getByText(`${E2E_NAMES.a} 기분 피곤해요`)).toBeAttached();
 
   // B: 새로고침 없이 홈과 알림
   await expect(
