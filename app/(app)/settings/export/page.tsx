@@ -7,11 +7,20 @@ import { requireMember } from "@/lib/household";
 
 export const metadata: Metadata = { title: "데이터 내보내기 · 설정 · 감자밭" };
 
-/** 데이터 내보내기 (F-52): 가구 데이터 전체를 엑셀 파일 하나로 받는다. 다운로드는 일반 링크(아이폰 홈 화면 앱 포함) */
-export default async function ExportSettingsPage() {
+/**
+ * 데이터 내보내기 (F-52): 가구 데이터 전체를 엑셀 파일 하나로 받는다. 다운로드는 일반 링크(아이폰 홈 화면 앱 포함).
+ * 받기가 실패하면 /api/export가 ?error=1로 이 화면에 돌려보낸다 (글자만 있는 화면에 갇히지 않게).
+ */
+export default async function ExportSettingsPage({ searchParams }: PageProps<"/settings/export">) {
   await requireMember();
+  const failed = (await searchParams).error === "1";
   return (
     <SettingsSubpage title="데이터 내보내기">
+      {failed ? (
+        <p role="alert" className="rounded-md bg-danger-soft px-4 py-3 text-body text-danger">
+          내보내기에 실패했어요. 잠시 뒤 다시 해 주세요.
+        </p>
+      ) : null}
       <SettingsSection
         title="엑셀 백업"
         description="처음부터 지금까지의 데이터를 엑셀 파일 하나로 받아요. 앱에 문제가 생겨도 기록이 남도록 가끔 받아 두세요."

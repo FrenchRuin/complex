@@ -27,3 +27,12 @@ test("설정 → 데이터 내보내기: 시트 11장짜리 엑셀 백업을 받
   for (let i = 1; i <= 11; i++) expect(listing).toContain(`xl/worksheets/sheet${i}.xml`);
   expect(listing).not.toContain("xl/worksheets/sheet12.xml");
 });
+
+test("내보내기가 실패하면 데이터 내보내기 화면으로 돌아와 안내를 본다 (F-52)", async ({ page }) => {
+  await login(page, "a", "/settings/export?error=1");
+  await expect(page.getByRole("main").getByRole("alert")).toHaveText("내보내기에 실패했어요. 잠시 뒤 다시 해 주세요.");
+  await expect(page.getByRole("link", { name: "엑셀로 내보내기" })).toBeVisible();
+
+  await page.goto("/settings/export");
+  await expect(page.getByRole("main").getByRole("alert")).toHaveCount(0);
+});
