@@ -4,6 +4,7 @@ import {
   CalendarRange,
   ChevronRight,
   CreditCard,
+  Download,
   Gauge,
   LogOut,
   Smartphone,
@@ -91,6 +92,7 @@ export default async function SettingsPage() {
     },
     { href: "/settings/theme", label: "화면 모드", icon: SunMoon, summary: "시스템·라이트·다크" },
     { href: "/settings/app", label: "앱으로 설치", icon: Smartphone, summary: "홈 화면에 추가" },
+    { href: "/settings/export", label: "데이터 내보내기", icon: Download, summary: "엑셀 백업" },
     {
       href: "/settings/usage",
       label: "서비스 사용량",
