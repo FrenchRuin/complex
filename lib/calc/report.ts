@@ -6,6 +6,7 @@ import { addDays, formatMonthLabel, shiftMonth, type DateRange, type DateString,
 import { formatWon } from "@/lib/money";
 import { goalProgress, netWorthOn, type HistoryAsset, type HistoryValue } from "./assets";
 import { overText, type SpendBudgetRow } from "./budget";
+import { compareWithLastMonth } from "./dashboard";
 import type { DayTotal } from "./group";
 import type { CategoryStat } from "./stats";
 
@@ -39,6 +40,22 @@ export function compareWithLastPeriod(thisExpense: number, lastExpense: number):
   const diff = thisExpense - lastExpense;
   if (diff === 0) return "지난달과 똑같이 썼어요";
   return `지난달보다 ${formatWon(Math.abs(diff))} ${diff < 0 ? "적게" : "많이"} 썼어요`;
+}
+
+/**
+ * 결산의 지난달 비교. 끝난 달은 지난달 전체와, 진행 중인 달은 홈(F-20)처럼 지난달 같은 기간과 비교한다
+ * (달 초에 "지난달보다 훨씬 적게 썼어요"처럼 잘못 보이지 않게).
+ * lastRows: 지난 기간의 내역, samePeriod: 진행 중이면 지난달 같은 기간, 끝난 달이면 null
+ */
+export function reportComparison(
+  thisExpense: number,
+  lastRows: readonly { type: string; amount: number; occurredOn: DateString }[],
+  samePeriod: DateRange | null,
+): string {
+  const last = lastRows
+    .filter((r) => r.type === "expense" && (!samePeriod || (r.occurredOn >= samePeriod.start && r.occurredOn <= samePeriod.end)))
+    .reduce((s, r) => s + r.amount, 0);
+  return samePeriod ? compareWithLastMonth(thisExpense, last) : compareWithLastPeriod(thisExpense, last);
 }
 
 /** 가장 크게 쓴 지출 n건: 금액 큰 순, 같으면 날짜 빠른 순 */
@@ -106,11 +123,12 @@ export function reportGoals(goals: readonly GoalInput[], range: DateRange): Repo
   });
 }
 
-export type NetWorthChange = { net: number; diff: number };
+/** diff가 null이면 그 달에 처음 기록해 지난달과 비교할 수 없다 */
+export type NetWorthChange = { net: number; diff: number | null };
 
 /**
  * 기간 마지막 날 기준 순자산(진행 중인 달이면 오늘 기준)과 지난 기간 마지막 날 대비 변화 (F-41과 같은 계산).
- * 금액 기록이 하나도 없으면 null.
+ * 금액 기록이 없거나 첫 기록이 이 기간보다 뒤면 null. 첫 기록이 이 기간 안이면 비교 없음(diff null).
  */
 export function netWorthChange(
   history: { assets: readonly HistoryAsset[]; values: readonly HistoryValue[] },
@@ -119,13 +137,17 @@ export function netWorthChange(
 ): NetWorthChange | null {
   if (history.values.length === 0) return null;
   const end = range.end < today ? range.end : today;
+  const first = history.values.reduce((min, v) => (v.asOf < min ? v.asOf : min), history.values[0].asOf);
+  if (first > end) return null;
   const net = netWorthOn(end, history.assets, history.values);
-  const before = netWorthOn(addDays(range.start, -1), history.assets, history.values);
-  return { net, diff: net - before };
+  const lastEnd = addDays(range.start, -1);
+  if (first > lastEnd) return { net, diff: null };
+  return { net, diff: net - netWorthOn(lastEnd, history.assets, history.values) };
 }
 
-/** "지난달보다 500,000원 늘었어요" / "…줄었어요" / "지난달과 같아요" */
-export function netWorthDiffText(diff: number): string {
+/** "지난달보다 500,000원 늘었어요" / "…줄었어요" / "지난달과 같아요" / 이 달부터 기록 */
+export function netWorthDiffText(diff: number | null): string {
+  if (diff === null) return "이 달부터 기록했어요";
   if (diff === 0) return "지난달과 같아요";
   return `지난달보다 ${formatWon(Math.abs(diff))} ${diff > 0 ? "늘었어요" : "줄었어요"}`;
 }

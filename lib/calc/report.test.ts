@@ -7,6 +7,7 @@ import {
   madeOnText,
   netWorthChange,
   netWorthDiffText,
+  reportComparison,
   overBudgetTexts,
   reportGoals,
   reportMonth,
@@ -187,6 +188,39 @@ describe("netWorthChange", () => {
   });
   it("금액 기록이 없으면 null", () => {
     expect(netWorthChange({ assets: [], values: [] }, { start: "2026-09-01", end: "2026-09-30" }, "2026-10-01")).toBeNull();
+  });
+  it("그 달에 처음 기록했으면 지난달 비교 없음 (순자산 전체가 늘어난 것처럼 보이지 않게)", () => {
+    const first = {
+      assets: [{ id: "통장", isLiability: false, deletedOn: null }],
+      values: [{ assetId: "통장", asOf: "2026-09-27", amount: 5_000_000 }],
+    };
+    expect(netWorthChange(first, { start: "2026-09-01", end: "2026-09-30" }, "2026-10-01")).toEqual({
+      net: 5_000_000,
+      diff: null,
+    });
+  });
+  it("첫 기록보다 앞선 달은 null", () => {
+    const first = {
+      assets: [{ id: "통장", isLiability: false, deletedOn: null }],
+      values: [{ assetId: "통장", asOf: "2026-09-27", amount: 5_000_000 }],
+    };
+    expect(netWorthChange(first, { start: "2026-08-01", end: "2026-08-31" }, "2026-10-01")).toBeNull();
+  });
+});
+
+describe("reportComparison", () => {
+  const rows = [
+    { type: "expense", amount: 100_000, occurredOn: "2026-09-02" },
+    { type: "expense", amount: 400_000, occurredOn: "2026-09-20" },
+    { type: "income", amount: 3_000_000, occurredOn: "2026-09-01" },
+  ];
+  it("끝난 달은 지난달 전체와", () => {
+    expect(reportComparison(450_000, rows, null)).toBe("지난달보다 50,000원 적게 썼어요");
+  });
+  it("진행 중인 달은 지난달 같은 기간과 (홈과 같은 문구)", () => {
+    expect(reportComparison(150_000, rows, { start: "2026-09-01", end: "2026-09-05" })).toBe(
+      "지난달 같은 기간보다 50,000원 많이 썼어요",
+    );
   });
 });
 

@@ -14,9 +14,9 @@ import { assetComposition } from "@/lib/calc/assets";
 import { spendBudgetRows } from "@/lib/calc/budget";
 import { splitByOwner } from "@/lib/calc/dashboard";
 import { sumTotals } from "@/lib/calc/group";
-import { periodOf, periodRange } from "@/lib/calc/period";
+import { periodOf, periodRange, samePeriodLastPeriod } from "@/lib/calc/period";
 import {
-  compareWithLastPeriod,
+  reportComparison,
   netWorthChange,
   overBudgetTexts,
   reportGoals,
@@ -93,7 +93,7 @@ export default async function ReportPage({ searchParams }: PageProps<"/stats/rep
         <ReportHeader title={title} range={range} inProgress={month === current} today={today} />
         <MoneyFlowSection
           totals={totals}
-          compareText={compareWithLastPeriod(totals.expense, sumTotals(lastMonth).expense)}
+          compareText={reportComparison(totals.expense, lastMonth, month === current ? samePeriodLastPeriod(today, cfg) : null)}
           split={splitByOwner(thisMonth)}
           names={names}
           chart={monthlyExpense(rows, months, inPeriod)}
