@@ -160,8 +160,9 @@
 | mood | text | 정해진 12개 키 중 하나 (check) |
 | note | text null | 한 줄 메모, 20자까지 |
 | updated_at | timestamptz | |
+| deleted_at | timestamptz null | 기분 지우기 (소프트 삭제). 같은 날 다시 고르면 그 행을 고치고 비운다 |
 
-지우기는 행을 실제로 지운다(소프트 삭제 아님, 기록용 데이터가 아니라 그날 상태라서). RLS: 같은 가구 조회, 본인 행만 쓰기. 트리거 `notify_mood_changed`가 상대에게 `kind = 'mood_set'` 알림(`subject` = 이모지 + 이름 + 메모).
+RLS: 같은 가구 조회, 본인 행만 쓰기. 트리거 `notify_mood_changed`가 상대에게 `kind = 'mood_set'` 알림(`subject` = 이모지 + 이름 + 메모).
 
 **events** (F-19, 2026-09-28 추가)
 | 컬럼 | 타입 | 설명 |
