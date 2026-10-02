@@ -117,7 +117,7 @@ export function ScheduleBoard({ title, titleStart, titleEnd, month, today, event
       </button>
       {/* Button의 inline-flex가 hidden을 이겨서 감싸는 칸으로 숨긴다 */}
       <span className="hidden lg:contents">
-        <Button onClick={() => openNew(selected)} className="h-11 px-4">
+        <Button onClick={() => openNew(selected)} className="h-11! px-4">
           <Plus size={20} strokeWidth={1.75} aria-hidden />
           일정 추가
         </Button>
