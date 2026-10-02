@@ -3,6 +3,7 @@ import { MobileTabBar } from "@/components/layout/MobileTabBar";
 import { NotificationsProvider } from "@/components/notifications/NotificationsProvider";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { OfflineBanner } from "@/components/realtime/OfflineBanner";
+import { PresenceProvider } from "@/components/realtime/PresenceProvider";
 import { RealtimeProvider } from "@/components/realtime/RealtimeProvider";
 import { TransactionPanelProvider } from "@/components/transactions/TransactionPanelProvider";
 import { ToastProvider } from "@/components/ui/Toast";
@@ -44,20 +45,22 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
   return (
     <ToastProvider>
       <RealtimeProvider householdId={me.householdId}>
-        <NotificationsProvider value={{ items: notifications, names: namesById }}>
-          <TransactionPanelProvider data={{ categories, paymentMethods, members, names, mySlot: me.slot, rules }}>
-            <MobileMenuProvider data={sidebar}>
-              <div className="lg:flex lg:h-dvh print:block! print:h-auto!">
-                <Sidebar {...sidebar} initialCollapsed={sidebarCollapsed} />
-                <main className="relative min-w-0 flex-1 pb-[calc(96px+env(safe-area-inset-bottom,0px))] lg:overflow-y-auto lg:pb-10 print:overflow-visible! print:pb-0!">
-                  <OfflineBanner />
-                  {children}
-                </main>
-              </div>
-              <MobileTabBar recurringDue={recurring.dueUnpaid} />
-            </MobileMenuProvider>
-          </TransactionPanelProvider>
-        </NotificationsProvider>
+        <PresenceProvider householdId={me.householdId} memberId={me.id}>
+          <NotificationsProvider value={{ items: notifications, names: namesById }}>
+            <TransactionPanelProvider data={{ categories, paymentMethods, members, names, mySlot: me.slot, rules }}>
+              <MobileMenuProvider data={sidebar}>
+                <div className="lg:flex lg:h-dvh print:block! print:h-auto!">
+                  <Sidebar {...sidebar} initialCollapsed={sidebarCollapsed} />
+                  <main className="relative min-w-0 flex-1 pb-[calc(96px+env(safe-area-inset-bottom,0px))] lg:overflow-y-auto lg:pb-10 print:overflow-visible! print:pb-0!">
+                    <OfflineBanner />
+                    {children}
+                  </main>
+                </div>
+                <MobileTabBar recurringDue={recurring.dueUnpaid} />
+              </MobileMenuProvider>
+            </TransactionPanelProvider>
+          </NotificationsProvider>
+        </PresenceProvider>
       </RealtimeProvider>
     </ToastProvider>
   );
