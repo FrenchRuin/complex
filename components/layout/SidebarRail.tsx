@@ -1,6 +1,6 @@
 "use client";
 
-import { PanelLeftOpen, Plus, Settings } from "lucide-react";
+import { Plus, Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
@@ -12,7 +12,8 @@ import { Avatar } from "@/components/ui/Avatar";
 import type { TodayMood } from "@/lib/calc/mood";
 import type { HouseholdMember } from "@/lib/household";
 import { NAV_ITEMS, isActivePath } from "@/lib/nav";
-import { DOT_STATUS, SYNC_LABEL } from "./SidebarContent";
+import { RailPartner } from "./SidebarPartner";
+import { DOT_STATUS, SYNC_LABEL } from "./status";
 
 /** 마우스를 올리거나 키보드로 오면 오른쪽에 뜨는 이름표 (이름은 aria-label로도 읽힌다) */
 function Tip({ children }: { children: ReactNode }) {
@@ -29,21 +30,19 @@ function Tip({ children }: { children: ReactNode }) {
 const ITEM =
   "group relative inline-flex size-11 items-center justify-center rounded-sm text-ink hover:bg-surface-sunken aria-[current=page]:bg-primary-soft aria-[current=page]:text-primary";
 
-type Props = { me: HouseholdMember; mood: TodayMood | undefined; recurringDue: number; onExpand: () => void };
+type Props = { me: HouseholdMember; members: HouseholdMember[]; moods: Record<string, TodayMood>; recurringDue: number };
 
-/** 접힌 웹 사이드바 (폭 64px): 펼치기, 알림, 내역 추가, 메뉴 아이콘, 내 연결 상태, 설정 */
-export function SidebarRail({ me, mood, recurringDue, onExpand }: Props) {
+/** 접힌 웹 사이드바 (폭 64px, 머리 줄의 펼치기 버튼 아래): 알림, 내역 추가, 메뉴 아이콘, 상대 접속 상태, 내 연결 상태, 설정 */
+export function SidebarRail({ me, members, moods, recurringDue }: Props) {
   const pathname = usePathname();
   const { openNew } = useTransactionPanel();
   const status = useSyncStatus();
+  const partner = members.find((m) => m.id !== me.id);
+  const mood = moods[me.id];
 
   return (
     <>
-      <div className="flex flex-col items-center gap-1 border-b border-line pt-4 pb-3">
-        <button type="button" onClick={onExpand} aria-label="사이드바 펼치기" className={ITEM}>
-          <PanelLeftOpen size={22} strokeWidth={1.75} aria-hidden />
-          <Tip>사이드바 펼치기</Tip>
-        </button>
+      <div className="flex flex-col items-center gap-1 border-b border-line pt-3 pb-3">
         <NotificationBell />
         <button
           type="button"
@@ -86,6 +85,12 @@ export function SidebarRail({ me, mood, recurringDue, onExpand }: Props) {
       </nav>
 
       <div className="flex flex-col items-center gap-1 border-t border-line pt-3 pb-3">
+        {/* 상대(접속 상태)가 위, 내가 아래 (2026-10-02) */}
+        {partner ? (
+          <span className="pb-2">
+            <RailPartner partner={partner} mood={moods[partner.id]} />
+          </span>
+        ) : null}
         <span className="relative" title={`${me.displayName} · ${SYNC_LABEL[status]}`}>
           <Avatar slot={me.slot} name={me.displayName} avatarUrl={me.avatarUrl} />
           {/* 오늘 기분 (F-04): 고르기는 펼친 사이드바에서 */}

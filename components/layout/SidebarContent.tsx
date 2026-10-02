@@ -3,9 +3,8 @@
 import { Plus, Search, Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef } from "react";
 import { useSyncStatus } from "@/components/realtime/RealtimeProvider";
-import { MoodBadge } from "@/components/mood/MoodBadge";
 import { MoodPicker } from "@/components/mood/MoodPicker";
 import { useTransactionPanel } from "@/components/transactions/TransactionPanelProvider";
 import { Avatar } from "@/components/ui/Avatar";
@@ -17,14 +16,8 @@ import type { HouseholdMember } from "@/lib/household";
 import type { PaymentMethodOption } from "@/lib/household-data";
 import { NAV_ITEMS, isActivePath } from "@/lib/nav";
 import { SidebarMethods } from "./SidebarMethods";
-
-export const SYNC_LABEL = { connecting: "연결하는 중", online: "실시간 연결됨", offline: "연결 끊김" } as const;
-/** 아바타 오른쪽 아래 상태 점: 연결됨 초록, 연결 중 회색, 끊김 속 빈 동그라미 (색만으로 구분하지 않게 모양도 다르게) */
-export const DOT_STATUS = {
-  online: "bg-online",
-  connecting: "bg-line-strong",
-  offline: "border-2 border-line-strong bg-surface-raised",
-} as const;
+import { SidebarPartner } from "./SidebarPartner";
+import { DOT_STATUS, SYNC_LABEL } from "./status";
 
 export type SidebarData = {
   me: HouseholdMember;
@@ -38,8 +31,6 @@ export type SidebarData = {
 };
 
 type Props = SidebarData & {
-  /** 머리 오른쪽 (웹: 알림 종, 폰 메뉴: 닫기) */
-  headerAction: ReactNode;
   /** 링크·버튼을 누른 뒤 (폰 메뉴는 닫는다) */
   onNavigate?: () => void;
   /** Ctrl K로 검색칸 (웹 사이드바만) */
@@ -48,8 +39,8 @@ type Props = SidebarData & {
   autoFocusSearch?: boolean;
 };
 
-/** 사이드바 내용 (SPEC §4.2). 웹은 왼쪽에 고정, 폰은 ☰ 메뉴에서 같은 내용을 쓴다 */
-export function SidebarContent({ me, members, names, paymentMethods, recurringDue, moods, headerAction, onNavigate, shortcut = false, autoFocusSearch = false }: Props) {
+/** 사이드바 내용 (SPEC §4.2), 머리 줄 아래 검색부터. 웹은 왼쪽에 고정, 폰은 ☰ 메뉴에서 같은 내용을 쓴다 */
+export function SidebarContent({ me, members, names, paymentMethods, recurringDue, moods, onNavigate, shortcut = false, autoFocusSearch = false }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const { openNew } = useTransactionPanel();
@@ -72,24 +63,13 @@ export function SidebarContent({ me, members, names, paymentMethods, recurringDu
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [shortcut]);
 
+  const partner = members.find((m) => m.id !== me.id);
+
   return (
     <>
-      <div className="flex items-center gap-3 px-4 pt-5 pb-4">
-        <span className="flex -space-x-2">
-          {members.map((m) => (
-            <span key={m.id} className="relative">
-              <Avatar slot={m.slot} name={m.displayName} avatarUrl={m.avatarUrl} />
-              <MoodBadge name={m.displayName} mood={moods[m.id]} className="-right-1 -bottom-1" />
-            </span>
-          ))}
-        </span>
-        <span className="min-w-0 flex-1 truncate text-heading text-ink">감자밭</span>
-        {headerAction}
-      </div>
-
       <form
         role="search"
-        className="px-3"
+        className="px-3 pt-3"
         onSubmit={(e) => {
           e.preventDefault();
           const q = searchRef.current?.value.trim() ?? "";
@@ -153,35 +133,38 @@ export function SidebarContent({ me, members, names, paymentMethods, recurringDu
         <SidebarMethods paymentMethods={paymentMethods} names={names} onNavigate={onNavigate} />
       </div>
 
-      {/* 아래: 내 프로필 + 오른쪽 톱니바퀴(설정) */}
-      <div className="flex items-center gap-2 border-t border-line pt-2 pr-3 pl-6 pb-[calc(8px+env(safe-area-inset-bottom,0px))]">
-        {/* 내 프로필 줄을 누르면 오늘 기분 고르기 (F-04) */}
-        <MoodPicker current={moods[me.id] ?? null}>
-          <button
-            type="button"
-            aria-label={`${me.displayName} · ${SYNC_LABEL[status]} · 오늘 기분 고르기, 지금 ${moods[me.id] ? moodText(moods[me.id]) : "아직 안 정했어요"}`}
-            className="-ml-2 flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-sm px-2 text-left hover:bg-surface-sunken"
+      {/* 아래: 상대(접속 상태) 위에, 맨 아래 내 프로필 + 오른쪽 톱니바퀴(설정) (2026-10-02) */}
+      <div className="border-t border-line pt-2 pr-3 pl-6 pb-[calc(8px+env(safe-area-inset-bottom,0px))]">
+        {partner ? <SidebarPartner partner={partner} mood={moods[partner.id]} /> : null}
+        <div className="flex items-center gap-2">
+          {/* 내 프로필 줄을 누르면 오늘 기분 고르기 (F-04) */}
+          <MoodPicker current={moods[me.id] ?? null}>
+            <button
+              type="button"
+              aria-label={`${me.displayName} · ${SYNC_LABEL[status]} · 오늘 기분 고르기, 지금 ${moods[me.id] ? moodText(moods[me.id]) : "아직 안 정했어요"}`}
+              className="-ml-2 flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-sm px-2 text-left hover:bg-surface-sunken"
+            >
+              <span className="relative shrink-0" title={SYNC_LABEL[status]}>
+                <Avatar slot={me.slot} name={me.displayName} avatarUrl={me.avatarUrl} />
+                <span aria-hidden className={`absolute -right-0.5 -bottom-0.5 size-3 rounded-full ring-2 ring-surface-raised ${DOT_STATUS[status]}`} />
+              </span>
+              <span className="min-w-0 flex-1 truncate text-body text-ink">
+                {me.displayName}
+                {moods[me.id] ? <span aria-hidden> {moodOf(moods[me.id].mood).emoji}</span> : null}
+                <span className="sr-only"> · {SYNC_LABEL[status]}</span>
+              </span>
+            </button>
+          </MoodPicker>
+          <Link
+            href="/settings"
+            onClick={onNavigate}
+            aria-label="설정"
+            aria-current={isActivePath(pathname, "/settings") ? "page" : undefined}
+            className="inline-flex size-11 shrink-0 items-center justify-center rounded-sm text-ink-muted hover:bg-surface-sunken hover:text-ink aria-[current=page]:bg-primary-soft aria-[current=page]:text-primary"
           >
-            <span className="relative shrink-0" title={SYNC_LABEL[status]}>
-              <Avatar slot={me.slot} name={me.displayName} avatarUrl={me.avatarUrl} />
-              <span aria-hidden className={`absolute -right-0.5 -bottom-0.5 size-3 rounded-full ring-2 ring-surface-raised ${DOT_STATUS[status]}`} />
-            </span>
-            <span className="min-w-0 flex-1 truncate text-body text-ink">
-              {me.displayName}
-              {moods[me.id] ? <span aria-hidden> {moodOf(moods[me.id].mood).emoji}</span> : null}
-              <span className="sr-only"> · {SYNC_LABEL[status]}</span>
-            </span>
-          </button>
-        </MoodPicker>
-        <Link
-          href="/settings"
-          onClick={onNavigate}
-          aria-label="설정"
-          aria-current={isActivePath(pathname, "/settings") ? "page" : undefined}
-          className="inline-flex size-11 shrink-0 items-center justify-center rounded-sm text-ink-muted hover:bg-surface-sunken hover:text-ink aria-[current=page]:bg-primary-soft aria-[current=page]:text-primary"
-        >
-          <Settings size={22} strokeWidth={1.75} aria-hidden />
-        </Link>
+            <Settings size={22} strokeWidth={1.75} aria-hidden />
+          </Link>
+        </div>
       </div>
     </>
   );

@@ -33,13 +33,12 @@ test("오늘 기분: A가 고르면 홈·사이드바에 보이고 B에게 알�
   await expect(picker).toBeHidden();
   await expect(homeMoods.getByRole("listitem").filter({ hasText: E2E_NAMES.a })).toContainText("😴 피곤해요 · 야근 중");
 
-  // 사이드바 위 아바타 배지는 누구 기분인지 읽어 준다
-  await expect(pageA.getByRole("complementary").getByText(`${E2E_NAMES.a} 기분 피곤해요`)).toBeAttached();
-
   // B: 새로고침 없이 홈과 알림
   await expect(
     pageB.getByRole("region", { name: "오늘 기분" }).getByRole("listitem").filter({ hasText: E2E_NAMES.a }),
   ).toContainText("😴 피곤해요 · 야근 중", { timeout: 8000 });
+  // 사이드바 아래 상대 줄도 누구 기분인지 읽어 준다
+  await expect(pageB.getByRole("complementary").getByText(`${E2E_NAMES.a} 기분 피곤해요`)).toBeAttached();
   await expect(bellB).toHaveAccessibleName("알림, 안 읽은 알림 1건", { timeout: 8000 });
   await bellB.click();
   await expect(
@@ -53,5 +52,21 @@ test("오늘 기분: A가 고르면 홈·사이드바에 보이고 B에게 알�
   await expect(homeMoods.getByRole("listitem").filter({ hasText: E2E_NAMES.a })).toContainText("아직 안 정했어요");
 
   await contextA.close();
+  await contextB.close();
+});
+
+test("사이드바 아래 상대 줄: 상대가 앱을 열어 두면 접속 중, 닫으면 접속 안 함", async ({ browser }) => {
+  const contextA = await browser.newContext();
+  const contextB = await browser.newContext();
+  const pageA = await contextA.newPage();
+  const pageB = await contextB.newPage();
+  await login(pageB, "b", "/");
+  const sidebar = pageB.getByRole("complementary");
+
+  await login(pageA, "a", "/");
+  await expect(sidebar.getByText("접속 중", { exact: true })).toBeVisible({ timeout: 10000 });
+
+  await contextA.close();
+  await expect(sidebar.getByText("접속 안 함", { exact: true })).toBeVisible({ timeout: 15000 });
   await contextB.close();
 });

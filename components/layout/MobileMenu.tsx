@@ -26,18 +26,16 @@ export function MobileMenuProvider({ data, children }: { data: SidebarData; chil
             className="fixed inset-y-0 left-0 z-50 flex w-[280px] max-w-[85vw] flex-col bg-surface-raised pt-[env(safe-area-inset-top,0px)] shadow-float outline-none motion-safe:animate-[drawer-in_200ms_ease-out] lg:hidden"
           >
             <Dialog.Title className="sr-only">메뉴</Dialog.Title>
-            <SidebarContent
-              {...data}
-              onNavigate={close}
-              headerAction={
-                <Dialog.Close
-                  aria-label="메뉴 닫기"
-                  className="-mr-2 inline-flex size-10 shrink-0 items-center justify-center rounded-sm text-ink-muted hover:bg-surface-sunken hover:text-ink"
-                >
-                  <X size={22} strokeWidth={1.75} aria-hidden />
-                </Dialog.Close>
-              }
-            />
+            <div className="flex items-center gap-3 px-4 pt-4 pb-1">
+              <span className="min-w-0 flex-1 truncate text-heading text-ink">감자밭</span>
+              <Dialog.Close
+                aria-label="메뉴 닫기"
+                className="-mr-2 inline-flex size-10 shrink-0 items-center justify-center rounded-sm text-ink-muted hover:bg-surface-sunken hover:text-ink"
+              >
+                <X size={22} strokeWidth={1.75} aria-hidden />
+              </Dialog.Close>
+            </div>
+            <SidebarContent {...data} onNavigate={close} />
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>

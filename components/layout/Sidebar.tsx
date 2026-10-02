@@ -1,6 +1,6 @@
 "use client";
 
-import { PanelLeftClose } from "lucide-react";
+import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useEffect, useState } from "react";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { saveSidebarCollapsed } from "@/lib/sidebar";
@@ -14,6 +14,7 @@ type Props = SidebarData & {
 
 /**
  * 웹(1024px 이상) 왼쪽 사이드바 (SPEC §4.2). 펼치면 248px, 접으면 아이콘만 64px.
+ * 맨 위 머리 줄(접기·감자밭·알림)은 오른쪽 화면 제목 줄(PageHeader)과 높이·아래 선을 맞춰 한 줄로 보인다.
  * 접힘 상태는 기기마다 기억한다. 접혀 있을 때 Ctrl K를 누르면 펼치고 검색칸으로 간다.
  */
 export function Sidebar({ initialCollapsed, ...data }: Props) {
@@ -38,35 +39,38 @@ export function Sidebar({ initialCollapsed, ...data }: Props) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [collapsed]);
 
+  const ToggleIcon = collapsed ? PanelLeftOpen : PanelLeftClose;
+  const toggleLabel = collapsed ? "사이드바 펼치기" : "사이드바 접기";
+
   return (
     <aside
       className={`hidden h-dvh shrink-0 flex-col border-r border-line bg-surface-raised lg:flex print:hidden! ${collapsed ? "w-16" : "w-[248px]"}`}
     >
+      {/* 머리 줄: PageHeader와 같은 높이 (py-3 + 44px + 아래 선). 접기 버튼은 접든 펴든 같은 자리 */}
+      <div className={`flex shrink-0 items-center border-b border-line py-3 ${collapsed ? "justify-center" : "gap-1 px-3"}`}>
+        <button
+          type="button"
+          onClick={() => {
+            setFocusSearch(false);
+            setAndSave(!collapsed);
+          }}
+          aria-label={toggleLabel}
+          title={toggleLabel}
+          className="inline-flex size-11 shrink-0 items-center justify-center rounded-sm text-ink-muted hover:bg-surface-sunken hover:text-ink"
+        >
+          <ToggleIcon size={22} strokeWidth={1.75} aria-hidden />
+        </button>
+        {collapsed ? null : (
+          <>
+            <span className="min-w-0 flex-1 truncate pl-1 text-heading text-ink">감자밭</span>
+            <NotificationBell />
+          </>
+        )}
+      </div>
       {collapsed ? (
-        <SidebarRail me={data.me} mood={data.moods[data.me.id]} recurringDue={data.recurringDue} onExpand={() => setAndSave(false)} />
+        <SidebarRail me={data.me} members={data.members} moods={data.moods} recurringDue={data.recurringDue} />
       ) : (
-        <SidebarContent
-          {...data}
-          headerAction={
-            <span className="-mr-1 flex items-center">
-              <NotificationBell />
-              <button
-                type="button"
-                onClick={() => {
-                  setFocusSearch(false);
-                  setAndSave(true);
-                }}
-                aria-label="사이드바 접기"
-                title="사이드바 접기"
-                className="inline-flex size-10 items-center justify-center rounded-sm text-ink-muted hover:bg-surface-sunken hover:text-ink"
-              >
-                <PanelLeftClose size={20} strokeWidth={1.75} aria-hidden />
-              </button>
-            </span>
-          }
-          shortcut
-          autoFocusSearch={focusSearch}
-        />
+        <SidebarContent {...data} shortcut autoFocusSearch={focusSearch} />
       )}
     </aside>
   );
