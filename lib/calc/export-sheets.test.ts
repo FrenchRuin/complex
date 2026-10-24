@@ -17,9 +17,6 @@ const base: ExportData = {
   assetValues: [],
   goals: [],
   contributions: [],
-  loanProfile: null,
-  loanDebts: [],
-  loanScenarios: [],
 };
 
 function sheet(d: Partial<ExportData>, name: string): ExportSheet {
@@ -42,7 +39,7 @@ describe("exportFileName", () => {
 });
 
 describe("buildExportSheets", () => {
-  it("시트 11장을 정한 순서로, 데이터가 없으면 제목 줄만", () => {
+  it("시트 8장을 정한 순서로, 데이터가 없으면 제목 줄만", () => {
     const sheets = buildExportSheets(base);
     expect(sheets.map((s) => s.name)).toEqual([...EXPORT_SHEET_NAMES]);
     for (const s of sheets) {
@@ -191,25 +188,5 @@ describe("buildExportSheets", () => {
       [t("여행"), dt("2026-09-11"), m(200_000), t("지훈"), null],
       [t("여행"), dt("2026-09-15"), m(300_000), t("B"), t("보너스")],
     ]);
-  });
-
-  it("대출: 우리 정보는 항목·값 줄, 금리는 % 숫자(425 → 4.25), 없는 값은 빈칸", () => {
-    const d: Partial<ExportData> = {
-      loanProfile: { incomeA: 50_000_000, incomeB: 40_000_000, homeStatus: "none", firstTime: true },
-      loanDebts: [
-        { name: "신용대출", kind: "credit", owner: "a", balance: 10_000_000, rateBp: 425, monthsLeft: null, monthlyPayment: null, createdAt: "2026-09-30T00:00:00Z" },
-      ],
-      loanScenarios: [
-        { name: "○○아파트", deal: "jeonse", price: 300_000_000, region: "metro", rateBp: null, termYears: 2, extraCosts: 0, memo: null, createdAt: "2026-09-30T00:00:00Z" },
-      ],
-    };
-    expect(sheet(d, "대출 우리 정보").rows).toEqual([
-      [t("지훈 연소득"), m(50_000_000)],
-      [t("B 연소득"), m(40_000_000)],
-      [t("주택 보유"), t("무주택")],
-      [t("생애최초"), t("예")],
-    ]);
-    expect(sheet(d, "기존 대출").rows).toEqual([[t("신용대출"), t("신용대출"), t("지훈"), m(10_000_000), n(4.25), null, null]]);
-    expect(sheet(d, "집 후보").rows).toEqual([[t("○○아파트"), t("전세"), m(300_000_000), t("수도권 비규제"), null, n(2), m(0), null]]);
   });
 });

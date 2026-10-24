@@ -13,26 +13,31 @@ export const getMyNotifications = cache(async (): Promise<NotificationItem[]> =>
   const since = `${addDays(todayKST(), -DAYS)}T00:00:00+09:00`;
   const { data, error } = await supabase
     .from("notifications")
-    .select("id, created_at, kind, actor_id, transaction_id, note_id, event_id, occurred_on, subject, amount, count, read_at, mood")
+    .select("id, created_at, kind, actor_id, transaction_id, occurred_on, subject, amount, count, read_at, mood")
     .gte("created_at", since)
     .order("created_at", { ascending: false })
     .limit(LIMIT);
 
   if (error) throw new Error(`알림을 불러오지 못했어요: ${error.message}`);
 
-  return data.map((n) => ({
-    id: n.id,
-    createdAt: n.created_at,
-    kind: toNotificationKind(n.kind),
-    actorId: n.actor_id,
-    transactionId: n.transaction_id,
-    noteId: n.note_id,
-    eventId: n.event_id,
-    occurredOn: n.occurred_on,
-    mood: n.mood,
-    subject: n.subject,
-    amount: n.amount,
-    count: n.count,
-    read: n.read_at !== null,
-  }));
+  // 지운 기능(메모·일정 등)의 알림은 정리 마이그레이션 전까지 DB에 남아 있어 건너뛴다
+  return data.flatMap((n) => {
+    const kind = toNotificationKind(n.kind);
+    if (!kind) return [];
+    return [
+      {
+        id: n.id,
+        createdAt: n.created_at,
+        kind,
+        actorId: n.actor_id,
+        transactionId: n.transaction_id,
+        occurredOn: n.occurred_on,
+        mood: n.mood,
+        subject: n.subject,
+        amount: n.amount,
+        count: n.count,
+        read: n.read_at !== null,
+      },
+    ];
+  });
 });

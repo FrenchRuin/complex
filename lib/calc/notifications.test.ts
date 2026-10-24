@@ -33,64 +33,6 @@ describe("notificationSentence", () => {
   });
 });
 
-describe("일정 알림 (F-19)", () => {
-  it("문장", () => {
-    expect(notificationSentence({ subject: "친구 결혼식", amount: null, count: 1, kind: "event_created" }, "서연")).toBe(
-      "서연님이 일정 ‘친구 결혼식’을 추가했어요",
-    );
-    expect(notificationSentence({ subject: "치과", amount: null, count: 1, kind: "event_deleted" }, "지훈")).toBe(
-      "지훈님이 일정 ‘치과’를 삭제했어요",
-    );
-  });
-
-  it("반복 일정의 그날만 지우기·되돌리기는 날짜와 함께", () => {
-    const one = { subject: "운동", amount: null, count: 1, occurredOn: "2026-09-30" };
-    expect(notificationSentence({ ...one, kind: "event_occurrence_deleted" }, "지훈")).toBe(
-      "지훈님이 9월 30일 일정 ‘운동’을 삭제했어요",
-    );
-    expect(notificationSentence({ ...one, kind: "event_occurrence_restored" }, "지훈")).toBe(
-      "지훈님이 9월 30일 일정 ‘운동’을 되돌렸어요",
-    );
-    expect(notificationHref({ kind: "event_occurrence_deleted", transactionId: null, occurredOn: "2026-09-30", eventId: "e1" })).toBe(
-      "/schedule?month=2026-09",
-    );
-  });
-
-  it("누르면 그 달 일정 화면에서 그 일정, 삭제면 그 달만", () => {
-    expect(notificationHref({ kind: "event_updated", transactionId: null, occurredOn: "2026-10-03", eventId: "e1" })).toBe(
-      "/schedule?month=2026-10&event=e1",
-    );
-    expect(notificationHref({ kind: "event_deleted", transactionId: null, occurredOn: "2026-10-03", eventId: "e1" })).toBe(
-      "/schedule?month=2026-10",
-    );
-  });
-});
-
-describe("메모 알림 (F-18)", () => {
-  it("문장: 받침에 따라 을/를", () => {
-    expect(notificationSentence({ subject: "장보기", amount: null, count: 1, kind: "note_created" }, "서연")).toBe(
-      "서연님이 메모 ‘장보기’를 썼어요",
-    );
-    expect(notificationSentence({ subject: "여행 준비물", amount: null, count: 1, kind: "note_updated" }, "서연")).toBe(
-      "서연님이 메모 ‘여행 준비물’을 고쳤어요",
-    );
-    expect(notificationSentence({ subject: null, amount: null, count: 1, kind: "note_deleted" }, "지훈")).toBe(
-      "지훈님이 메모 ‘제목 없는 메모’를 지웠어요",
-    );
-  });
-
-  it("누르면 그 메모, 지운 메모는 메모 화면", () => {
-    expect(notificationHref({ kind: "note_updated", transactionId: null, occurredOn: null, noteId: "n1" })).toBe("/notes?note=n1");
-    expect(notificationHref({ kind: "note_deleted", transactionId: null, occurredOn: null, noteId: "n1" })).toBe("/notes");
-  });
-
-  it("을/를", () => {
-    expect(objectParticle("월세")).toBe("를");
-    expect(objectParticle("장보기 목록")).toBe("을");
-    expect(objectParticle("Netflix")).toBe("를");
-  });
-});
-
 describe("notificationHref", () => {
   it("내역이 있으면 그 날짜 + 편집 창", () => {
     expect(notificationHref({ kind: "updated", transactionId: "t1", occurredOn: "2026-09-27" })).toBe(
@@ -134,9 +76,12 @@ describe("notificationTimeLabel", () => {
 });
 
 describe("toNotificationKind", () => {
-  it("모르는 값은 수정으로", () => {
-    expect(toNotificationKind("sms_batch")).toBe("sms_batch");
-    expect(toNotificationKind("???")).toBe("updated");
+  it("아는 종류는 그대로, 지운 기능의 종류(메모·일정)와 모르는 값은 null", () => {
+    expect(toNotificationKind("created")).toBe("created");
+    expect(toNotificationKind("mood_set")).toBe("mood_set");
+    expect(toNotificationKind("note_created")).toBeNull();
+    expect(toNotificationKind("event_updated")).toBeNull();
+    expect(toNotificationKind("???")).toBeNull();
   });
 });
 
@@ -149,5 +94,13 @@ describe("기분 알림 (F-04)", () => {
     );
     expect(notificationHref({ kind: "mood_set", transactionId: null, occurredOn: "2026-10-01" })).toBe("/");
     expect(toNotificationKind("mood_set")).toBe("mood_set");
+  });
+});
+
+describe("objectParticle", () => {
+  it("받침이 있으면 을, 없거나 한글이 아니면 를", () => {
+    expect(objectParticle("운동")).toBe("을");
+    expect(objectParticle("치과")).toBe("를");
+    expect(objectParticle("ABC")).toBe("를");
   });
 });

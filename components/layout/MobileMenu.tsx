@@ -9,7 +9,7 @@ const OpenContext = createContext<(() => void) | null>(null);
 
 /**
  * 폰(1024px 미만) ☰ 메뉴: 왼쪽에서 밀려 나오는 사이드바. 하단 탭바는 그대로 두고,
- * 탭바에 없는 메모·자산·목표 등은 여기서 간다 (사용자 요청 2026-09-28).
+ * 탭바에 없는 메뉴는 여기서 간다 (사용자 요청 2026-09-28).
  */
 export function MobileMenuProvider({ data, children }: { data: SidebarData; children: ReactNode }) {
   const [open, setOpen] = useState(false);

@@ -64,11 +64,13 @@ export async function sendPushForNotification(id: string): Promise<{ sent: numbe
   const db = createAdminClient();
   const { data: n, error } = await db
     .from("notifications")
-    .select("id, created_at, pushed_at, kind, recipient_id, actor_id, transaction_id, note_id, event_id, occurred_on, subject, amount, count, mood")
+    .select("id, created_at, pushed_at, kind, recipient_id, actor_id, transaction_id, occurred_on, subject, amount, count, mood")
     .eq("id", id)
     .maybeSingle();
   if (error) throw new Error(`알림을 불러오지 못했어요: ${error.message}`);
-  if (!n || !isPushable({ createdAt: n.created_at, pushedAt: n.pushed_at })) return { sent: 0, skipped: "not_pushable" };
+  const kind = n ? toNotificationKind(n.kind) : null;
+  // 지운 기능의 알림(메모·일정 등)은 보내지 않는다
+  if (!n || !kind || !isPushable({ createdAt: n.created_at, pushedAt: n.pushed_at })) return { sent: 0, skipped: "not_pushable" };
 
   const { data: claimed } = await db
     .from("notifications")
@@ -82,13 +84,11 @@ export async function sendPushForNotification(id: string): Promise<{ sent: numbe
   const payload = pushPayload(
     {
       id: n.id,
-      kind: toNotificationKind(n.kind),
+      kind,
       subject: n.subject,
       amount: n.amount,
       count: n.count,
       transactionId: n.transaction_id,
-      noteId: n.note_id,
-      eventId: n.event_id,
       occurredOn: n.occurred_on,
       mood: n.mood,
       actorId: n.actor_id,

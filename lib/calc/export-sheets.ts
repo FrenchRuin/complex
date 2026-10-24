@@ -14,16 +14,6 @@ import {
   type Slot,
 } from "@/lib/domain";
 import { ASSET_KIND_LABEL, goalProgress, type AssetKind } from "./assets";
-import {
-  DEAL_LABEL,
-  DEBT_KIND_LABEL,
-  HOME_STATUS_LABEL,
-  REGION_LABEL,
-  type Deal,
-  type DebtKind,
-  type HomeStatus,
-  type Region,
-} from "./loans";
 
 export type ExportCell =
   | { kind: "text"; value: string }
@@ -84,28 +74,6 @@ export type ExportData = {
   assetValues: { assetId: string; asOf: DateString; amount: number }[];
   goals: { id: string; name: string; targetAmount: number; dueDate: DateString | null; isDone: boolean; createdAt: string }[];
   contributions: { goalId: string; amount: number; contributedOn: DateString; memberSlot: Slot; memo: string | null }[];
-  loanProfile: { incomeA: number; incomeB: number; homeStatus: HomeStatus; firstTime: boolean } | null;
-  loanDebts: {
-    name: string;
-    kind: DebtKind;
-    owner: Owner;
-    balance: number;
-    rateBp: number;
-    monthsLeft: number | null;
-    monthlyPayment: number | null;
-    createdAt: string;
-  }[];
-  loanScenarios: {
-    name: string;
-    deal: Deal;
-    price: number;
-    region: Region;
-    rateBp: number | null;
-    termYears: number | null;
-    extraCosts: number;
-    memo: string | null;
-    createdAt: string;
-  }[];
 };
 
 export const EXPORT_SHEET_NAMES = [
@@ -117,9 +85,6 @@ export const EXPORT_SHEET_NAMES = [
   "자산 금액 기록",
   "저축 목표",
   "목표 적립",
-  "대출 우리 정보",
-  "기존 대출",
-  "집 후보",
 ] as const;
 
 /** "감자밭-백업-2026-10-01.xlsx" */
@@ -134,13 +99,11 @@ const date = (value: DateString | null): ExportCell => (value ? { kind: "date", 
 const yesNo = (value: boolean): ExportCell => text(value ? "예" : "아니요");
 /** 그 달 1일 → "2026-09" */
 const month = (first: DateString | null): ExportCell => text(first ? first.slice(0, 7) : null);
-/** 0.01% 단위 정수 → % 숫자 (425 → 4.25) */
-const rate = (bp: number | null): ExportCell => num(bp === null ? null : bp / 100);
 const cols = (...list: [title: string, width: number][]): ExportColumn[] => list.map(([title, width]) => ({ title, width }));
 const compare = (a: string | number, b: string | number) => (a < b ? -1 : a > b ? 1 : 0);
 const byCreated = <T extends { createdAt: string }>(list: readonly T[]) => [...list].sort((a, b) => compare(a.createdAt, b.createdAt));
 
-/** 시트 11장 (EXPORT_SHEET_NAMES 순서) */
+/** 시트 8장 (EXPORT_SHEET_NAMES 순서) */
 export function buildExportSheets(d: ExportData): ExportSheet[] {
   const category = (id: string) => d.categories[id]?.name ?? null;
   const categoryOrder = (id: string) => d.categories[id]?.sortOrder ?? Number.MAX_SAFE_INTEGER;
@@ -152,7 +115,6 @@ export function buildExportSheets(d: ExportData): ExportSheet[] {
   const assetName = new Map(assets.map((a) => [a.id, a.name]));
   const goalName = new Map(d.goals.map((g) => [g.id, g.name]));
   const saved = (goalId: string) => d.contributions.filter((c) => c.goalId === goalId).reduce((s, c) => s + c.amount, 0);
-  const p = d.loanProfile;
 
   return [
     {
@@ -251,45 +213,6 @@ export function buildExportSheets(d: ExportData): ExportSheet[] {
         .filter((c) => goalName.has(c.goalId))
         .sort((a, b) => compare(a.contributedOn, b.contributedOn))
         .map((c) => [text(goalName.get(c.goalId)), date(c.contributedOn), money(c.amount), text(person(c.memberSlot)), text(c.memo)]),
-    },
-    {
-      name: "대출 우리 정보",
-      columns: cols(["항목", 16], ["값", 16]),
-      rows: p
-        ? [
-            [text(`${person("a")} 연소득`), money(p.incomeA)],
-            [text(`${person("b")} 연소득`), money(p.incomeB)],
-            [text("주택 보유"), text(HOME_STATUS_LABEL[p.homeStatus])],
-            [text("생애최초"), yesNo(p.firstTime)],
-          ]
-        : [],
-    },
-    {
-      name: "기존 대출",
-      columns: cols(["이름", 20], ["종류", 12], ["소유", 12], ["잔액", 16], ["금리(%)", 10], ["남은 기간(개월)", 14], ["매달 상환액", 14]),
-      rows: byCreated(d.loanDebts).map((l) => [
-        text(l.name),
-        text(DEBT_KIND_LABEL[l.kind]),
-        text(person(l.owner)),
-        money(l.balance),
-        rate(l.rateBp),
-        num(l.monthsLeft),
-        money(l.monthlyPayment),
-      ]),
-    },
-    {
-      name: "집 후보",
-      columns: cols(["이름", 20], ["매매/전세", 10], ["가격", 16], ["지역", 14], ["금리(%)", 10], ["기간(년)", 10], ["추가 비용", 14], ["메모", 30]),
-      rows: byCreated(d.loanScenarios).map((s) => [
-        text(s.name),
-        text(DEAL_LABEL[s.deal]),
-        money(s.price),
-        text(REGION_LABEL[s.region]),
-        rate(s.rateBp),
-        num(s.termYears),
-        money(s.extraCosts),
-        text(s.memo),
-      ]),
     },
   ];
 }

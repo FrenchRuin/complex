@@ -112,7 +112,7 @@ export function PushSettings({ publicKey }: { publicKey: string }) {
       ) : null}
       {status === "off" ? (
         <>
-          <p className="text-body text-ink">상대가 내역·메모·일정을 바꾸면 이 폰으로도 알림이 와요. 앱 안 알림과 같아요.</p>
+          <p className="text-body text-ink">상대가 내역을 바꾸거나 기분을 정하면 이 폰으로도 알림이 와요. 앱 안 알림과 같아요.</p>
           <Button onClick={turnOn} pending={pending} className="w-full">
             {pending ? "켜는 중" : "이 폰에서 알림 받기"}
           </Button>

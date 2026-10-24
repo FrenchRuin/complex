@@ -3,7 +3,6 @@
  */
 import { z } from "zod";
 import { ASSET_KINDS } from "./calc/assets";
-import { AMORTIZING_KINDS, DEALS, DEBT_KINDS, HOME_STATUSES, REGIONS } from "./calc/loans";
 import { CATEGORY_ICON_NAMES } from "./category-icons";
 import { CATEGORY_TYPES, OWNERS, PAYMENT_KINDS, SCOPES, SLOTS } from "./domain";
 
@@ -164,111 +163,6 @@ export const contributionInputSchema = z.object({
   memberSlot: z.enum(SLOTS),
 });
 export type ContributionInput = z.input<typeof contributionInputSchema>;
-
-const rateBpSchema = z
-  .number("금리를 입력해 주세요")
-  .int("금리를 확인해 주세요")
-  .min(0, "금리를 확인해 주세요")
-  .max(3000, "금리는 30%까지 입력할 수 있어요");
-
-/** 대출 계산: 우리 정보 (F-43). 1주택이면 생애최초는 끈다 */
-export const loanProfileSchema = z
-  .object({
-    incomeA: moneySchema("소득").min(0, "소득을 확인해 주세요"),
-    incomeB: moneySchema("소득").min(0, "소득을 확인해 주세요"),
-    homeStatus: z.enum(HOME_STATUSES, "주택 보유를 골라 주세요"),
-    firstTime: z.boolean(),
-  })
-  .transform((v) => ({ ...v, firstTime: v.homeStatus === "none" && v.firstTime }));
-export type LoanProfileInput = z.input<typeof loanProfileSchema>;
-
-/** 대출 계산: 기존 대출 (F-43) */
-export const loanDebtSchema = z
-  .object({
-    id: z.uuid().optional(),
-    name: z.string().trim().min(1, "이름을 입력해 주세요").max(30, "이름은 30자까지 쓸 수 있어요"),
-    kind: z.enum(DEBT_KINDS, "종류를 골라 주세요"),
-    owner: z.enum(OWNERS, "소유를 골라 주세요"),
-    balance: moneySchema("잔액").min(1, "잔액을 입력해 주세요"),
-    rateBp: rateBpSchema,
-    monthsLeft: z
-      .number()
-      .int("남은 기간은 개월 수로 입력해 주세요")
-      .min(1, "남은 기간을 확인해 주세요")
-      .max(600, "남은 기간은 600개월까지 입력할 수 있어요")
-      .nullable(),
-    monthlyPayment: moneySchema("매달 내는 금액").min(1, "매달 내는 금액을 확인해 주세요").nullable(),
-  })
-  .refine((v) => !AMORTIZING_KINDS.includes(v.kind) || v.monthsLeft !== null || v.monthlyPayment !== null, {
-    message: "남은 기간이나 매달 내는 금액 중 하나를 입력해 주세요",
-    path: ["monthsLeft"],
-  });
-export type LoanDebtInput = z.input<typeof loanDebtSchema>;
-
-/** 대출 계산: 집 후보 (F-43). 금리·만기를 비우면 기준값의 기본값 */
-export const loanScenarioSchema = z.object({
-  id: z.uuid().optional(),
-  name: z.string().trim().min(1, "이름을 입력해 주세요").max(30, "이름은 30자까지 쓸 수 있어요"),
-  deal: z.enum(DEALS),
-  price: moneySchema("가격").min(1, "가격을 입력해 주세요"),
-  region: z.enum(REGIONS, "지역을 골라 주세요"),
-  rateBp: rateBpSchema.nullable(),
-  termYears: z.number().int("만기를 확인해 주세요").min(1, "만기를 확인해 주세요").max(30, "만기는 30년까지 입력할 수 있어요").nullable(),
-  extraCosts: moneySchema("기타 비용").min(0, "기타 비용을 확인해 주세요"),
-  memo: z.string().trim().max(500, "메모는 500자까지 쓸 수 있어요"),
-});
-export type LoanScenarioFormInput = z.input<typeof loanScenarioSchema>;
-
-/** 공유 메모 (F-18). 빈 항목은 저장 전에 뺀다 */
-export const noteInputSchema = z
-  .object({
-    id: z.uuid().optional(),
-    kind: z.enum(["text", "checklist"]),
-    body: z.string().max(5000, "메모는 5,000자까지 쓸 수 있어요"),
-    items: z
-      .array(
-        z.object({
-          id: z.string().min(1).max(40),
-          text: z.string().trim().max(200, "항목 하나는 200자까지 쓸 수 있어요"),
-          done: z.boolean(),
-        }),
-      )
-      .max(100, "항목은 100개까지 넣을 수 있어요")
-      .transform((items) => items.filter((item) => item.text !== "")),
-  })
-  .refine((note) => note.body.trim() !== "" || note.items.length > 0, "메모 내용을 입력해 주세요");
-export type NoteInput = z.input<typeof noteInputSchema>;
-
-const timeSchema = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "시각을 다시 골라 주세요");
-
-/** 공유 일정 (F-19) */
-export const eventInputSchema = z
-  .object({
-    id: z.uuid().optional(),
-    title: z.string().trim().min(1, "일정 이름을 입력해 주세요").max(50, "일정 이름은 50자까지 쓸 수 있어요"),
-    memo: z.string().max(1000, "메모는 1,000자까지 쓸 수 있어요"),
-    owner: z.enum(OWNERS),
-    startDate: dateStringSchema,
-    endDate: dateStringSchema,
-    allDay: z.boolean(),
-    startTime: timeSchema.nullable(),
-    endTime: timeSchema.nullable(),
-    repeat: z.enum(["none", "weekly", "monthly", "yearly"]),
-    repeatUntil: dateStringSchema.nullable(),
-  })
-  .refine((e) => e.endDate >= e.startDate, { message: "끝나는 날은 시작하는 날과 같거나 뒤여야 해요" })
-  .refine((e) => e.allDay || e.startTime !== null, { message: "시작 시각을 골라 주세요" })
-  .refine((e) => e.allDay || !e.endTime || !e.startTime || e.endDate > e.startDate || e.endTime > e.startTime, {
-    message: "끝나는 시각은 시작 시각보다 뒤여야 해요",
-  })
-  .refine((e) => !e.repeatUntil || e.repeatUntil >= e.startDate, { message: "반복 끝나는 날은 시작하는 날 뒤여야 해요" })
-  .transform((e) => ({
-    ...e,
-    startTime: e.allDay ? null : e.startTime,
-    endTime: e.allDay ? null : e.endTime,
-    repeatUntil: e.repeat === "none" ? null : e.repeatUntil,
-  }));
-export type EventInput = z.input<typeof eventInputSchema>;
 
 /** "yyyy-MM-01" */
 export const monthFirstSchema = dateStringSchema.refine(

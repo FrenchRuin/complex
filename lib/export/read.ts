@@ -1,6 +1,5 @@
 import { toAssetKind } from "@/lib/calc/assets";
 import type { ExportData } from "@/lib/calc/export-sheets";
-import { toDeal, toDebtKind, toHomeStatus, toRegion } from "@/lib/calc/loans";
 import { todayKST } from "@/lib/date";
 import { toCategoryType, toOwner, toScope, toSlot } from "@/lib/domain";
 import { getHouseholdMembers, toMemberNames } from "@/lib/household";
@@ -27,9 +26,6 @@ export async function readExportData(): Promise<ExportData> {
     assetValues,
     goals,
     contributions,
-    debts,
-    scenarios,
-    profileRes,
   ] = await Promise.all([
     getHouseholdMembers(),
     fetchAll("카테고리", (f, t) => supabase.from("categories").select("id, name, sort_order").order("id").range(f, t)),
@@ -81,28 +77,9 @@ export async function readExportData(): Promise<ExportData> {
         .order("id")
         .range(f, t),
     ),
-    fetchAll("기존 대출", (f, t) =>
-      supabase
-        .from("loan_debts")
-        .select("name, kind, owner, balance, rate_bp, months_left, monthly_payment, created_at")
-        .is("deleted_at", null)
-        .order("id")
-        .range(f, t),
-    ),
-    fetchAll("집 후보", (f, t) =>
-      supabase
-        .from("loan_scenarios")
-        .select("name, deal, price, region, rate_bp, term_years, extra_costs, memo, created_at")
-        .is("deleted_at", null)
-        .order("id")
-        .range(f, t),
-    ),
-    supabase.from("loan_profiles").select("income_a, income_b, home_status, first_time").maybeSingle(),
   ]);
-  if (profileRes.error) throw new Error(`대출 우리 정보를 불러오지 못했어요: ${profileRes.error.message}`);
 
   const budgetById = new Map(spendBudgets.map((b) => [b.id, b]));
-  const profile = profileRes.data;
 
   return {
     today: todayKST(),
@@ -168,30 +145,6 @@ export async function readExportData(): Promise<ExportData> {
       contributedOn: c.contributed_on,
       memberSlot: toSlot(c.member_slot),
       memo: c.memo,
-    })),
-    loanProfile: profile
-      ? { incomeA: profile.income_a, incomeB: profile.income_b, homeStatus: toHomeStatus(profile.home_status), firstTime: profile.first_time }
-      : null,
-    loanDebts: debts.map((l) => ({
-      name: l.name,
-      kind: toDebtKind(l.kind),
-      owner: toOwner(l.owner),
-      balance: l.balance,
-      rateBp: l.rate_bp,
-      monthsLeft: l.months_left,
-      monthlyPayment: l.monthly_payment,
-      createdAt: l.created_at,
-    })),
-    loanScenarios: scenarios.map((s) => ({
-      name: s.name,
-      deal: toDeal(s.deal),
-      price: s.price,
-      region: toRegion(s.region),
-      rateBp: s.rate_bp,
-      termYears: s.term_years,
-      extraCosts: s.extra_costs,
-      memo: s.memo,
-      createdAt: s.created_at,
     })),
   };
 }

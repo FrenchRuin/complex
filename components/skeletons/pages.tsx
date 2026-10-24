@@ -74,37 +74,6 @@ export function AssetsSkeleton() {
   );
 }
 
-export function LoansSkeleton() {
-  return (
-    <PageSkeleton title="대출" className="flex flex-col gap-4 px-5 py-6 lg:px-8">
-      <CardSkeleton lines={1} />
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-start">
-        <div className="flex flex-col gap-4">
-          <CardSkeleton lines={4} />
-          <CardSkeleton rows={3} />
-        </div>
-        <CardSkeleton rows={4} />
-      </div>
-    </PageSkeleton>
-  );
-}
-
-export function NotesSkeleton() {
-  return (
-    <PageSkeleton title="메모" className="flex flex-col gap-4 px-5 py-6 lg:px-8">
-      <div className="flex gap-2">
-        <Skeleton className="h-11 flex-1 rounded-sm" />
-        <Skeleton className="h-11 w-28 rounded-md" />
-      </div>
-      <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <CardSkeleton lines={3} />
-        <CardSkeleton lines={4} />
-        <CardSkeleton lines={2} />
-      </div>
-    </PageSkeleton>
-  );
-}
-
 export function SettingsSkeleton() {
   return (
     <PageSkeleton title="설정" className="flex w-full max-w-[720px] flex-col gap-4 px-5 py-6 lg:px-8">
@@ -132,18 +101,6 @@ export function SettingsSubpageSkeleton({ title }: { title: string }) {
         <CardSkeleton lines={2} />
       </SettingsSubpage>
     </div>
-  );
-}
-
-export function ScheduleSkeleton() {
-  return (
-    <PageSkeleton title={null} className="grid grid-cols-1 items-start gap-4 px-5 py-4 lg:grid-cols-[1fr_360px] lg:px-8 lg:py-6">
-      <CardSkeleton block />
-      <div className="flex flex-col gap-4">
-        <CardSkeleton rows={2} />
-        <CardSkeleton rows={3} />
-      </div>
-    </PageSkeleton>
   );
 }
 

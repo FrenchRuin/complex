@@ -1,9 +1,9 @@
 import { relativeDayLabel } from "@/lib/calc/dashboard";
 import { isMoodKey, moodOf } from "@/lib/calc/mood";
-import { formatTimeKST, monthOf, todayKST, type DateString } from "@/lib/date";
+import { formatTimeKST, todayKST, type DateString } from "@/lib/date";
 import { formatWon } from "@/lib/money";
 
-/** 알림 종류 (F-17, 메모는 F-18, 기분은 F-04). DB notifications.kind와 같다 */
+/** 알림 종류 (F-17, 기분은 F-04). DB notifications.kind와 같다 */
 export type NotificationKind =
   | "created"
   | "updated"
@@ -12,16 +12,6 @@ export type NotificationKind =
   | "recurring_paid"
   | "recurring_unchecked"
   | "sms_batch"
-  | "note_created"
-  | "note_updated"
-  | "note_deleted"
-  | "note_restored"
-  | "event_created"
-  | "event_updated"
-  | "event_deleted"
-  | "event_restored"
-  | "event_occurrence_deleted"
-  | "event_occurrence_restored"
   | "mood_set";
 
 export type NotificationItem = {
@@ -30,8 +20,6 @@ export type NotificationItem = {
   kind: NotificationKind;
   actorId: string;
   transactionId: string | null;
-  noteId: string | null;
-  eventId: string | null;
   occurredOn: DateString | null;
   /** 기분 알림(F-04)의 기분 키 */
   mood: string | null;
@@ -49,46 +37,12 @@ const KINDS: readonly NotificationKind[] = [
   "recurring_paid",
   "recurring_unchecked",
   "sms_batch",
-  "note_created",
-  "note_updated",
-  "note_deleted",
-  "note_restored",
-  "event_created",
-  "event_updated",
-  "event_deleted",
-  "event_restored",
-  "event_occurrence_deleted",
-  "event_occurrence_restored",
   "mood_set",
 ];
 
-const EVENT_ACTION_TEXT = {
-  event_created: "추가했어요",
-  event_updated: "수정했어요",
-  event_deleted: "삭제했어요",
-  event_restored: "되돌렸어요",
-  // 반복 일정의 회차 하나 ("이 일정만")
-  event_occurrence_deleted: "삭제했어요",
-  event_occurrence_restored: "되돌렸어요",
-} as const;
-
-function isEventKind(kind: NotificationKind): kind is keyof typeof EVENT_ACTION_TEXT {
-  return kind in EVENT_ACTION_TEXT;
-}
-
-const NOTE_ACTION_TEXT = {
-  note_created: "썼어요",
-  note_updated: "고쳤어요",
-  note_deleted: "지웠어요",
-  note_restored: "되돌렸어요",
-} as const;
-
-function isNoteKind(kind: NotificationKind): kind is keyof typeof NOTE_ACTION_TEXT {
-  return kind in NOTE_ACTION_TEXT;
-}
-
-export function toNotificationKind(value: string): NotificationKind {
-  return (KINDS as readonly string[]).includes(value) ? (value as NotificationKind) : "updated";
+/** DB 값 → 알림 종류. 지운 기능(메모·일정 등)의 알림이나 모르는 값은 null (목록에서 뺀다) */
+export function toNotificationKind(value: string): NotificationKind | null {
+  return (KINDS as readonly string[]).includes(value) ? (value as NotificationKind) : null;
 }
 
 const ACTION_TEXT: Record<"created" | "updated" | "deleted" | "restored", string> = {
@@ -103,7 +57,6 @@ const ACTION_TEXT: Record<"created" | "updated" | "deleted" | "restored", string
  * "서연님이 월세 700,000원 납부를 체크했어요"
  * "서연님이 월세 700,000원 납부 체크를 풀었어요"
  * "서연님이 문자로 5건을 추가했어요"
- * "지훈님이 9월 30일 일정 ‘치과’를 삭제했어요" (반복 일정의 그날만)
  * "서연님이 오늘 기분을 🥰 행복해요로 정했어요 · 야근 중" (F-04)
  */
 export function notificationSentence(
@@ -115,19 +68,6 @@ export function notificationSentence(
     const m = item.mood && isMoodKey(item.mood) ? moodOf(item.mood) : null;
     const what = m ? `${m.emoji} ${m.label}` : "새 기분";
     return `${who} 오늘 기분을 ${what}로 정했어요${item.subject ? ` · ${item.subject}` : ""}`;
-  }
-  if (isNoteKind(item.kind)) {
-    const title = item.subject ?? "제목 없는 메모";
-    return `${who} 메모 ‘${title}’${objectParticle(title)} ${NOTE_ACTION_TEXT[item.kind]}`;
-  }
-  if (isEventKind(item.kind)) {
-    const title = item.subject ?? "일정";
-    const occurrence = item.kind === "event_occurrence_deleted" || item.kind === "event_occurrence_restored";
-    if (occurrence && item.occurredOn) {
-      const day = `${Number(item.occurredOn.slice(5, 7))}월 ${Number(item.occurredOn.slice(8, 10))}일`;
-      return `${who} ${day} 일정 ‘${title}’${objectParticle(title)} ${EVENT_ACTION_TEXT[item.kind]}`;
-    }
-    return `${who} 일정 ‘${title}’${objectParticle(title)} ${EVENT_ACTION_TEXT[item.kind]}`;
   }
   if (item.kind === "sms_batch") return `${who} 문자로 ${item.count}건을 추가했어요`;
 
@@ -147,25 +87,11 @@ export function objectParticle(word: string): "을" | "를" {
 
 /**
  * 누르면 갈 곳: 그 내역의 날짜 (+ 편집 창 열기). 삭제된 내역은 날짜만, 문자 묶음은 그 달만.
- * 메모는 그 메모를 연다 (지운 메모는 메모 화면만).
  */
 export function notificationHref(
-  item: Pick<NotificationItem, "kind" | "transactionId" | "occurredOn"> & { noteId?: string | null; eventId?: string | null },
+  item: Pick<NotificationItem, "kind" | "transactionId" | "occurredOn">,
 ): string {
   if (item.kind === "mood_set") return "/";
-  if (isEventKind(item.kind)) {
-    const params = new URLSearchParams();
-    if (item.occurredOn) params.set("month", monthOf(item.occurredOn));
-    // 지운 일정(그날만 지운 것 포함)은 그 달만
-    if (item.eventId && item.kind !== "event_deleted" && item.kind !== "event_occurrence_deleted") {
-      params.set("event", item.eventId);
-    }
-    const query = params.toString();
-    return query ? `/schedule?${query}` : "/schedule";
-  }
-  if (isNoteKind(item.kind)) {
-    return item.noteId && item.kind !== "note_deleted" ? `/notes?note=${item.noteId}` : "/notes";
-  }
   if (!item.occurredOn) return "/transactions";
   // month 없이 날짜만 주면 내역 화면이 한 달 기준(F-56)으로 그 날짜가 든 달을 연다. 문자 묶음은 그 달만(at)
   if (item.kind === "sms_batch") return `/transactions?at=${item.occurredOn}`;

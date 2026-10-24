@@ -121,34 +121,6 @@ export function RealtimeProvider({ householdId, children }: { householdId: strin
           { event: "*", schema: "public", table: "asset_values", filter: `household_id=eq.${householdId}` },
           scheduleRefresh,
         )
-        // 일정 (F-19)
-        .on(
-          "postgres_changes",
-          { event: "*", schema: "public", table: "events", filter: `household_id=eq.${householdId}` },
-          scheduleRefresh,
-        )
-        // 대출 계산 (F-43)
-        .on(
-          "postgres_changes",
-          { event: "*", schema: "public", table: "loan_profiles", filter: `household_id=eq.${householdId}` },
-          scheduleRefresh,
-        )
-        .on(
-          "postgres_changes",
-          { event: "*", schema: "public", table: "loan_debts", filter: `household_id=eq.${householdId}` },
-          scheduleRefresh,
-        )
-        .on(
-          "postgres_changes",
-          { event: "*", schema: "public", table: "loan_scenarios", filter: `household_id=eq.${householdId}` },
-          scheduleRefresh,
-        )
-        // 메모 (F-18)
-        .on(
-          "postgres_changes",
-          { event: "*", schema: "public", table: "notes", filter: `household_id=eq.${householdId}` },
-          scheduleRefresh,
-        )
         // 오늘 기분 (F-04)
         .on(
           "postgres_changes",
