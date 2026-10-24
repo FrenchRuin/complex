@@ -17,7 +17,6 @@ import { CATEGORY_TYPE_LABEL, CATEGORY_TYPES, type CategoryType, type Scope, typ
 import { AmountInput } from "./AmountInput";
 import { AssignmentFields } from "./AssignmentFields";
 import { CategoryGrid } from "./CategoryGrid";
-import { PaymentMethodSelect } from "./PaymentMethodSelect";
 import { AuthorLine, FormFooter } from "./TransactionMeta";
 import type { PanelData, TransactionRecord } from "./types";
 
@@ -44,7 +43,6 @@ export function TransactionForm({ record, data, onDone, onLearn }: Props) {
   const [categoryId, setCategoryId] = useState<string | null>(initial?.categoryId ?? null);
   const [merchant, setMerchant] = useState(initial?.merchant ?? "");
   const [memo, setMemo] = useState(initial?.memo ?? "");
-  const [paymentMethodId, setPaymentMethodId] = useState<string | null>(initial?.paymentMethodId ?? null);
   const firstAssignment = initial
     ? { scope: initial.scope, memberSlot: initial.memberSlot }
     : defaultAssignment(null, data.mySlot);
@@ -74,14 +72,6 @@ export function TransactionForm({ record, data, onDone, onLearn }: Props) {
     setCategoryId(id);
   }
 
-  function changePaymentMethod(id: string | null) {
-    setPaymentMethodId(id);
-    const owner = data.paymentMethods.find((m) => m.id === id)?.owner ?? null;
-    const next = defaultAssignment(owner, data.mySlot);
-    setScope(next.scope);
-    setMemberSlot(next.memberSlot);
-  }
-
   function submit(e: FormEvent) {
     e.preventDefault();
     setError(null);
@@ -94,7 +84,6 @@ export function TransactionForm({ record, data, onDone, onLearn }: Props) {
         categoryId: categoryId ?? "",
         merchant,
         memo,
-        paymentMethodId,
         scope,
         memberSlot,
       });
@@ -161,12 +150,6 @@ export function TransactionForm({ record, data, onDone, onLearn }: Props) {
           maxLength={50}
         />
         <CategoryGrid categories={categories} value={categoryId} onChange={pickCategory} />
-        <PaymentMethodSelect
-          methods={data.paymentMethods}
-          names={data.names}
-          value={paymentMethodId}
-          onChange={changePaymentMethod}
-        />
         <AssignmentFields
           names={data.names}
           scope={scope}

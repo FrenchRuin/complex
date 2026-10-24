@@ -4,9 +4,9 @@ export type Assignment = { scope: Scope; memberSlot: Slot };
 
 /**
  * 내역의 구분·사람 기본값 (F-10, §8.1).
- * - 결제수단 소유가 공동 → 공동 + 입력한 사람이 결제
+ * - 자산 소유가 공동 → 공동 + 입력한 사람이 씀
  * - A/B 소유 → 그 사람의 개인
- * - 결제수단 없음 → 입력한 사람의 개인
+ * - 자산 없음 → 입력한 사람의 개인
  */
 export function defaultAssignment(owner: Owner | null, mySlot: Slot): Assignment {
   if (owner === "joint") return { scope: "joint", memberSlot: mySlot };

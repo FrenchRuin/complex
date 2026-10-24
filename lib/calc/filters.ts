@@ -12,7 +12,6 @@ export type TransactionFilters = {
   who: PersonFilter;
   type: TypeFilter;
   categories: string[];
-  paymentMethods: string[];
   q: string;
   /** 검색어가 금액이면 그 금액 (예: "12,000" → 12000). 금액이 딱 같은 내역도 찾는다 */
   amount: number | null;
@@ -85,7 +84,6 @@ export function parseFilters(
     who: who === "joint" || who === "a" || who === "b" ? who : "all",
     type: type === "expense" || type === "income" ? type : "all",
     categories: idList(params.cat),
-    paymentMethods: idList(params.pm),
     // 금액이면 숫자만 남긴다 (쉼표는 필터 문법을 깨므로)
     q: amount !== null ? String(amount) : sanitizeSearch(rawQ),
     amount,
@@ -108,7 +106,6 @@ export function filtersToHref(
   if (f.who !== "all") params.set("who", f.who);
   if (f.type !== "all") params.set("type", f.type);
   if (f.categories.length) params.set("cat", f.categories.join(","));
-  if (f.paymentMethods.length) params.set("pm", f.paymentMethods.join(","));
   if (f.q) params.set("q", f.q);
   if (f.q && f.thisMonthOnly) params.set("period", "month");
   if (f.q && !f.thisMonthOnly && f.limit > SEARCH_PAGE_SIZE) params.set("limit", String(f.limit));
@@ -118,9 +115,7 @@ export function filtersToHref(
   return query ? `/transactions?${query}` : "/transactions";
 }
 
-/** 기본값이 아닌 세부 필터 개수 (유형·카테고리·결제수단) — 필터 버튼 배지용 */
+/** 기본값이 아닌 세부 필터 개수 (유형·카테고리) — 필터 버튼 배지용 */
 export function activeFilterCount(filters: TransactionFilters): number {
-  return (
-    (filters.type !== "all" ? 1 : 0) + filters.categories.length + filters.paymentMethods.length
-  );
+  return (filters.type !== "all" ? 1 : 0) + filters.categories.length;
 }

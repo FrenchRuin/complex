@@ -2,16 +2,16 @@ import { describe, expect, it } from "vitest";
 import { defaultAssignment, ownerOfTransaction } from "./assignment";
 
 describe("defaultAssignment", () => {
-  it("공동 소유 결제수단이면 공동 + 입력한 사람", () => {
+  it("공동 소유 자산이면 공동 + 입력한 사람", () => {
     expect(defaultAssignment("joint", "b")).toEqual({ scope: "joint", memberSlot: "b" });
   });
 
-  it("개인 소유 결제수단이면 소유자의 개인", () => {
+  it("개인 소유 자산이면 소유자의 개인", () => {
     expect(defaultAssignment("a", "b")).toEqual({ scope: "personal", memberSlot: "a" });
     expect(defaultAssignment("b", "a")).toEqual({ scope: "personal", memberSlot: "b" });
   });
 
-  it("결제수단이 없으면 입력한 사람의 개인", () => {
+  it("자산을 고르지 않았으면 입력한 사람의 개인", () => {
     expect(defaultAssignment(null, "a")).toEqual({ scope: "personal", memberSlot: "a" });
   });
 });

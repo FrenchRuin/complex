@@ -10,19 +10,14 @@ import { useTransactionPanel } from "@/components/transactions/TransactionPanelP
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { moodOf, moodText, type TodayMood } from "@/lib/calc/mood";
-import type { MemberNames } from "@/lib/domain";
 import type { HouseholdMember } from "@/lib/household";
-import type { PaymentMethodOption } from "@/lib/household-data";
 import { NAV_ITEMS, isActivePath } from "@/lib/nav";
-import { SidebarMethods } from "./SidebarMethods";
 import { SidebarPartner } from "./SidebarPartner";
 import { DOT_STATUS, SYNC_LABEL } from "./status";
 
 export type SidebarData = {
   me: HouseholdMember;
   members: HouseholdMember[];
-  names: MemberNames;
-  paymentMethods: PaymentMethodOption[];
   /** 오늘 기분 (F-04), 사람 id → 기분 */
   moods: Record<string, TodayMood>;
 };
@@ -37,7 +32,7 @@ type Props = SidebarData & {
 };
 
 /** 사이드바 내용 (SPEC §4.2), 머리 줄 아래 검색부터. 웹은 왼쪽에 고정, 폰은 ☰ 메뉴에서 같은 내용을 쓴다 */
-export function SidebarContent({ me, members, names, paymentMethods, moods, onNavigate, shortcut = false, autoFocusSearch = false }: Props) {
+export function SidebarContent({ me, members, moods, onNavigate, shortcut = false, autoFocusSearch = false }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const { openNew } = useTransactionPanel();
@@ -101,7 +96,7 @@ export function SidebarContent({ me, members, names, paymentMethods, moods, onNa
         </Button>
       </div>
 
-      {/* 가운데(메뉴 + 계좌·카드)만 한 덩어리로 스크롤. 위(검색·내역 추가)와 아래(프로필)는 고정 */}
+      {/* 가운데(메뉴)만 한 덩어리로 스크롤. 위(검색·내역 추가)와 아래(프로필)는 고정 */}
       <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
         <nav aria-label="메뉴" className="pt-3">
           <ul className="flex flex-col gap-1">
@@ -126,7 +121,6 @@ export function SidebarContent({ me, members, names, paymentMethods, moods, onNa
           </ul>
         </nav>
 
-        <SidebarMethods paymentMethods={paymentMethods} names={names} onNavigate={onNavigate} />
       </div>
 
       {/* 아래: 상대(접속 상태) 위에, 맨 아래 내 프로필 + 오른쪽 톱니바퀴(설정) (2026-10-02) */}

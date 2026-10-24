@@ -1,11 +1,4 @@
-import {
-  ChartColumn,
-  House,
-  PiggyBank,
-  ReceiptText,
-  Settings,
-  type LucideIcon,
-} from "lucide-react";
+import { ChartColumn, House, PiggyBank, ReceiptText, Settings, type LucideIcon } from "lucide-react";
 
 export type NavItem = {
   href: string;
@@ -21,7 +14,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "홈", icon: House, inTabBar: true, inSidebar: true },
   { href: "/transactions", label: "내역", icon: ReceiptText, inTabBar: true, inSidebar: true },
   { href: "/stats", label: "통계", icon: ChartColumn, inTabBar: true, inSidebar: true },
-  { href: "/assets", label: "자산", icon: PiggyBank, inTabBar: false, inSidebar: true },
+  { href: "/assets", label: "자산", icon: PiggyBank, inTabBar: true, inSidebar: true },
   { href: "/settings", label: "설정", icon: Settings, inTabBar: true, inSidebar: false },
 ];
 

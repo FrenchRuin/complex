@@ -11,7 +11,6 @@ describe("parseFilters", () => {
       who: "all",
       type: "all",
       categories: [],
-      paymentMethods: [],
       q: "",
       amount: null,
       thisMonthOnly: false,
@@ -91,9 +90,17 @@ describe("filtersToHref", () => {
   });
 
   it("주소 → 필터 → 주소가 같다", () => {
-    const href = `/transactions?month=2026-08&who=joint&type=expense&cat=${ID1}&pm=${ID2}&q=%EB%8B%A4%EC%9D%B4%EC%86%8C&day=2026-08-15`;
+    const href = `/transactions?month=2026-08&who=joint&type=expense&cat=${ID1}&q=%EB%8B%A4%EC%9D%B4%EC%86%8C&day=2026-08-15`;
     const params = Object.fromEntries(new URL(href, "http://x").searchParams);
     expect(filtersToHref(parseFilters(params, "2026-09"), "2026-09")).toBe(href);
+  });
+});
+
+describe("결제수단 파라미터", () => {
+  it("pm은 무시한다 (2026-10-25 결제수단 제거)", () => {
+    const f = parseFilters({ pm: ID2 }, "2026-10");
+    expect("paymentMethods" in f).toBe(false);
+    expect(filtersToHref(f, "2026-10")).toBe("/transactions");
   });
 });
 
@@ -104,7 +111,7 @@ describe("sanitizeSearch", () => {
 });
 
 describe("activeFilterCount", () => {
-  it("유형·카테고리·결제수단 개수", () => {
+  it("유형·카테고리 개수", () => {
     const f = parseFilters({ type: "income", cat: `${ID1},${ID2}`, who: "a" }, "2026-09");
     expect(activeFilterCount(f)).toBe(3);
   });

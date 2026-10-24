@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import { cache } from "react";
-import { toCategoryType, toOwner, toPaymentKind } from "./domain";
+import { toCategoryType } from "./domain";
 import { createClient } from "./supabase/server";
 
 function loadError(what: string, error: { message: string }): Error {
@@ -13,16 +13,6 @@ export const getAllCategories = cache(async () => {
   const { data, error } = await supabase.from("categories").select("id, type, name, icon, sort_order, is_hidden");
   if (error) throw loadError("카테고리", error);
   return data.map((c) => ({ ...c, type: toCategoryType(c.type) }));
-});
-
-/** 숨긴 것까지 포함한 결제수단 전체 (설정 관리용) */
-export const getAllPaymentMethods = cache(async () => {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("payment_methods")
-    .select("id, name, kind, owner, sms_aliases, sort_order, is_hidden");
-  if (error) throw loadError("결제수단", error);
-  return data.map((m) => ({ ...m, kind: toPaymentKind(m.kind), owner: toOwner(m.owner) }));
 });
 
 /** 아직 쓰지 않은 유효한 초대 1건 */

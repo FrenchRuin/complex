@@ -11,7 +11,7 @@ import { filtersToHref, isSearchAll, parseFilters } from "@/lib/calc/filters";
 import { formatPeriodRangeShort, isCalendarRange, periodOf, periodRange } from "@/lib/calc/period";
 import { todayKST } from "@/lib/date";
 import { getHouseholdMembers, requireMember, toMemberNames } from "@/lib/household";
-import { getVisibleCategories, getVisiblePaymentMethods } from "@/lib/household-data";
+import { getVisibleCategories } from "@/lib/household-data";
 import { getPeriodConfig } from "@/lib/period";
 import { getLabelMaps, getMonthTransactions, searchAllTransactions } from "@/lib/transactions";
 
@@ -29,12 +29,11 @@ export default async function TransactionsPage({ searchParams }: PageProps<"/tra
   const searchAll = isSearchAll(filters);
   const range = periodRange(filters.month, cfg);
 
-  const [rows, labels, members, categories, paymentMethods] = await Promise.all([
+  const [rows, labels, members, categories] = await Promise.all([
     searchAll ? searchAllTransactions(filters) : getMonthTransactions(filters, range),
     getLabelMaps(),
     getHouseholdMembers(),
     getVisibleCategories(),
-    getVisiblePaymentMethods(),
   ]);
   const names = toMemberNames(members);
 
@@ -73,7 +72,7 @@ export default async function TransactionsPage({ searchParams }: PageProps<"/tra
       </PageHeader>
 
       <div className="flex flex-col gap-4 px-5 py-4 lg:px-8">
-        <FilterBar filters={filters} currentMonth={currentMonth} categories={categories} paymentMethods={paymentMethods} />
+        <FilterBar filters={filters} currentMonth={currentMonth} categories={categories} />
         {searchAll ? (
           <SearchResults filters={filters} currentMonth={currentMonth} rows={rows} labels={labels} names={names} />
         ) : (

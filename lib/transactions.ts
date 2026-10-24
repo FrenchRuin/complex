@@ -12,7 +12,6 @@ export type TransactionRecord = {
   categoryId: string;
   merchant: string | null;
   memo: string | null;
-  paymentMethodId: string | null;
   scope: Scope;
   memberSlot: Slot;
   /** manual / sms / recurring / import */
@@ -24,7 +23,7 @@ export type TransactionRecord = {
 };
 
 const COLUMNS =
-  "id, type, amount, occurred_on, category_id, merchant, memo, payment_method_id, scope, member_slot, source, created_by, updated_by, created_at, updated_at";
+  "id, type, amount, occurred_on, category_id, merchant, memo, scope, member_slot, source, created_by, updated_by, created_at, updated_at";
 
 type Query = Partial<Omit<TransactionFilters, "month" | "day">> & {
   range?: DateRange;
@@ -44,7 +43,6 @@ async function fetchTransactions(q: Query): Promise<TransactionRecord[]> {
   if (q.who === "a" || q.who === "b") query = query.eq("scope", "personal").eq("member_slot", q.who);
   if (q.type && q.type !== "all") query = query.eq("type", q.type);
   if (q.categories?.length) query = query.in("category_id", q.categories);
-  if (q.paymentMethods?.length) query = query.in("payment_method_id", q.paymentMethods);
   if (q.q) {
     // 가맹점·메모 부분 일치, 검색어가 금액이면 그 금액인 내역도
     const amount = q.amount ? `,amount.eq.${q.amount}` : "";
@@ -90,7 +88,6 @@ type Row = {
   category_id: string;
   merchant: string | null;
   memo: string | null;
-  payment_method_id: string | null;
   scope: string;
   member_slot: string;
   source: string;
@@ -109,7 +106,6 @@ function toRecord(row: Row): TransactionRecord {
     categoryId: row.category_id,
     merchant: row.merchant,
     memo: row.memo,
-    paymentMethodId: row.payment_method_id,
     scope: toScope(row.scope),
     memberSlot: toSlot(row.member_slot),
     source: row.source,
@@ -122,21 +118,15 @@ function toRecord(row: Row): TransactionRecord {
 
 export type LabelMaps = {
   categories: Record<string, { name: string; icon: string }>;
-  paymentMethods: Record<string, string>;
 };
 
-/** 숨긴 것까지 포함한 카테고리·결제수단 이름 (지난 내역 표시용) */
+/** 숨긴 것까지 포함한 카테고리 이름 (지난 내역 표시용) */
 export async function getLabelMaps(): Promise<LabelMaps> {
   const supabase = await createClient();
-  const [categories, methods] = await Promise.all([
-    supabase.from("categories").select("id, name, icon"),
-    supabase.from("payment_methods").select("id, name"),
-  ]);
+  const categories = await supabase.from("categories").select("id, name, icon");
   if (categories.error) throw new Error(`카테고리를 불러오지 못했어요: ${categories.error.message}`);
-  if (methods.error) throw new Error(`결제수단을 불러오지 못했어요: ${methods.error.message}`);
 
   return {
     categories: Object.fromEntries(categories.data.map((c) => [c.id, { name: c.name, icon: c.icon }])),
-    paymentMethods: Object.fromEntries(methods.data.map((m) => [m.id, m.name])),
   };
 }

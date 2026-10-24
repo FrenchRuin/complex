@@ -12,14 +12,13 @@ import {
   type TypeFilter,
 } from "@/lib/calc/filters";
 import type { MonthString } from "@/lib/date";
-import type { CategoryOption, PaymentMethodOption } from "@/lib/household-data";
+import type { CategoryOption } from "@/lib/household-data";
 import { CheckboxList } from "./CheckboxList";
 
 type Props = {
   filters: TransactionFilters;
   currentMonth: MonthString;
   categories: CategoryOption[];
-  paymentMethods: PaymentMethodOption[];
 };
 
 const TYPE_OPTIONS: { value: TypeFilter; label: string }[] = [
@@ -30,8 +29,8 @@ const TYPE_OPTIONS: { value: TypeFilter; label: string }[] = [
 
 const SEARCH_DEBOUNCE_MS = 300;
 
-/** 검색(가맹점·메모, 이번 달) + 세부 필터(유형·카테고리·결제수단) (F-12) */
-export function FilterBar({ filters, currentMonth, categories, paymentMethods }: Props) {
+/** 검색(가맹점·메모, 이번 달) + 세부 필터(유형·카테고리) (F-12) */
+export function FilterBar({ filters, currentMonth, categories }: Props) {
   const router = useRouter();
   const [q, setQ] = useState(filters.q);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -97,15 +96,9 @@ export function FilterBar({ filters, currentMonth, categories, paymentMethods }:
               selected={filters.categories}
               onChange={(categoriesSelected) => apply({ categories: categoriesSelected })}
             />
-            <CheckboxList
-              legend="결제수단"
-              options={paymentMethods.map((m) => ({ value: m.id, label: m.name }))}
-              selected={filters.paymentMethods}
-              onChange={(methods) => apply({ paymentMethods: methods })}
-            />
             <button
               type="button"
-              onClick={() => apply({ type: "all", categories: [], paymentMethods: [] })}
+              onClick={() => apply({ type: "all", categories: [] })}
               disabled={count === 0}
               className="h-11 rounded-md border border-line-strong text-body font-semibold text-ink hover:bg-surface-sunken disabled:opacity-40 disabled:hover:bg-transparent"
             >

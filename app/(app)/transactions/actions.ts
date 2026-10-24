@@ -24,7 +24,6 @@ export async function saveTransaction(input: TransactionInput): Promise<ActionRe
     category_id: v.categoryId,
     merchant: v.merchant,
     memo: v.memo,
-    payment_method_id: v.paymentMethodId,
     scope: v.scope,
     member_slot: v.memberSlot,
   };

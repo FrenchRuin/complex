@@ -5,7 +5,8 @@ import { login } from "./support/login";
 test("모바일: 하단 탭바와 추가 버튼, 바텀시트", async ({ page }) => {
   await login(page, "b", "/");
   const tabs = page.getByRole("navigation", { name: "메뉴" });
-  await expect(tabs.getByRole("link", { name: /내역/ })).toBeVisible();
+  // 2026-10-25 단순화: 탭은 홈·내역·통계·자산·설정
+  await expect(tabs.getByRole("link")).toHaveText(["홈", "내역", "통계", "자산", "설정"]);
   await tabs.getByRole("link", { name: /내역/ }).click();
   await expect(page).toHaveURL(/\/transactions/);
 

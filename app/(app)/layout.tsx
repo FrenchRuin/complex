@@ -11,7 +11,6 @@ import { getHouseholdMembers, requireMember, toMemberNames } from "@/lib/househo
 import {
   getMerchantRules,
   getVisibleCategories,
-  getVisiblePaymentMethods,
 } from "@/lib/household-data";
 import { getTodayMoods } from "@/lib/moods";
 import { getMyNotifications } from "@/lib/notifications";
@@ -24,10 +23,9 @@ import { cookies } from "next/headers";
  */
 export default async function AppLayout({ children }: LayoutProps<"/">) {
   const me = await requireMember();
-  const [members, categories, paymentMethods, rules, notifications, moods] = await Promise.all([
+  const [members, categories, rules, notifications, moods] = await Promise.all([
     getHouseholdMembers(),
     getVisibleCategories(),
-    getVisiblePaymentMethods(),
     getMerchantRules(),
     getMyNotifications(),
     getTodayMoods(),
@@ -36,7 +34,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
   const namesById = Object.fromEntries(members.map((m) => [m.id, m.displayName]));
   const meMember = { id: me.id, slot: me.slot, displayName: me.displayName, avatarUrl: me.avatarUrl };
 
-  const sidebar = { me: meMember, members, names, paymentMethods, moods };
+  const sidebar = { me: meMember, members, moods };
   // 웹 사이드바 접힘 (기기마다 쿠키)
   const sidebarCollapsed = (await cookies()).get(SIDEBAR_COOKIE)?.value === "1";
 
@@ -45,7 +43,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
       <RealtimeProvider householdId={me.householdId}>
         <PresenceProvider householdId={me.householdId} memberId={me.id}>
           <NotificationsProvider value={{ items: notifications, names: namesById }}>
-            <TransactionPanelProvider data={{ categories, paymentMethods, members, names, mySlot: me.slot, rules }}>
+            <TransactionPanelProvider data={{ categories, members, names, mySlot: me.slot, rules }}>
               <MobileMenuProvider data={sidebar}>
                 <div className="lg:flex lg:h-dvh print:block! print:h-auto!">
                   <Sidebar {...sidebar} initialCollapsed={sidebarCollapsed} />

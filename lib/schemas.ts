@@ -4,7 +4,7 @@
 import { z } from "zod";
 import { ASSET_KINDS } from "./calc/assets";
 import { CATEGORY_ICON_NAMES } from "./category-icons";
-import { CATEGORY_TYPES, OWNERS, PAYMENT_KINDS, SCOPES, SLOTS } from "./domain";
+import { CATEGORY_TYPES, OWNERS, SCOPES, SLOTS } from "./domain";
 
 export const displayNameSchema = z
   .string()
@@ -22,32 +22,6 @@ export const categoryInputSchema = z.object({
     .min(1, "카테고리 이름을 입력해 주세요")
     .max(12, "카테고리 이름은 12자까지 쓸 수 있어요"),
   icon: z.enum(CATEGORY_ICON_NAMES, "아이콘을 골라 주세요"),
-});
-
-/** "신한, 삼성카드 ," → ["신한", "삼성카드"] */
-const smsAliasesSchema = z
-  .string()
-  .transform((raw) =>
-    raw
-      .split(",")
-      .map((alias) => alias.trim())
-      .filter((alias) => alias !== ""),
-  )
-  .pipe(
-    z
-      .array(z.string().max(20, "별칭은 하나에 20자까지 쓸 수 있어요"))
-      .max(10, "별칭은 10개까지 넣을 수 있어요"),
-  );
-
-export const paymentMethodInputSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(1, "이름을 입력해 주세요")
-    .max(20, "이름은 20자까지 쓸 수 있어요"),
-  kind: z.enum(PAYMENT_KINDS, "종류를 골라 주세요"),
-  owner: z.enum(OWNERS, "소유를 골라 주세요"),
-  smsAliases: smsAliasesSchema,
 });
 
 export const moveDirectionSchema = z.enum(["up", "down"]);
@@ -83,7 +57,6 @@ export const transactionInputSchema = z.object({
   categoryId: z.uuid("카테고리를 골라 주세요"),
   merchant: optionalText(50, "가맹점·내용은 50자까지 쓸 수 있어요"),
   memo: optionalText(200, "메모는 200자까지 쓸 수 있어요"),
-  paymentMethodId: z.uuid().nullable(),
   scope: z.enum(SCOPES),
   memberSlot: z.enum(SLOTS),
 });

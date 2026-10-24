@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
   categoryInputSchema,
   displayNameSchema,
-  paymentMethodInputSchema,
   transactionInputSchema,
 } from "./schemas";
 
@@ -39,7 +38,6 @@ describe("transactionInputSchema", () => {
     categoryId: "7b6c0a1e-4a4f-4b8e-9d7a-2f1d3c5b6a70",
     merchant: " 다이소 ",
     memo: "",
-    paymentMethodId: null,
     scope: "joint",
     memberSlot: "a",
   } as const;
@@ -67,40 +65,5 @@ describe("transactionInputSchema", () => {
   it("카테고리가 없으면 안내 문구", () => {
     const result = transactionInputSchema.safeParse({ ...base, categoryId: "" });
     expect(result.error?.issues[0]?.message).toBe("카테고리를 골라 주세요");
-  });
-});
-
-describe("paymentMethodInputSchema", () => {
-  it("별칭을 쉼표로 나눈다", () => {
-    const parsed = paymentMethodInputSchema.parse({
-      name: " 가족카드 ",
-      kind: "card",
-      owner: "joint",
-      smsAliases: "신한, 신한카드 , ,",
-    });
-    expect(parsed).toEqual({
-      name: "가족카드",
-      kind: "card",
-      owner: "joint",
-      smsAliases: ["신한", "신한카드"],
-    });
-  });
-
-  it("별칭이 비어 있으면 빈 목록", () => {
-    const parsed = paymentMethodInputSchema.parse({
-      name: "현금",
-      kind: "cash",
-      owner: "a",
-      smsAliases: "",
-    });
-    expect(parsed.smsAliases).toEqual([]);
-  });
-
-
-  it("잘못된 소유는 거부한다", () => {
-    expect(
-      paymentMethodInputSchema.safeParse({ name: "x", kind: "card", owner: "c", smsAliases: "" })
-        .success,
-    ).toBe(false);
   });
 });

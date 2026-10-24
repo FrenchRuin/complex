@@ -48,7 +48,6 @@ export function TransactionList({ groups, labels, names, emptyMessage, currentYe
           <ul>
             {group.items.map((tx) => {
               const category = labels.categories[tx.categoryId];
-              const method = tx.paymentMethodId ? labels.paymentMethods[tx.paymentMethodId] : null;
               const owner = ownerOfTransaction(tx.scope, tx.memberSlot);
               const title = tx.merchant ?? category?.name ?? "내역";
               return (
@@ -62,7 +61,7 @@ export function TransactionList({ groups, labels, names, emptyMessage, currentYe
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-body text-ink">{title}</span>
                       <span className="block truncate text-caption text-ink-muted">
-                        {[category?.name, method, tx.memo].filter(Boolean).join(" · ")}
+                        {[category?.name, tx.memo].filter(Boolean).join(" · ")}
                       </span>
                     </span>
                     <span className="flex shrink-0 flex-col items-end gap-1">
