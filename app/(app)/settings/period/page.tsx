@@ -40,7 +40,7 @@ export default async function PeriodSettingsPage() {
     <SettingsSubpage title="한 달 기준">
       <SettingsSection
         title="한 달 기준"
-        description="월급날부터 다음 월급날 전날까지를 한 달로 봐요. 홈·예산·통계·내역·정기지출이 이 기준을 따라요. 일정 달력은 실제 달력 그대로예요."
+        description="월급날부터 다음 월급날 전날까지를 한 달로 봐요. 홈·통계·내역이 이 기준을 따라요."
       >
         <PeriodSettingsForm settings={{ startDay: cfg.startDay, label: cfg.label, shift: cfg.shift }} />
       </SettingsSection>

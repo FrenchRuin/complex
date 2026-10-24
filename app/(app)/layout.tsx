@@ -15,7 +15,6 @@ import {
 } from "@/lib/household-data";
 import { getTodayMoods } from "@/lib/moods";
 import { getMyNotifications } from "@/lib/notifications";
-import { getRecurringOverview } from "@/lib/recurring";
 import { SIDEBAR_COOKIE } from "@/lib/sidebar";
 import { cookies } from "next/headers";
 
@@ -25,11 +24,10 @@ import { cookies } from "next/headers";
  */
 export default async function AppLayout({ children }: LayoutProps<"/">) {
   const me = await requireMember();
-  const [members, categories, paymentMethods, recurring, rules, notifications, moods] = await Promise.all([
+  const [members, categories, paymentMethods, rules, notifications, moods] = await Promise.all([
     getHouseholdMembers(),
     getVisibleCategories(),
     getVisiblePaymentMethods(),
-    getRecurringOverview(),
     getMerchantRules(),
     getMyNotifications(),
     getTodayMoods(),
@@ -38,7 +36,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
   const namesById = Object.fromEntries(members.map((m) => [m.id, m.displayName]));
   const meMember = { id: me.id, slot: me.slot, displayName: me.displayName, avatarUrl: me.avatarUrl };
 
-  const sidebar = { me: meMember, members, names, paymentMethods, recurringDue: recurring.dueUnpaid, moods };
+  const sidebar = { me: meMember, members, names, paymentMethods, moods };
   // 웹 사이드바 접힘 (기기마다 쿠키)
   const sidebarCollapsed = (await cookies()).get(SIDEBAR_COOKIE)?.value === "1";
 
@@ -56,7 +54,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
                     {children}
                   </main>
                 </div>
-                <MobileTabBar recurringDue={recurring.dueUnpaid} />
+                <MobileTabBar />
               </MobileMenuProvider>
             </TransactionPanelProvider>
           </NotificationsProvider>

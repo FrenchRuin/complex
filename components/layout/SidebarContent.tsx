@@ -9,7 +9,6 @@ import { MoodPicker } from "@/components/mood/MoodPicker";
 import { useTransactionPanel } from "@/components/transactions/TransactionPanelProvider";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
-import { CountBadge } from "@/components/ui/CountBadge";
 import { moodOf, moodText, type TodayMood } from "@/lib/calc/mood";
 import type { MemberNames } from "@/lib/domain";
 import type { HouseholdMember } from "@/lib/household";
@@ -24,8 +23,6 @@ export type SidebarData = {
   members: HouseholdMember[];
   names: MemberNames;
   paymentMethods: PaymentMethodOption[];
-  /** 정기지출 미납 배지 (결제일이 오늘이거나 지난 것) */
-  recurringDue: number;
   /** 오늘 기분 (F-04), 사람 id → 기분 */
   moods: Record<string, TodayMood>;
 };
@@ -40,7 +37,7 @@ type Props = SidebarData & {
 };
 
 /** 사이드바 내용 (SPEC §4.2), 머리 줄 아래 검색부터. 웹은 왼쪽에 고정, 폰은 ☰ 메뉴에서 같은 내용을 쓴다 */
-export function SidebarContent({ me, members, names, paymentMethods, recurringDue, moods, onNavigate, shortcut = false, autoFocusSearch = false }: Props) {
+export function SidebarContent({ me, members, names, paymentMethods, moods, onNavigate, shortcut = false, autoFocusSearch = false }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const { openNew } = useTransactionPanel();
@@ -122,7 +119,6 @@ export function SidebarContent({ me, members, names, paymentMethods, recurringDu
                   >
                     <item.icon size={20} strokeWidth={1.75} aria-hidden />
                     <span className="flex-1">{item.label}</span>
-                    {item.href === "/recurring" ? <CountBadge count={recurringDue} label="미납" /> : null}
                   </Link>
                 </li>
               );

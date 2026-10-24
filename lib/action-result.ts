@@ -24,8 +24,6 @@ const RPC_ERROR_MESSAGES: Record<string, string> = {
   category_type_mismatch: "지출/수입에 맞는 카테고리를 골라 주세요",
   invalid_payment_method: "결제수단을 찾을 수 없어요. 새로고침 후 다시 골라 주세요",
   invalid_recurring_item: "정기지출을 찾을 수 없어요. 새로고침해 주세요",
-  recurring_not_in_month: "이번 달에는 이 정기지출이 없어요. 새로고침해 주세요",
-  already_paid: "이미 납부 체크했어요. 새로고침해 주세요",
   invalid_amount: "금액을 입력해 주세요",
   invalid_goal: "저축 목표를 찾을 수 없어요. 새로고침해 주세요",
   invalid_asset: "자산 항목을 찾을 수 없어요. 새로고침해 주세요",

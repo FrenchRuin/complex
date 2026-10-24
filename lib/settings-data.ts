@@ -42,7 +42,6 @@ export async function getActiveInvite(): Promise<{ token: string; expiresAt: str
 export type Usage = {
   dbSizeBytes: number;
   transactionCount: number;
-  recurringCount: number;
   lastActivity: string | null;
 };
 
@@ -55,7 +54,6 @@ export const getUsage = cache(async (): Promise<Usage | null> => {
   return {
     dbSizeBytes: row.db_size_bytes,
     transactionCount: row.transaction_count,
-    recurringCount: row.recurring_count,
     lastActivity: row.last_activity,
   };
 });

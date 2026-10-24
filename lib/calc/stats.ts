@@ -99,11 +99,3 @@ export function personStats(rows: readonly Row[]): Record<"joint" | "a" | "b", P
   };
   return { joint: stat(groups.joint), a: stat(groups.a), b: stat(groups.b) };
 }
-
-/** 예산 없는 고정지출: 정기지출로 기록된 지출 중 예산이 없는 카테고리의 합계 */
-export function unbudgetedFixedTotal(rows: readonly Row[], budgets: readonly BudgetItem[]): number {
-  const budgeted = new Set(budgets.map((b) => b.categoryId));
-  return rows
-    .filter((r) => r.type === "expense" && r.source === "recurring" && !budgeted.has(r.categoryId))
-    .reduce((sum, r) => sum + r.amount, 0);
-}

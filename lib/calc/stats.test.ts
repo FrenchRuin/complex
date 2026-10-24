@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { categoryStats, monthlyExpense, personStats, recentMonths, unbudgetedFixedTotal } from "./stats";
+import { categoryStats, monthlyExpense, personStats, recentMonths } from "./stats";
 
 const row = (over: Partial<Parameters<typeof monthlyExpense>[0][number]>) => ({
   type: "expense" as const,
@@ -72,16 +72,5 @@ describe("personStats", () => {
       ],
     });
     expect(p.b).toEqual({ total: 0, top: [] });
-  });
-});
-
-describe("unbudgetedFixedTotal", () => {
-  it("정기지출 중 예산 없는 카테고리만", () => {
-    const rows = [
-      row({ source: "recurring", categoryId: "house", amount: 180000 }),
-      row({ source: "recurring", categoryId: "food", amount: 17000 }),
-      row({ source: "manual", categoryId: "house", amount: 5000 }),
-    ];
-    expect(unbudgetedFixedTotal(rows, [{ categoryId: "food", amount: 100 }])).toBe(180000);
   });
 });

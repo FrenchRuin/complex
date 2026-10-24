@@ -9,11 +9,10 @@ import { PersonStats } from "@/components/stats/PersonStats";
 import { MonthPicker } from "@/components/transactions/MonthPicker";
 import { getMonthBudgets } from "@/lib/budget";
 import { parseFilters } from "@/lib/calc/filters";
-import { categoryStats, monthlyExpense, personStats, recentMonths, unbudgetedFixedTotal } from "@/lib/calc/stats";
+import { categoryStats, monthlyExpense, personStats, recentMonths } from "@/lib/calc/stats";
 import { formatPeriodRange, formatPeriodRangeShort, isCalendarRange, periodOf, periodRange } from "@/lib/calc/period";
 import { shiftMonth, todayKST, type MonthString } from "@/lib/date";
 import { getHouseholdMembers, requireMember, toMemberNames } from "@/lib/household";
-import { formatWon } from "@/lib/money";
 import { getPeriodConfig } from "@/lib/period";
 import { getLabelMaps, getTransactionsInRange } from "@/lib/transactions";
 
@@ -41,7 +40,6 @@ export default async function StatsPage({ searchParams }: PageProps<"/stats">) {
 
   const thisMonth = rows.filter((r) => inPeriod(r.occurredOn) === month);
   const lastMonth = rows.filter((r) => inPeriod(r.occurredOn) === shiftMonth(month, -1));
-  const fixed = unbudgetedFixedTotal(thisMonth, budgets);
 
   const monthNav = (direction: -1 | 1) => (
     <Link
@@ -97,12 +95,6 @@ export default async function StatsPage({ searchParams }: PageProps<"/stats">) {
         </div>
         <SettingsSection title="카테고리별 지출" description="예산 대비 사용률과 지난달 대비 증감이에요.">
           <CategoryStatsTable stats={categoryStats(thisMonth, lastMonth, budgets)} categories={labels.categories} />
-          {fixed > 0 ? (
-            <p className="mt-3 rounded-sm bg-surface px-3 py-2 text-body text-ink tabular-nums">
-              예산 없는 고정지출 {formatWon(fixed)}
-              <span className="block text-caption text-ink-muted">정기지출로 기록된 것 중 예산이 없는 카테고리의 합계예요.</span>
-            </p>
-          ) : null}
         </SettingsSection>
       </div>
     </>

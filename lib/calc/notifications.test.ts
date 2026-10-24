@@ -11,15 +11,6 @@ describe("notificationSentence", () => {
     expect(notificationSentence({ ...base, kind: "restored" }, "서연")).toBe("서연님이 다이소 12,000원을 되돌렸어요");
   });
 
-  it("정기지출 납부 체크", () => {
-    expect(notificationSentence({ subject: "월세", amount: 700000, count: 1, kind: "recurring_paid" }, "지훈")).toBe(
-      "지훈님이 월세 700,000원 납부를 체크했어요",
-    );
-    expect(notificationSentence({ subject: "월세", amount: 700000, count: 1, kind: "recurring_unchecked" }, "지훈")).toBe(
-      "지훈님이 월세 700,000원 납부 체크를 풀었어요",
-    );
-  });
-
   it("문자 여러 건은 건수로", () => {
     expect(notificationSentence({ subject: null, amount: 50000, count: 5, kind: "sms_batch" }, "서연")).toBe(
       "서연님이 문자로 5건을 추가했어요",
@@ -42,9 +33,6 @@ describe("notificationHref", () => {
 
   it("삭제된 내역은 날짜만", () => {
     expect(notificationHref({ kind: "deleted", transactionId: "t1", occurredOn: "2026-08-31" })).toBe(
-      "/transactions?day=2026-08-31",
-    );
-    expect(notificationHref({ kind: "recurring_unchecked", transactionId: "t1", occurredOn: "2026-08-31" })).toBe(
       "/transactions?day=2026-08-31",
     );
   });
@@ -76,11 +64,13 @@ describe("notificationTimeLabel", () => {
 });
 
 describe("toNotificationKind", () => {
-  it("아는 종류는 그대로, 지운 기능의 종류(메모·일정)와 모르는 값은 null", () => {
+  it("아는 종류는 그대로, 지운 기능의 종류(메모·일정·정기지출)와 모르는 값은 null", () => {
     expect(toNotificationKind("created")).toBe("created");
     expect(toNotificationKind("mood_set")).toBe("mood_set");
     expect(toNotificationKind("note_created")).toBeNull();
     expect(toNotificationKind("event_updated")).toBeNull();
+    expect(toNotificationKind("recurring_paid")).toBeNull();
+    expect(toNotificationKind("recurring_unchecked")).toBeNull();
     expect(toNotificationKind("???")).toBeNull();
   });
 });

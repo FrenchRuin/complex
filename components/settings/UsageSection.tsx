@@ -7,7 +7,6 @@ import { SettingsSection } from "./SettingsSection";
 export type Usage = {
   dbSizeBytes: number;
   transactionCount: number;
-  recurringCount: number;
   lastActivity: string | null;
 };
 
@@ -45,10 +44,6 @@ export function UsageSection({ usage, supabaseProjectRef }: Props) {
         <div className="flex justify-between">
           <dt className="text-ink-muted">내역</dt>
           <dd className="text-ink">{usage.transactionCount.toLocaleString("ko-KR")}건</dd>
-        </div>
-        <div className="flex justify-between">
-          <dt className="text-ink-muted">정기지출</dt>
-          <dd className="text-ink">{usage.recurringCount.toLocaleString("ko-KR")}개</dd>
         </div>
         <div className="flex justify-between">
           <dt className="text-ink-muted">마지막 입력</dt>

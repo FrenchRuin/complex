@@ -54,7 +54,7 @@ test("한 사람이 내역을 추가하면 다른 사람에게 알림이 오고,
   await contextB.close();
 });
 
-test("알림 규칙: 문자 여러 건은 하나로, 같은 내역 수정은 하나로, 삭제·정기지출 체크, 내 알림은 안 옴 (F-17)", async () => {
+test("알림 규칙: 문자 여러 건은 하나로, 같은 내역 수정은 하나로, 삭제, 내 알림은 안 옴 (F-17)", async () => {
   const creds = readCreds();
   const a = await userClient(creds.a.email, creds.a.password);
   const b = await userClient(creds.b.email, creds.b.password);
@@ -81,22 +81,6 @@ test("알림 규칙: 문자 여러 건은 하나로, 같은 내역 수정은 하
   // 바뀐 게 없는 저장은 알림 없음
   await a.from("transactions").update({ amount: 7000 }).eq("id", tx!.id);
   await a.from("transactions").update({ deleted_at: new Date().toISOString() }).eq("id", tx!.id);
-  // 정기지출 납부 체크로 생긴 내역 (source = recurring)
-  await a.from("transactions").insert(row("E2E 월세", 700000, "recurring"));
-  // 진짜 정기지출을 체크했다가 풀면 "삭제" 대신 "납부 체크를 풀었어요" (지난달에만 있는 항목: 다른 테스트의 미납 개수에 안 섞이게)
-  const { data: item, error: itemError } = await a
-    .from("recurring_items")
-    .insert({
-      name: "E2E 관리비", amount: 150000, day_of_month: 25, category_id: categoryId,
-      scope: "joint", member_slot: "a", start_month: "2026-08-01", end_month: "2026-08-01",
-      household_id: "00000000-0000-0000-0000-000000000000",
-    })
-    .select("id")
-    .single();
-  expect(itemError).toBeNull();
-  expect((await a.rpc("check_recurring", { p_item_id: item!.id, p_month: "2026-08-01" })).error).toBeNull();
-  expect((await a.rpc("uncheck_recurring", { p_item_id: item!.id, p_month: "2026-08-01" })).error).toBeNull();
-
   const { data: forB } = await b
     .from("notifications")
     .select("kind, subject, amount, count, transaction_id")
@@ -108,11 +92,7 @@ test("알림 규칙: 문자 여러 건은 하나로, 같은 내역 수정은 하
   const mine = (forB ?? []).filter((n) => n.transaction_id === tx!.id);
   expect(mine.map((n) => n.kind)).toEqual(["created", "updated", "deleted"]);
   expect(mine.find((n) => n.kind === "updated")).toMatchObject({ amount: 7000, subject: "E2E 규칙" });
-  expect(forB!.filter((n) => n.kind === "recurring_paid").map((n) => n.subject)).toEqual(["E2E 월세", "E2E 관리비"]);
   expect(forB!.filter((n) => n.kind === "deleted")).toHaveLength(1);
-  expect(forB!.filter((n) => n.kind === "recurring_unchecked")).toEqual([
-    expect.objectContaining({ subject: "E2E 관리비", amount: 150000 }),
-  ]);
 
   // A 자신에게는 알림이 없다
   const { data: forA } = await a.from("notifications").select("id").gte("created_at", since);

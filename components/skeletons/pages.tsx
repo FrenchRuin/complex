@@ -37,15 +37,6 @@ export function TransactionsSkeleton() {
   );
 }
 
-export function RecurringSkeleton() {
-  return (
-    <PageSkeleton title="정기지출" className="flex w-full max-w-[720px] flex-col gap-4 px-5 py-6 lg:px-8">
-      <CardSkeleton rows={4} />
-      <CardSkeleton rows={4} />
-    </PageSkeleton>
-  );
-}
-
 export function StatsSkeleton() {
   return (
     <PageSkeleton title={null} className="grid grid-cols-1 gap-4 px-5 py-6 lg:grid-cols-2 lg:items-start lg:px-8">

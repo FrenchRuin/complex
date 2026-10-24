@@ -68,7 +68,7 @@ export function Sidebar({ initialCollapsed, ...data }: Props) {
         )}
       </div>
       {collapsed ? (
-        <SidebarRail me={data.me} members={data.members} moods={data.moods} recurringDue={data.recurringDue} />
+        <SidebarRail me={data.me} members={data.members} moods={data.moods} />
       ) : (
         <SidebarContent {...data} shortcut autoFocusSearch={focusSearch} />
       )}

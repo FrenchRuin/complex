@@ -30,10 +30,10 @@ function Tip({ children }: { children: ReactNode }) {
 const ITEM =
   "group relative inline-flex size-11 items-center justify-center rounded-sm text-ink hover:bg-surface-sunken aria-[current=page]:bg-primary-soft aria-[current=page]:text-primary";
 
-type Props = { me: HouseholdMember; members: HouseholdMember[]; moods: Record<string, TodayMood>; recurringDue: number };
+type Props = { me: HouseholdMember; members: HouseholdMember[]; moods: Record<string, TodayMood> };
 
 /** 접힌 웹 사이드바 (폭 64px, 머리 줄의 펼치기 버튼 아래): 알림, 내역 추가, 메뉴 아이콘, 상대 접속 상태, 내 연결 상태, 설정 */
-export function SidebarRail({ me, members, moods, recurringDue }: Props) {
+export function SidebarRail({ me, members, moods }: Props) {
   const pathname = usePathname();
   const { openNew } = useTransactionPanel();
   const status = useSyncStatus();
@@ -58,24 +58,15 @@ export function SidebarRail({ me, members, moods, recurringDue }: Props) {
       <nav aria-label="메뉴" className="flex-1">
         <ul className="flex flex-col items-center gap-1 pt-3 pb-1">
           {NAV_ITEMS.filter((item) => item.inSidebar).map((item) => {
-            const due = item.href === "/recurring" && recurringDue > 0;
             return (
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  aria-label={due ? `${item.label}, 미납 ${recurringDue}건` : item.label}
+                  aria-label={item.label}
                   aria-current={isActivePath(pathname, item.href) ? "page" : undefined}
                   className={ITEM}
                 >
                   <item.icon size={22} strokeWidth={1.75} aria-hidden />
-                  {due ? (
-                    <span
-                      aria-hidden
-                      className="absolute top-1 right-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] leading-none font-semibold text-on-primary tabular-nums"
-                    >
-                      {recurringDue}
-                    </span>
-                  ) : null}
                   <Tip>{item.label}</Tip>
                 </Link>
               </li>
