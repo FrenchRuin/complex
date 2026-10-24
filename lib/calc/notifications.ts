@@ -9,7 +9,6 @@ export type NotificationKind =
   | "updated"
   | "deleted"
   | "restored"
-  | "sms_batch"
   | "mood_set";
 
 export type NotificationItem = {
@@ -32,7 +31,6 @@ const KINDS: readonly NotificationKind[] = [
   "updated",
   "deleted",
   "restored",
-  "sms_batch",
   "mood_set",
 ];
 
@@ -52,7 +50,6 @@ const ACTION_TEXT: Record<"created" | "updated" | "deleted" | "restored", string
  * "서연님이 다이소 12,000원을 추가했어요"
  * "서연님이 월세 700,000원 납부를 체크했어요"
  * "서연님이 월세 700,000원 납부 체크를 풀었어요"
- * "서연님이 문자로 5건을 추가했어요"
  * "서연님이 오늘 기분을 🥰 행복해요로 정했어요 · 야근 중" (F-04)
  */
 export function notificationSentence(
@@ -65,9 +62,8 @@ export function notificationSentence(
     const what = m ? `${m.emoji} ${m.label}` : "새 기분";
     return `${who} 오늘 기분을 ${what}로 정했어요${item.subject ? ` · ${item.subject}` : ""}`;
   }
-  if (item.kind === "sms_batch") return `${who} 문자로 ${item.count}건을 추가했어요`;
 
-  // 문자 묶음이 아니면 DB가 금액을 항상 채운다. 그래서 "…원을"로 끝나 조사가 늘 "을"
+  // DB가 금액을 항상 채운다. 그래서 "…원을"로 끝나 조사가 늘 "을"
   const what = `${item.subject ?? "내역"} ${formatWon(item.amount ?? 0)}`;
   return `${who} ${what}을 ${ACTION_TEXT[item.kind as keyof typeof ACTION_TEXT]}`;
 }
@@ -80,15 +76,14 @@ export function objectParticle(word: string): "을" | "를" {
 }
 
 /**
- * 누르면 갈 곳: 그 내역의 날짜 (+ 편집 창 열기). 삭제된 내역은 날짜만, 문자 묶음은 그 달만.
+ * 누르면 갈 곳: 그 내역의 날짜 (+ 편집 창 열기). 삭제된 내역은 날짜만.
  */
 export function notificationHref(
   item: Pick<NotificationItem, "kind" | "transactionId" | "occurredOn">,
 ): string {
   if (item.kind === "mood_set") return "/";
   if (!item.occurredOn) return "/transactions";
-  // month 없이 날짜만 주면 내역 화면이 한 달 기준(F-56)으로 그 날짜가 든 달을 연다. 문자 묶음은 그 달만(at)
-  if (item.kind === "sms_batch") return `/transactions?at=${item.occurredOn}`;
+  // month 없이 날짜만 주면 내역 화면이 한 달 기준(F-56)으로 그 날짜가 든 달을 연다
   const params = new URLSearchParams({ day: item.occurredOn });
   // 지운 내역은 날짜만
   if (item.transactionId && item.kind !== "deleted") {

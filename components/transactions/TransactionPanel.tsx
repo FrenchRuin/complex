@@ -2,8 +2,6 @@
 
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
-import { useState } from "react";
-import { SmsImport } from "./sms/SmsImport";
 import { TransactionForm } from "./TransactionForm";
 import type { PanelState } from "./TransactionPanelProvider";
 import type { PanelData } from "./types";
@@ -23,8 +21,6 @@ type Props = {
 export function TransactionPanel({ state, data, onClose, onLearn }: Props) {
   const open = state.mode !== "closed";
   const record = state.mode === "edit" ? state.record : null;
-  const [tab, setTab] = useState<"manual" | "sms">("manual");
-  const showSms = !record && tab === "sms";
 
   return (
     <Dialog.Root open={open} onOpenChange={(next) => (next ? undefined : onClose())}>
@@ -45,31 +41,7 @@ export function TransactionPanel({ state, data, onClose, onLearn }: Props) {
               <X size={22} strokeWidth={1.75} aria-hidden />
             </Dialog.Close>
           </div>
-          {record ? null : (
-            <div role="tablist" aria-label="입력 방식" className="mx-5 mb-2 flex rounded-sm bg-surface-sunken p-1">
-              {(
-                [
-                  { id: "manual", label: "직접 입력" },
-                  { id: "sms", label: "문자로 추가" },
-                ] as const
-              ).map((t) => (
-                <button
-                  key={t.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={tab === t.id}
-                  onClick={() => setTab(t.id)}
-                  className={`flex h-10 flex-1 items-center justify-center rounded-[6px] text-body ${
-                    tab === t.id ? "bg-surface-raised font-semibold text-ink ring-1 ring-line" : "text-ink-muted hover:text-ink"
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          )}
-          {open && showSms ? <SmsImport data={data} onDone={onClose} onLearn={onLearn} /> : null}
-          {open && !showSms ? (
+          {open ? (
             <TransactionForm record={record} data={data} onDone={onClose} onLearn={onLearn} />
           ) : null}
         </Dialog.Content>

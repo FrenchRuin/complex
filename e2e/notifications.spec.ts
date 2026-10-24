@@ -54,7 +54,7 @@ test("한 사람이 내역을 추가하면 다른 사람에게 알림이 오고,
   await contextB.close();
 });
 
-test("알림 규칙: 문자 여러 건은 하나로, 같은 내역 수정은 하나로, 삭제, 내 알림은 안 옴 (F-17)", async () => {
+test("알림 규칙: 같은 내역 수정은 하나로, 삭제, 내 알림은 안 옴 (F-17)", async () => {
   const creds = readCreds();
   const a = await userClient(creds.a.email, creds.a.password);
   const b = await userClient(creds.b.email, creds.b.password);
@@ -70,10 +70,6 @@ test("알림 규칙: 문자 여러 건은 하나로, 같은 내역 수정은 하
     updated_by: "00000000-0000-0000-0000-000000000000",
   });
 
-  // 문자 3건을 한 번에 → 알림 1개 (3건)
-  const sms = await a.from("transactions").insert([row("E2E 문자1", 1000, "sms"), row("E2E 문자2", 2000, "sms"), row("E2E 문자3", 3000, "sms")]);
-  expect(sms.error).toBeNull();
-
   // 직접 입력 1건 → 두 번 고치기 → 안 읽은 "수정" 알림은 하나만
   const { data: tx } = await a.from("transactions").insert(row("E2E 규칙", 5000, "manual")).select("id").single();
   await a.from("transactions").update({ amount: 6000 }).eq("id", tx!.id);
@@ -86,9 +82,6 @@ test("알림 규칙: 문자 여러 건은 하나로, 같은 내역 수정은 하
     .select("kind, subject, amount, count, transaction_id")
     .gte("created_at", since)
     .order("created_at");
-  const kinds = (forB ?? []).map((n) => n.kind);
-  expect(kinds.filter((k) => k === "sms_batch")).toHaveLength(1);
-  expect(forB!.find((n) => n.kind === "sms_batch")).toMatchObject({ count: 3, amount: 6000 });
   const mine = (forB ?? []).filter((n) => n.transaction_id === tx!.id);
   expect(mine.map((n) => n.kind)).toEqual(["created", "updated", "deleted"]);
   expect(mine.find((n) => n.kind === "updated")).toMatchObject({ amount: 7000, subject: "E2E 규칙" });
