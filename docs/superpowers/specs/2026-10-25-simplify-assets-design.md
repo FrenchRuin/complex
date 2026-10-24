@@ -58,7 +58,7 @@
 
 **지운 자산**: 목록·고르기 창에서 숨긴다. 예전 내역에는 이름이 보인다 (soft delete라 이름을 읽을 수 있음).
 
-**DB 마이그레이션 (PR마다 하나)**
+**DB 마이그레이션** (구현 계획에서 바꿈: PR 1은 DB를 건드리지 않고, PR 2에서 칸을 **더하는** 마이그레이션, 합치기 직전에 **지우는** 정리 마이그레이션. 개발하는 동안 운영 중인 앱이 깨지지 않게)
 - 지우기 전에 해당 표 데이터 전부를 로컬 `tmp/`(gitignore)에 JSON으로 백업
 - 지우는 표: `notes`, `events`, `loan_profiles`, `loan_debts`, `loan_scenarios`, `recurring_items`, `budgets`, `budget_months`, `spend_budgets`, `spend_budget_methods`, `spend_budget_amounts`, `goals`, `goal_contributions`, `payment_methods`, 그리고 관련 함수·트리거
 - `notifications`: `note_id`·`event_id` 칸 삭제, 메모·일정·정기지출 알림 행 삭제, `kind` 검사를 `created, updated, deleted, restored, mood_set`으로

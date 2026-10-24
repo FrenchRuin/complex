@@ -54,31 +54,31 @@
 | F-02 | 가구 만들기, 초대 링크로 배우자 합류 (최대 2명) | MVP | `spec/accounts.md` |
 | F-03 | 프로필: 표시 이름, 사람 색(A/B 자동 지정) | MVP | `spec/accounts.md` |
 | F-04 | 오늘 기분: 이모지 + 한 줄, 상대에게 보이고 알림 (사용자 요청, 2026-10-01 추가) | 개선 | `spec/accounts.md` |
-| F-10 | 내역 추가 (직접 입력) | MVP | `spec/transactions.md` |
+| F-10 | 내역 추가 (직접 입력. 결제수단 대신 자산 선택·이체, 2026-10-25) | MVP | `spec/transactions.md` |
 | F-11 | 내역 수정·삭제 | MVP | `spec/transactions.md` |
 | F-12 | 내역 목록, 필터, 검색 | MVP | `spec/transactions.md` |
 | F-13 | 캘린더 보기 | MVP | `spec/transactions.md` |
 | F-14 | 실시간 동기화, 활동 표시 | MVP | `spec/transactions.md` |
-| F-15 | 카드 문자 붙여넣기로 추가 | 2차 | `spec/transactions.md` |
+| F-15 | ~~카드 문자 붙여넣기로 추가~~ (제거됨, 2026-10-25 앱 단순화) | — | `spec/transactions.md` |
 | F-16 | 가맹점별 카테고리 자동 추천 | 2차 | `spec/transactions.md` |
 | F-17 | 앱 안 알림 (사용자 요청, 2026-09-28 추가) | 개선 | `spec/notifications-notes-schedule.md` |
-| F-18 | 공유 메모 (사용자 요청, 2026-09-28 추가) | 개선 | `spec/notifications-notes-schedule.md` |
-| F-19 | 공유 일정 (사용자 요청, 2026-09-28 추가) | 개선 | `spec/notifications-notes-schedule.md` |
+| F-18 | ~~공유 메모 (사용자 요청, 2026-09-28 추가)~~ (제거됨, 2026-10-25 앱 단순화) | — | `spec/notifications-notes-schedule.md` |
+| F-19 | ~~공유 일정 (사용자 요청, 2026-09-28 추가)~~ (제거됨, 2026-10-25 앱 단순화) | — | `spec/notifications-notes-schedule.md` |
 | F-20 | 홈 대시보드 | MVP | `spec/budget-stats.md` |
-| F-21 | 카테고리별 월 예산 | 2차 | `spec/budget-stats.md` |
-| F-22 | 예산 초과 표시 | 2차 | `spec/budget-stats.md` |
+| F-21 | ~~카테고리별 월 예산~~ (제거됨, 2026-10-25 앱 단순화) | — | `spec/budget-stats.md` |
+| F-22 | ~~예산 초과 표시~~ (제거됨, 2026-10-25 앱 단순화) | — | `spec/budget-stats.md` |
 | F-23 | 통계 화면 | 2차 | `spec/budget-stats.md` |
 | F-24 | ~~공동 지출 정산~~ (제거됨) | — | `spec/budget-stats.md` |
-| F-25 | 월말 결산 화면 + PDF로 저장 (사용자 요청, 2026-10-01 추가) | 개선 | `spec/budget-stats.md` |
-| F-30 | 정기지출 등록·수정·중지 | MVP | `spec/recurring.md` |
-| F-31 | 월별 납부 체크 → 내역 자동 기록 | MVP | `spec/recurring.md` |
+| F-25 | ~~월말 결산 화면 + PDF로 저장 (사용자 요청, 2026-10-01 추가)~~ (제거됨, 2026-10-25 앱 단순화) | — | `spec/budget-stats.md` |
+| F-30 | ~~정기지출 등록·수정·중지~~ (제거됨, 2026-10-25 앱 단순화) | — | `spec/recurring.md` |
+| F-31 | ~~월별 납부 체크 → 내역 자동 기록~~ (제거됨, 2026-10-25 앱 단순화) | — | `spec/recurring.md` |
 | F-40 | 자산·부채 수기 관리, 순자산 (M7에서 구현, 2026-09-27) | 3차 | `spec/assets.md` |
-| F-41 | 월말 순자산 기록과 추이 | 3차 | `spec/assets.md` |
-| F-42 | 저축 목표 | 3차 | `spec/assets.md` |
-| F-43 | 대출 계산: 매매·전세 최대 대출 금액 (사용자 요청, 2026-09-30 추가) | 개선 | `spec/loans.md` |
+| F-41 | 자산 잔액 기록 (추이 그래프는 제거됨, 2026-10-25) | 3차 | `spec/assets.md` |
+| F-42 | ~~저축 목표~~ (제거됨, 2026-10-25 앱 단순화) | — | `spec/assets.md` |
+| F-43 | ~~대출 계산: 매매·전세 최대 대출 금액 (사용자 요청, 2026-09-30 추가)~~ (제거됨, 2026-10-25 앱 단순화) | — | `spec/loans.md` |
 | F-50 | 카테고리 관리 | MVP | `spec/settings.md` |
-| F-51 | 계좌·카드(결제수단) 관리 | MVP | `spec/settings.md` |
-| F-52 | 엑셀 내보내기(백업) (가져오기는 제외됨, 2026-10-01 CSV에서 바꿈) | 2차 | `spec/settings.md` |
+| F-51 | ~~계좌·카드(결제수단) 관리~~ (제거됨, 2026-10-25 앱 단순화) | — | `spec/settings.md` |
+| F-52 | ~~엑셀 내보내기(백업) (가져오기는 제외됨, 2026-10-01 CSV에서 바꿈)~~ (제거됨, 2026-10-25 앱 단순화) | — | `spec/settings.md` |
 | F-53 | PWA 설치, 다크 모드 | 3차 | `spec/settings.md` |
 | F-54 | 서비스 사용량 보기 (사용자 요청, 2026-09-27 추가) | 2차 | `spec/settings.md` |
 | F-55 | 공휴일 관리 (사용자 요청, 2026-09-29 추가) | 개선 | `spec/settings.md` |

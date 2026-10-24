@@ -4,7 +4,7 @@ import { login } from "./support/login";
 
 const todayKST = () => new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Seoul" }).format(new Date());
 
-test("공휴일: 기본 목록, 쉬는 날 아님·다시 쉬는 날로, 직접 추가 → 일정 달력에 표시, 삭제·되돌리기 (F-55)", async ({ page }) => {
+test("공휴일: 기본 목록, 쉬는 날 아님·다시 쉬는 날로, 직접 추가, 삭제·되돌리기 (F-55)", async ({ page }) => {
   await login(page, "a", "/settings");
   await page.getByRole("navigation", { name: "설정 메뉴" }).getByRole("link", { name: /^공휴일/ }).click();
   await expect(page).toHaveURL(/\/settings\/holidays$/);
@@ -19,7 +19,7 @@ test("공휴일: 기본 목록, 쉬는 날 아님·다시 쉬는 날로, 직접 
   await foundation.getByRole("button", { name: /다시 쉬는 날로$/ }).click();
   await expect(foundation.getByRole("button", { name: /쉬는 날 아님$/ })).toBeVisible();
 
-  // 오늘 날짜로 직접 추가 → 일정 달력(오늘 선택)에 공휴일 이름
+  // 오늘 날짜로 직접 추가
   await page.goto("/settings/holidays");
   await page.getByLabel("이름").fill("E2E 휴무");
   await page.getByRole("button", { name: "공휴일 추가" }).click();
@@ -27,16 +27,7 @@ test("공휴일: 기본 목록, 쉬는 날 아님·다시 쉬는 날로, 직접 
   const added = page.getByRole("region", { name: "공휴일 목록" }).getByRole("listitem").filter({ hasText: "E2E 휴무" });
   await expect(added).toContainText("직접 추가");
 
-  await page.goto("/schedule");
-  await expect(page.getByRole("region", { name: /월 \d+일/ })).toContainText("공휴일 · E2E 휴무");
-  await expect(page.getByRole("button", { name: /E2E 휴무/ })).toBeVisible();
-
-  // 지난 추석은 9월 달력에 이름과 함께
-  await page.goto("/schedule?month=2026-09");
-  await expect(page.getByRole("button", { name: /9월 25일.*추석/ })).toBeVisible();
-
   // 삭제 → 되돌리기 → 다시 삭제
-  await page.goto("/settings/holidays");
   await added.getByRole("button", { name: /삭제$/ }).click();
   await expect(added).toHaveCount(0);
   await page.getByRole("button", { name: "되돌리기" }).click();

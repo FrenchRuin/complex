@@ -21,18 +21,13 @@ test("자산·부채 추가 → 순자산 (F-40)", async ({ page }) => {
   await add("E2E 대출", "2000000", "대출");
   await expect(page.getByText("자산 5,000,000원 − 부채 2,000,000원")).toBeVisible();
   await expect(page.getByText("3,000,000원").first()).toBeVisible();
-  // 자산 구성: 부채는 빼고 종류별 비율 (글자로도 보인다)
-  const composition = page.getByRole("figure").filter({ has: page.getByText("자산 종류별 비율") });
-  await expect(composition.getByRole("listitem")).toHaveCount(1);
-  await expect(composition.getByRole("listitem")).toContainText(["예금5,000,000원100%"]);
-
   // 목록은 종류별로 묶여 접혀 있다: 묶음 머리에 개수·합계, 누르면 펼쳐진다
   const depositGroup = page.getByRole("button", { name: /^예금 1개/ });
   await expect(depositGroup).toHaveAttribute("aria-expanded", "false");
   await expect(page.getByRole("button", { name: /^대출 1개/ })).toContainText("−2,000,000원");
   await depositGroup.click();
 
-  // 지난 날짜 금액 기록 → 지금 금액은 그대로, 추이 표에 지난달이 생긴다 (F-41)
+  // 지난 날짜 금액 기록 → 지금 금액은 그대로, 기록은 두 개 (F-41)
   await page.getByRole("button", { name: /E2E 통장/ }).click();
   const edit = page.getByRole("dialog", { name: "자산·부채 수정" });
   await edit.getByLabel("새 금액").fill("4000000");

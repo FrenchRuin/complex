@@ -46,7 +46,7 @@ app/
   (auth)/login, (auth)/invite/[token], onboarding
   (app)/layout.tsx          # 사이드바 + 메인 스크롤 영역 / 모바일 탭바
   (app)/(home)/page.tsx     # 홈 (loading.tsx를 홈에만 걸려고 그룹으로 감쌈)
-  (app)/transactions, recurring, stats, schedule, notes, assets, loans, settings
+  (app)/transactions, stats, assets, settings   # 2026-10-25 단순화로 정기지출·예산·일정·메모·대출 제거
 components/
   ui/                       # 버튼, 칩, 세그먼트, 진행바 등 디자인 시스템 부품
   layout/                   # Sidebar, MobileTabBar, PageHeader
