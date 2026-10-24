@@ -4,7 +4,7 @@
 import { z } from "zod";
 import { ASSET_KINDS } from "./calc/assets";
 import { CATEGORY_ICON_NAMES } from "./category-icons";
-import { CATEGORY_TYPES, OWNERS, SCOPES, SLOTS } from "./domain";
+import { CATEGORY_TYPES, OWNERS, SCOPES, SLOTS, TRANSACTION_TYPES } from "./domain";
 
 export const displayNameSchema = z
   .string()
@@ -44,22 +44,37 @@ export const dateStringSchema = z
     return date.getUTCFullYear() === y && date.getUTCMonth() === m - 1 && date.getUTCDate() === d;
   }, "날짜를 확인해 주세요");
 
-/** 내역 추가·수정 (F-10, F-11) */
-export const transactionInputSchema = z.object({
-  id: z.uuid().optional(),
-  type: z.enum(CATEGORY_TYPES),
-  amount: z
-    .number("금액을 입력해 주세요")
-    .int("금액은 원 단위로 입력해 주세요")
-    .min(1, "금액을 입력해 주세요")
-    .max(100_000_000_000, "금액이 너무 커요. 다시 확인해 주세요"),
-  occurredOn: dateStringSchema,
-  categoryId: z.uuid("카테고리를 골라 주세요"),
-  merchant: optionalText(50, "가맹점·내용은 50자까지 쓸 수 있어요"),
-  memo: optionalText(200, "메모는 200자까지 쓸 수 있어요"),
-  scope: z.enum(SCOPES),
-  memberSlot: z.enum(SLOTS),
-});
+/** 내역 추가·수정 (F-10, F-11). 새 지출·수입은 자산 필수, 예전 내역(자산 없음)은 고칠 때 비워 둬도 된다 */
+export const transactionInputSchema = z
+  .object({
+    id: z.uuid().optional(),
+    type: z.enum(TRANSACTION_TYPES),
+    amount: z
+      .number("금액을 입력해 주세요")
+      .int("금액은 원 단위로 입력해 주세요")
+      .min(1, "금액을 입력해 주세요")
+      .max(100_000_000_000, "금액이 너무 커요. 다시 확인해 주세요"),
+    occurredOn: dateStringSchema,
+    categoryId: z.uuid("카테고리를 골라 주세요").nullable(),
+    merchant: optionalText(50, "가맹점·내용은 50자까지 쓸 수 있어요"),
+    memo: optionalText(200, "메모는 200자까지 쓸 수 있어요"),
+    assetId: z.uuid("자산을 골라 주세요").nullable(),
+    toAssetId: z.uuid("받는 자산을 골라 주세요").nullable(),
+    scope: z.enum(SCOPES),
+    memberSlot: z.enum(SLOTS),
+  })
+  .superRefine((v, ctx) => {
+    const issue = (message: string, path: string) => ctx.addIssue({ code: "custom", message, path: [path] });
+    if (v.type === "transfer") {
+      if (!v.assetId) issue("보내는 자산을 골라 주세요", "assetId");
+      else if (!v.toAssetId) issue("받는 자산을 골라 주세요", "toAssetId");
+      else if (v.assetId === v.toAssetId) issue("보내는 자산과 받는 자산이 같아요. 다른 자산을 골라 주세요", "toAssetId");
+      return;
+    }
+    if (!v.categoryId) issue("카테고리를 골라 주세요", "categoryId");
+    if (!v.id && !v.assetId) issue("자산을 골라 주세요", "assetId");
+  })
+  .transform((v) => (v.type === "transfer" ? { ...v, categoryId: null, merchant: null } : { ...v, toAssetId: null }));
 
 export type TransactionInput = z.input<typeof transactionInputSchema>;
 

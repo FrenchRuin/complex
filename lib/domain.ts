@@ -11,6 +11,20 @@ export type Owner = (typeof OWNERS)[number];
 export const CATEGORY_TYPES = ["expense", "income"] as const;
 export type CategoryType = (typeof CATEGORY_TYPES)[number];
 
+/** 내역 유형. 카테고리 종류(CategoryType)는 지출·수입뿐이고, 이체는 카테고리가 없다 */
+export const TRANSACTION_TYPES = ["expense", "income", "transfer"] as const;
+export type TransactionType = (typeof TRANSACTION_TYPES)[number];
+
+export const TRANSACTION_TYPE_LABEL: Record<TransactionType, string> = {
+  expense: "지출",
+  income: "수입",
+  transfer: "이체",
+};
+
+export function toTransactionType(value: string): TransactionType {
+  return value === "income" || value === "transfer" ? value : "expense";
+}
+
 export const SCOPES = ["joint", "personal"] as const;
 export type Scope = (typeof SCOPES)[number];
 
