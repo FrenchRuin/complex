@@ -1,4 +1,4 @@
-/** Supabase는 한 번에 최대 1000줄까지 준다. 내보내기(F-52)는 전체가 필요해 1000줄씩 이어서 읽는다 */
+/** Supabase는 한 번에 최대 1000줄까지 준다. 전체가 필요한 곳(자산 잔액 등)은 1000줄씩 이어서 읽는다 */
 export const PAGE_SIZE = 1000;
 
 type Page<T> = { data: T[] | null; error: { message: string } | null };
