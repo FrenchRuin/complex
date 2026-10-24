@@ -1,23 +1,24 @@
 /**
  * 내역 합계와 날짜별 묶음 (F-12, F-13). 삭제된 내역은 미리 빼고 넘긴다.
  */
-import type { CategoryType } from "@/lib/domain";
+import type { TransactionType } from "@/lib/domain";
 import type { DateString } from "@/lib/date";
 
-export type Summable = { type: CategoryType; amount: number; occurredOn: DateString };
+export type Summable = { type: TransactionType; amount: number; occurredOn: DateString };
 export type DayTotal = { expense: number; income: number };
 
+/** 지출·수입 합계. 이체는 내 돈끼리 옮긴 것이라 더하지 않는다 */
 export function sumTotals(rows: readonly Summable[]): DayTotal {
-  return rows.reduce(
-    (acc, row) => ({ ...acc, [row.type]: acc[row.type] + row.amount }),
-    { expense: 0, income: 0 },
-  );
+  const total: DayTotal = { expense: 0, income: 0 };
+  for (const row of rows) if (row.type !== "transfer") total[row.type] += row.amount;
+  return total;
 }
 
-/** 날짜 → 그날 지출·수입 합계 */
+/** 날짜 → 그날 지출·수입 합계 (이체 제외) */
 export function dailyTotals(rows: readonly Summable[]): Record<DateString, DayTotal> {
   const totals: Record<DateString, DayTotal> = {};
   for (const row of rows) {
+    if (row.type === "transfer") continue;
     const day = (totals[row.occurredOn] ??= { expense: 0, income: 0 });
     day[row.type] += row.amount;
   }

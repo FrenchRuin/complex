@@ -2,13 +2,14 @@
  * 통계 계산 (F-23).
  */
 import { monthOf, shiftMonth, type MonthString } from "@/lib/date";
-import type { CategoryType, Scope, Slot } from "@/lib/domain";
+import type { Scope, Slot, TransactionType } from "@/lib/domain";
 
 type Row = {
-  type: CategoryType;
+  type: TransactionType;
   amount: number;
   occurredOn: string;
-  categoryId: string;
+  /** 이체는 카테고리가 없다 */
+  categoryId: string | null;
   scope: Scope;
   memberSlot: Slot;
   source: string;
@@ -44,7 +45,7 @@ export type CategoryStat = {
 export function categoryStats(thisMonth: readonly Row[], lastMonth: readonly Row[]): CategoryStat[] {
   const sum = (rows: readonly Row[]) => {
     const map: Record<string, number> = {};
-    for (const r of rows) if (r.type === "expense") map[r.categoryId] = (map[r.categoryId] ?? 0) + r.amount;
+    for (const r of rows) if (r.type === "expense" && r.categoryId) map[r.categoryId] = (map[r.categoryId] ?? 0) + r.amount;
     return map;
   };
   const now = sum(thisMonth);
@@ -65,7 +66,7 @@ export function personStats(rows: readonly Row[]): Record<"joint" | "a" | "b", P
   }
   const stat = (list: Row[]): PersonStat => {
     const byCategory: Record<string, number> = {};
-    for (const r of list) byCategory[r.categoryId] = (byCategory[r.categoryId] ?? 0) + r.amount;
+    for (const r of list) if (r.categoryId) byCategory[r.categoryId] = (byCategory[r.categoryId] ?? 0) + r.amount;
     return {
       total: list.reduce((s, r) => s + r.amount, 0),
       top: Object.entries(byCategory)

@@ -2,7 +2,7 @@
  * 홈 대시보드 계산 (F-20, F-14, SPEC §6).
  */
 import type { DateString } from "@/lib/date";
-import type { CategoryType, Scope, Slot } from "@/lib/domain";
+import type { Scope, Slot, TransactionType } from "@/lib/domain";
 import { formatWon } from "@/lib/money";
 import type { PersonFilter } from "./filters";
 
@@ -18,7 +18,7 @@ export function matchesPerson(row: PersonRow, who: PersonFilter): boolean {
 export type Split = { joint: number; a: number; b: number };
 
 /** 지출을 공동 / A 개인 / B 개인으로 나눈 합계 */
-export function splitByOwner(rows: readonly (PersonRow & { type: CategoryType; amount: number })[]): Split {
+export function splitByOwner(rows: readonly (PersonRow & { type: TransactionType; amount: number })[]): Split {
   const split: Split = { joint: 0, a: 0, b: 0 };
   for (const row of rows) {
     if (row.type !== "expense") continue;

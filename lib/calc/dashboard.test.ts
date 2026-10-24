@@ -88,3 +88,9 @@ describe("relativeDayLabel", () => {
     expect(relativeDayLabel("2026-09-30", "2026-10-01")).toBe("어제");
   });
 });
+
+describe("splitByOwner: 이체", () => {
+  it("이체는 지출 나누기에 들어가지 않는다", () => {
+    expect(splitByOwner([{ type: "transfer", amount: 500_000, scope: "joint", memberSlot: "a" }])).toEqual({ joint: 0, a: 0, b: 0 });
+  });
+});

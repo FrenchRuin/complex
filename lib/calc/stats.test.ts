@@ -70,3 +70,12 @@ describe("personStats", () => {
     expect(p.b).toEqual({ total: 0, top: [] });
   });
 });
+
+describe("이체", () => {
+  it("이체는 카테고리별·사람별·월별 지출에 들어가지 않는다", () => {
+    const transfer = row({ type: "transfer", amount: 900_000, categoryId: null });
+    expect(categoryStats([transfer], [])).toEqual([]);
+    expect(personStats([transfer]).joint.total).toBe(0);
+    expect(monthlyExpense([transfer], ["2026-09"])).toEqual([{ month: "2026-09", expense: 0 }]);
+  });
+});
