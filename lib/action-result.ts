@@ -25,7 +25,6 @@ const RPC_ERROR_MESSAGES: Record<string, string> = {
   invalid_payment_method: "결제수단을 찾을 수 없어요. 새로고침 후 다시 골라 주세요",
   invalid_recurring_item: "정기지출을 찾을 수 없어요. 새로고침해 주세요",
   invalid_amount: "금액을 입력해 주세요",
-  invalid_goal: "저축 목표를 찾을 수 없어요. 새로고침해 주세요",
   invalid_asset: "자산 항목을 찾을 수 없어요. 새로고침해 주세요",
   invalid_period: "시작일은 1일부터 28일까지 고를 수 있어요",
   last_asset_value: "금액 기록은 하나 이상 있어야 해요. 항목을 지우려면 항목 삭제를 눌러 주세요",

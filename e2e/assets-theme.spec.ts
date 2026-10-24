@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { login } from "./support/login";
 
-test("자산·부채 추가 → 순자산, 저축 목표 적립 → 진행률 (F-40, F-42)", async ({ page }) => {
+test("자산·부채 추가 → 순자산 (F-40)", async ({ page }) => {
   await login(page, "a", "/assets");
   await expect(page.getByRole("heading", { level: 2, name: "순자산", exact: true })).toBeVisible();
 
@@ -43,27 +43,11 @@ test("자산·부채 추가 → 순자산, 저축 목표 적립 → 진행률 (F
   await expect(edit.getByRole("listitem")).toHaveCount(2);
   await edit.getByRole("button", { name: "닫기" }).click();
   await expect(page.getByText("자산 5,000,000원 − 부채 2,000,000원")).toBeVisible();
-  await page.getByText("표로 보기").click();
-  await expect(page.getByRole("table")).toContainText("4,000,000원");
-
-  await page.getByRole("button", { name: "저축 목표 추가" }).click();
-  const goalDialog = page.getByRole("dialog", { name: "저축 목표 추가" });
-  await goalDialog.getByLabel("목표 이름").fill("E2E 여행");
-  await goalDialog.getByLabel("목표액").fill("1000000");
-  await goalDialog.getByRole("button", { name: "저장" }).click();
-  await expect(goalDialog).toBeHidden();
-
-  await page.getByRole("button", { name: "적립" }).first().click();
-  const contribute = page.getByRole("dialog", { name: "E2E 여행 적립" });
-  await contribute.getByLabel("적립 금액").fill("250000");
-  await contribute.getByRole("button", { name: "적립하기" }).click();
-  await expect(contribute).toBeHidden();
-  await expect(page.getByRole("progressbar", { name: "E2E 여행 진행률" })).toHaveAttribute("aria-valuenow", "25");
 
   // 홈은 돈 중심이라 자산 카드가 없다 (2026-09-29). 자산은 메뉴로
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /월 지출/ })).toBeVisible();
-  await expect(page.getByRole("main").getByRole("link", { name: /자산·목표/ })).toHaveCount(0);
+  await expect(page.getByRole("main").getByRole("link", { name: /^자산/ })).toHaveCount(0);
 });
 
 test("화면 모드: 다크를 고르면 바로 바뀌고 새로고침해도 유지, 시스템으로 되돌리기 (F-53)", async ({ page }) => {

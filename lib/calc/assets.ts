@@ -1,9 +1,7 @@
 /**
- * 자산·순자산·저축 목표 계산 (F-40~F-42).
+ * 자산·순자산 계산 (F-40, F-41).
  */
-import { monthOf, monthRange, shiftMonth, type DateString, type MonthString } from "@/lib/date";
 import type { Owner } from "@/lib/domain";
-import { formatWon } from "@/lib/money";
 
 export const ASSET_KINDS = [
   "deposit",
@@ -81,116 +79,4 @@ export function groupAssets<T extends { kind: AssetKind; isLiability: boolean; o
     }
   }
   return groups;
-}
-
-/** 자산 구성 도넛의 한 조각. slot은 차트 색 토큰 번호(chart-1~7) */
-export type CompositionPart = { kind: AssetKind; label: string; amount: number; percent: number; slot: number };
-
-/** 도넛에 쓰는 종류 순서 = 색 순서. 이웃한 색이 색맹 검사를 통과하도록 정한 순서라 금액 순으로 바꾸지 않는다 */
-const COMPOSITION_KINDS = ["deposit", "savings", "investment", "lease_deposit", "real_estate", "car", "other"] as const;
-
-/**
- * 자산 구성 (F-40): 부채를 뺀 자산을 종류별로 더하고 비율(%)을 낸다.
- * 순서는 종류 순서 고정, 0원인 종류는 뺀다. 비율은 반올림 뒤 합이 100이 되도록 가장 큰 종류에서 맞춘다.
- * 부채가 아닌데 종류가 대출이면 기타로 센다.
- */
-export function assetComposition(items: readonly { kind: AssetKind; isLiability: boolean; amount: number }[]): CompositionPart[] {
-  const sums = new Map<AssetKind, number>();
-  for (const item of items) {
-    if (item.isLiability) continue;
-    const kind = item.kind === "loan" ? "other" : item.kind;
-    sums.set(kind, (sums.get(kind) ?? 0) + item.amount);
-  }
-  const parts = COMPOSITION_KINDS.map((kind, i) => ({
-    kind: kind as AssetKind,
-    label: ASSET_KIND_LABEL[kind],
-    amount: sums.get(kind) ?? 0,
-    percent: 0,
-    slot: i + 1,
-  })).filter((p) => p.amount > 0);
-  const total = parts.reduce((s, p) => s + p.amount, 0);
-  if (total === 0) return [];
-
-  for (const p of parts) p.percent = Math.round((p.amount / total) * 100);
-  const largest = parts.reduce((max, p) => (p.amount > max.amount ? p : max), parts[0]);
-  largest.percent += 100 - parts.reduce((s, p) => s + p.percent, 0);
-  return parts;
-}
-
-export type TrendPoint = { month: MonthString; net: number; current: boolean };
-
-export type HistoryAsset = { id: string; isLiability: boolean; deletedOn: DateString | null };
-export type HistoryValue = { assetId: string; asOf: DateString; amount: number };
-
-/**
- * 그 날짜 기준 순자산: 항목마다 그날까지의 가장 최근 금액 기록을 쓴다.
- * 그날 이전에 삭제한 항목, 그날까지 기록이 없는 항목은 빠진다.
- */
-export function netWorthOn(date: DateString, assets: readonly HistoryAsset[], values: readonly HistoryValue[]): number {
-  let net = 0;
-  for (const asset of assets) {
-    if (asset.deletedOn && asset.deletedOn <= date) continue;
-    let latest: HistoryValue | null = null;
-    for (const v of values) {
-      if (v.assetId === asset.id && v.asOf <= date && (!latest || v.asOf > latest.asOf)) latest = v;
-    }
-    if (latest) net += asset.isLiability ? -latest.amount : latest.amount;
-  }
-  return net;
-}
-
-/**
- * 순자산 추이 (F-41): 최근 12개월 각 달 마지막 날 기준 + 이번 달은 오늘 기준("지금").
- * 금액 기록이 처음 생긴 달부터 보여준다. 지난 날짜로 기록을 넣으면 그 달 값도 바뀐다.
- * periodOfDate·endOf: 한 달 기준(F-56)의 기간 (기본은 달력의 달과 말일)
- */
-export function netWorthTrend(
-  assets: readonly HistoryAsset[],
-  values: readonly HistoryValue[],
-  currentMonth: MonthString,
-  today: DateString,
-  periodOfDate: (date: DateString) => MonthString = monthOf,
-  endOf: (month: MonthString) => DateString = (month) => monthRange(month).end,
-): TrendPoint[] {
-  if (values.length === 0) return [];
-  const firstMonth = values.reduce((min, v) => (periodOfDate(v.asOf) < min ? periodOfDate(v.asOf) : min), currentMonth);
-  const points: TrendPoint[] = [];
-  for (let i = 11; i >= 1; i--) {
-    const month = shiftMonth(currentMonth, -i);
-    if (month < firstMonth) continue;
-    points.push({ month, net: netWorthOn(endOf(month), assets, values), current: false });
-  }
-  points.push({ month: currentMonth, net: netWorthOn(today, assets, values), current: true });
-  return points;
-}
-
-export type GoalProgress = {
-  saved: number;
-  /** 진행률 % (100 넘으면 100) */
-  percent: number;
-  remaining: number;
-  /** 이번 달 포함 기한 달까지 남은 달 수 (기한 없으면 null, 지났으면 0) */
-  monthsLeft: number | null;
-  /** 기한까지 매달 모아야 할 금액 (올림) */
-  perMonth: number | null;
-};
-
-export function goalProgress(target: number, saved: number, dueDate: DateString | null, today: DateString): GoalProgress {
-  const remaining = Math.max(0, target - saved);
-  const percent = Math.min(100, Math.floor((saved / target) * 100));
-  if (!dueDate) return { saved, percent, remaining, monthsLeft: null, perMonth: null };
-
-  const [dy, dm] = dueDate.split("-").map(Number);
-  const [ty, tm] = today.split("-").map(Number);
-  const monthsLeft = dueDate < today ? 0 : dy * 12 + dm - (ty * 12 + tm) + 1;
-  const perMonth = monthsLeft > 0 && remaining > 0 ? Math.ceil(remaining / monthsLeft) : null;
-  return { saved, percent, remaining, monthsLeft, perMonth };
-}
-
-/** 목표 카드 아래 한 줄 */
-export function goalHint(p: GoalProgress, dueDate: DateString | null): string {
-  if (p.remaining === 0) return "목표액을 다 모았어요";
-  if (!dueDate) return `${formatWon(p.remaining)} 남았어요`;
-  if (p.monthsLeft === 0) return `기한이 지났어요 · ${formatWon(p.remaining)} 남았어요`;
-  return `${formatWon(p.remaining)} 남았어요 · 매달 ${formatWon(p.perMonth ?? 0)}씩 모으면 돼요`;
 }

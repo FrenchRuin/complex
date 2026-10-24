@@ -51,16 +51,9 @@ export function StatsSkeleton() {
 
 export function AssetsSkeleton() {
   return (
-    <PageSkeleton title="자산·목표" className="grid grid-cols-1 gap-4 px-5 py-6 lg:grid-cols-2 lg:items-start lg:px-8">
-      <div className="flex flex-col gap-4">
-        <CardSkeleton hero lines={1} />
-        <CardSkeleton block />
-        <CardSkeleton rows={4} />
-      </div>
-      <div className="flex flex-col gap-4">
-        <CardSkeleton block />
-        <CardSkeleton lines={4} />
-      </div>
+    <PageSkeleton title="자산" className="flex w-full max-w-[720px] flex-col gap-4 px-5 py-6 lg:px-8">
+      <CardSkeleton hero lines={1} />
+      <CardSkeleton rows={4} />
     </PageSkeleton>
   );
 }

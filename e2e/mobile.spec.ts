@@ -20,7 +20,7 @@ test("모바일: ☰ 메뉴로 다른 화면에 가고, 메뉴는 닫힌다", as
   await page.getByRole("button", { name: "메뉴 열기" }).click();
   const menu = page.getByRole("dialog", { name: "메뉴" });
   await expect(menu).toBeVisible();
-  await menu.getByRole("link", { name: "자산·목표" }).click();
+  await menu.getByRole("link", { name: "자산" }).click();
   await expect(page).toHaveURL(/\/assets$/);
   await expect(menu).toBeHidden();
 

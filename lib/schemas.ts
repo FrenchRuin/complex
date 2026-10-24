@@ -118,24 +118,6 @@ export const assetValueSchema = z.object({
 });
 export type AssetValueInput = z.input<typeof assetValueSchema>;
 
-/** 저축 목표 (F-42) */
-export const goalInputSchema = z.object({
-  id: z.uuid().optional(),
-  name: z.string().trim().min(1, "목표 이름을 입력해 주세요").max(30, "목표 이름은 30자까지 쓸 수 있어요"),
-  targetAmount: moneySchema("목표액").min(1, "목표액을 입력해 주세요"),
-  dueDate: dateStringSchema.nullable(),
-});
-export type GoalInput = z.input<typeof goalInputSchema>;
-
-/** 적립 (F-42) */
-export const contributionInputSchema = z.object({
-  goalId: z.uuid(),
-  amount: moneySchema("금액").min(1, "금액을 입력해 주세요"),
-  contributedOn: dateStringSchema,
-  memberSlot: z.enum(SLOTS),
-});
-export type ContributionInput = z.input<typeof contributionInputSchema>;
-
 /** "yyyy-MM-01" */
 export const monthFirstSchema = dateStringSchema.refine(
   (value) => value.endsWith("-01"),
