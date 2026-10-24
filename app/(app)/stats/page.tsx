@@ -7,7 +7,6 @@ import { CategoryStatsTable } from "@/components/stats/CategoryStatsTable";
 import { MonthlyChart } from "@/components/stats/MonthlyChart";
 import { PersonStats } from "@/components/stats/PersonStats";
 import { MonthPicker } from "@/components/transactions/MonthPicker";
-import { getMonthBudgets } from "@/lib/budget";
 import { parseFilters } from "@/lib/calc/filters";
 import { categoryStats, monthlyExpense, personStats, recentMonths } from "@/lib/calc/stats";
 import { formatPeriodRange, formatPeriodRangeShort, isCalendarRange, periodOf, periodRange } from "@/lib/calc/period";
@@ -20,7 +19,7 @@ export const metadata: Metadata = { title: "통계 · 감자밭" };
 
 const hrefFor = (month: MonthString, current: MonthString) => (month === current ? "/stats" : `/stats?month=${month}`);
 
-/** 통계 (F-23): 최근 6개월 지출, 카테고리별 예산 대비, 사람별, 예산 없는 고정지출. 달은 한 달 기준(F-56)의 기간 */
+/** 통계 (F-23): 최근 6개월 지출, 카테고리별, 사람별. 달은 한 달 기준(F-56)의 기간 */
 export default async function StatsPage({ searchParams }: PageProps<"/stats">) {
   await requireMember();
   const cfg = await getPeriodConfig();
@@ -30,9 +29,8 @@ export default async function StatsPage({ searchParams }: PageProps<"/stats">) {
   const range = periodRange(month, cfg);
   const inPeriod = (date: string) => periodOf(date, cfg);
 
-  const [rows, budgets, labels, members] = await Promise.all([
+  const [rows, labels, members] = await Promise.all([
     getTransactionsInRange({ start: periodRange(months[0], cfg).start, end: range.end }),
-    getMonthBudgets(month),
     getLabelMaps(),
     getHouseholdMembers(),
   ]);
@@ -71,14 +69,6 @@ export default async function StatsPage({ searchParams }: PageProps<"/stats">) {
             )}
           </>
         }
-        actions={
-          <Link
-            href="/stats/report"
-            className="inline-flex h-10 items-center rounded-md px-3 text-body font-semibold text-primary hover:bg-primary-soft"
-          >
-            월말 결산
-          </Link>
-        }
       />
       <div className="grid grid-cols-1 gap-4 px-5 py-6 lg:grid-cols-2 lg:items-start lg:px-8">
         {/* 폰: 머리에 못 넣은 기간 (한 달 기준 F-56) */}
@@ -93,8 +83,8 @@ export default async function StatsPage({ searchParams }: PageProps<"/stats">) {
             <PersonStats stats={personStats(thisMonth)} names={memberNames} categoryNames={labels.categories} />
           </SettingsSection>
         </div>
-        <SettingsSection title="카테고리별 지출" description="예산 대비 사용률과 지난달 대비 증감이에요.">
-          <CategoryStatsTable stats={categoryStats(thisMonth, lastMonth, budgets)} categories={labels.categories} />
+        <SettingsSection title="카테고리별 지출" description="지난달 대비 증감이에요.">
+          <CategoryStatsTable stats={categoryStats(thisMonth, lastMonth)} categories={labels.categories} />
         </SettingsSection>
       </div>
     </>

@@ -3,7 +3,6 @@
  */
 import { monthOf, shiftMonth, type MonthString } from "@/lib/date";
 import type { CategoryType, Scope, Slot } from "@/lib/domain";
-import type { BudgetItem } from "./budget";
 
 type Row = {
   type: CategoryType;
@@ -37,20 +36,12 @@ export function monthlyExpense(
 export type CategoryStat = {
   categoryId: string;
   spent: number;
-  budget: number | null;
-  /** 예산 사용률 %, 예산 없으면 null */
-  percent: number | null;
-  overBy: number;
   /** 지난달 대비 증감 (양수 = 더 씀) */
   diff: number;
 };
 
-/** 카테고리별: 쓴 돈 / 예산 / 사용률 / 지난달 대비. 쓴 돈이나 예산이 있는 것만, 많이 쓴 순 */
-export function categoryStats(
-  thisMonth: readonly Row[],
-  lastMonth: readonly Row[],
-  budgets: readonly BudgetItem[],
-): CategoryStat[] {
+/** 카테고리별: 쓴 돈 / 지난달 대비. 쓴 돈이 있는 것만, 많이 쓴 순 */
+export function categoryStats(thisMonth: readonly Row[], lastMonth: readonly Row[]): CategoryStat[] {
   const sum = (rows: readonly Row[]) => {
     const map: Record<string, number> = {};
     for (const r of rows) if (r.type === "expense") map[r.categoryId] = (map[r.categoryId] ?? 0) + r.amount;
@@ -58,23 +49,9 @@ export function categoryStats(
   };
   const now = sum(thisMonth);
   const before = sum(lastMonth);
-  const budgetOf = Object.fromEntries(budgets.map((b) => [b.categoryId, b.amount]));
-  const ids = new Set([...Object.keys(now), ...Object.keys(budgetOf)]);
-
-  return [...ids]
-    .map((categoryId) => {
-      const spent = now[categoryId] ?? 0;
-      const budget = budgetOf[categoryId] ?? null;
-      return {
-        categoryId,
-        spent,
-        budget,
-        percent: budget ? Math.round((spent / budget) * 100) : null,
-        overBy: budget ? Math.max(0, spent - budget) : 0,
-        diff: spent - (before[categoryId] ?? 0),
-      };
-    })
-    .sort((a, b) => b.spent - a.spent || (b.budget ?? 0) - (a.budget ?? 0));
+  return Object.entries(now)
+    .map(([categoryId, spent]) => ({ categoryId, spent, diff: spent - (before[categoryId] ?? 0) }))
+    .sort((a, b) => b.spent - a.spent);
 }
 
 export type PersonStat = { total: number; top: { categoryId: string; amount: number }[] };

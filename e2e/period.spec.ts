@@ -22,7 +22,7 @@ function expectedPeriod(today: string) {
   };
 }
 
-test("한 달 기준: 25일로 정하면 홈·내역·예산이 그 기간을 따르고, 1일로 돌리면 원래대로 (F-56)", async ({ page }) => {
+test("한 달 기준: 25일로 정하면 홈·내역이 그 기간을 따르고, 1일로 돌리면 원래대로 (F-56)", async ({ page }) => {
   const a = await userClient(readCreds().a.email, readCreds().a.password);
   const reset = () => a.rpc("set_period_settings", { p_start_day: 1, p_label: "end", p_shift: true });
   await reset();
@@ -57,10 +57,6 @@ test("한 달 기준: 25일로 정하면 홈·내역·예산이 그 기간을 �
     // 홈: "10월 지출" + 기간
     await page.goto("/");
     await expect(page.getByRole("heading", { name: `${p.name} 지출` })).toBeVisible();
-    await expect(page.getByText(`${p.startLabel} ~ ${p.endLabel}`)).toBeVisible();
-
-    // 예산: 머리에 기간
-    await page.goto("/budget");
     await expect(page.getByText(`${p.startLabel} ~ ${p.endLabel}`)).toBeVisible();
 
     // 내역: 달력은 기간 첫날부터, 첫 칸은 "월/일", 첫날 내역이 목록에

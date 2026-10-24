@@ -4,7 +4,6 @@ import {
   PiggyBank,
   ReceiptText,
   Settings,
-  Wallet,
   type LucideIcon,
 } from "lucide-react";
 
@@ -22,7 +21,6 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "홈", icon: House, inTabBar: true, inSidebar: true },
   { href: "/transactions", label: "내역", icon: ReceiptText, inTabBar: true, inSidebar: true },
   { href: "/stats", label: "통계", icon: ChartColumn, inTabBar: true, inSidebar: true },
-  { href: "/budget", label: "예산", icon: Wallet, inTabBar: false, inSidebar: true },
   { href: "/assets", label: "자산·목표", icon: PiggyBank, inTabBar: false, inSidebar: true },
   { href: "/settings", label: "설정", icon: Settings, inTabBar: true, inSidebar: false },
 ];

@@ -34,23 +34,19 @@ describe("monthlyExpense", () => {
 });
 
 describe("categoryStats", () => {
-  const stats = categoryStats(
-    [row({ categoryId: "food", amount: 432000 }), row({ categoryId: "cafe", amount: 20000 })],
-    [row({ categoryId: "food", amount: 400000 }), row({ categoryId: "cafe", amount: 50000 })],
-    [
-      { categoryId: "food", amount: 400000 },
-      { categoryId: "shop", amount: 100000 },
-    ],
-  );
-
-  it("많이 쓴 순, 예산만 있는 카테고리도 포함", () => {
-    expect(stats.map((s) => s.categoryId)).toEqual(["food", "cafe", "shop"]);
-  });
-
-  it("사용률·초과·지난달 대비", () => {
-    expect(stats[0]).toEqual({ categoryId: "food", spent: 432000, budget: 400000, percent: 108, overBy: 32000, diff: 32000 });
-    expect(stats[1]).toEqual({ categoryId: "cafe", spent: 20000, budget: null, percent: null, overBy: 0, diff: -30000 });
-    expect(stats[2]).toMatchObject({ spent: 0, percent: 0 });
+  it("지출만 카테고리별로 더하고 많이 쓴 순, 지난달 대비 증감", () => {
+    const stats = categoryStats(
+      [
+        row({ categoryId: "food", amount: 432000 }),
+        row({ categoryId: "cafe", amount: 20000 }),
+        row({ categoryId: "salary", amount: 3000000, type: "income" }),
+      ],
+      [row({ categoryId: "food", amount: 400000 }), row({ categoryId: "cafe", amount: 50000 }), row({ categoryId: "taxi", amount: 8000 })],
+    );
+    expect(stats).toEqual([
+      { categoryId: "food", spent: 432000, diff: 32000 },
+      { categoryId: "cafe", spent: 20000, diff: -30000 },
+    ]);
   });
 });
 

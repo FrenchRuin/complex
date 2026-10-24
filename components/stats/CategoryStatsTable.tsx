@@ -1,4 +1,3 @@
-import { BudgetBar } from "@/components/dashboard/BudgetBar";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import type { CategoryStat } from "@/lib/calc/stats";
 import { formatWon } from "@/lib/money";
@@ -14,7 +13,7 @@ function diffText(diff: number): string {
   return `${diff > 0 ? "▲" : "▼"} ${formatWon(Math.abs(diff))}`;
 }
 
-/** 카테고리별: 쓴 돈 / 예산 / 사용률 / 지난달 대비 (F-23) */
+/** 카테고리별: 쓴 돈 / 지난달 대비 (F-23) */
 export function CategoryStatsTable({ stats, categories }: Props) {
   if (stats.length === 0) {
     return <p className="py-6 text-center text-body text-ink-muted">이 달에는 지출이 없어요.</p>;
@@ -32,15 +31,9 @@ export function CategoryStatsTable({ stats, categories }: Props) {
               <span className="min-w-0 flex-1 truncate text-body text-ink">{name}</span>
               <span className="text-amount text-expense tabular-nums">{formatWon(s.spent)}</span>
             </div>
-            <div className="mt-1 flex items-center justify-between pl-11 text-caption text-ink-muted tabular-nums">
-              <span>{s.budget ? `예산 ${formatWon(s.budget)}` : "예산 없음"}</span>
+            <div className="mt-1 flex justify-end pl-11 text-caption text-ink-muted tabular-nums">
               <span>지난달 대비 {diffText(s.diff)}</span>
             </div>
-            {s.budget && s.percent !== null ? (
-              <div className="mt-2 pl-11">
-                <BudgetBar percent={s.percent} overBy={s.overBy} label={name} />
-              </div>
-            ) : null}
           </li>
         );
       })}

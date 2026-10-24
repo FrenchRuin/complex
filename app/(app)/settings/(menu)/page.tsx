@@ -3,7 +3,6 @@ import {
   CalendarOff,
   CalendarRange,
   ChevronRight,
-  CreditCard,
   Download,
   Gauge,
   LogOut,
@@ -22,7 +21,7 @@ import { getHouseholdMembers, requireMember } from "@/lib/household";
 import { getCustomHolidays } from "@/lib/holidays";
 import { getPeriodSettings } from "@/lib/period";
 import { createClient } from "@/lib/supabase/server";
-import { getAllCategories, getAllPaymentMethods, getUsage } from "@/lib/settings-data";
+import { getAllCategories, getUsage } from "@/lib/settings-data";
 import { logout } from "../actions";
 
 export const metadata: Metadata = { title: "설정 · 감자밭" };
@@ -33,10 +32,9 @@ type MenuItem = { href: string; label: string; icon: LucideIcon; summary: string
 export default async function SettingsPage() {
   const me = await requireMember();
   const supabase = await createClient();
-  const [members, categories, methods, usage, customHolidays, period, devices] = await Promise.all([
+  const [members, categories, usage, customHolidays, period, devices] = await Promise.all([
     getHouseholdMembers(),
     getAllCategories(),
-    getAllPaymentMethods(),
     getUsage(),
     getCustomHolidays(),
     getPeriodSettings(),
@@ -62,12 +60,6 @@ export default async function SettingsPage() {
       summary:
         `지출 ${visible.filter((c) => c.type === "expense").length}개 · 수입 ${visible.filter((c) => c.type === "income").length}개` +
         (hidden ? ` · 숨김 ${hidden}개` : ""),
-    },
-    {
-      href: "/settings/payment-methods",
-      label: "계좌·카드",
-      icon: CreditCard,
-      summary: `${methods.filter((m) => !m.is_hidden).length}개`,
     },
     {
       href: "/settings/period",

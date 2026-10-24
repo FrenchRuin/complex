@@ -62,27 +62,7 @@ export function RealtimeProvider({ householdId, children }: { householdId: strin
         )
         .on(
           "postgres_changes",
-          { event: "*", schema: "public", table: "budgets", filter: `household_id=eq.${householdId}` },
-          scheduleRefresh,
-        )
-        .on(
-          "postgres_changes",
           // 없는 표를 구독하면 채널 전체가 실패한다 (지운 표 이름을 남기지 않기)
-          { event: "*", schema: "public", table: "spend_budgets", filter: `household_id=eq.${householdId}` },
-          scheduleRefresh,
-        )
-        .on(
-          "postgres_changes",
-          { event: "*", schema: "public", table: "spend_budget_methods", filter: `household_id=eq.${householdId}` },
-          scheduleRefresh,
-        )
-        .on(
-          "postgres_changes",
-          { event: "*", schema: "public", table: "spend_budget_amounts", filter: `household_id=eq.${householdId}` },
-          scheduleRefresh,
-        )
-        .on(
-          "postgres_changes",
           { event: "*", schema: "public", table: "custom_holidays", filter: `household_id=eq.${householdId}` },
           scheduleRefresh,
         )
